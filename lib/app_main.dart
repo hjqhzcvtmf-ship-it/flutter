@@ -9998,6 +9998,20 @@ class _StoriesRowState extends State<_StoriesRow> {
     if (picked == null) return;
     setState(() => _uploading = true);
     try {
+      // Defensive: make sure the referralCode custom claim is current on
+      // the local ID token BEFORE attempting writes. The Firestore stories
+      // rule gates on `request.auth.token.referralCode == userCode`, and
+      // the local token can be stale at this point (race vs the async
+      // sync from MainApp.initState).
+      try {
+        final callable = FirebaseFunctions.instanceFor(region: 'us-central1')
+            .httpsCallable('syncReferralClaim');
+        await callable.call(<String, dynamic>{'referralCode': _userCode});
+        await FirebaseAuth.instance.currentUser?.getIdToken(true);
+      } catch (e) {
+        debugPrint('Pre-upload claim sync failed (continuing anyway): $e');
+      }
+
       final ts = DateTime.now().millisecondsSinceEpoch;
       final ref = FirebaseStorage.instance.ref('stories/$_userCode/$ts.jpg');
       await ref.putFile(File(picked.path));

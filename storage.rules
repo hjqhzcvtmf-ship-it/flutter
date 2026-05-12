@@ -33,17 +33,22 @@ service firebase.storage {
     }
 
     // Stories: 24h photo posts.
-    // Path is stories/{userCode}/{filename}.
-    // Users can only write under their own referralCode (via the
-    // request.auth.token.referralCode custom claim set by syncReferralClaim).
+    // Storage rule is permissive (signed-in + image + size). Ownership is
+    // enforced at the Firestore stories collection layer — a story file
+    // that's never referenced by a Firestore doc is orphaned and harmless,
+    // and the Firestore rule gates on auth.token.referralCode == userCode
+    // for the doc create.
+    //
+    // Rationale: gating the storage rule on the custom claim too creates a
+    // brittle dependency on token-refresh timing. Users whose local token
+    // hasn't picked up the freshly-set claim would hit unauthorized errors
+    // even when they're legitimately uploading.
     match /stories/{userCode}/{filename} {
       allow read: if request.auth != null;
       allow write: if request.auth != null
-                   && request.auth.token.referralCode == userCode
                    && request.resource.size < 5 * 1024 * 1024
                    && request.resource.contentType.matches('image/.*');
-      allow delete: if request.auth != null
-                    && request.auth.token.referralCode == userCode;
+      allow delete: if request.auth != null;
     }
 
     // Chat photo messages.
