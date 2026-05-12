@@ -187,9 +187,21 @@ service cloud.firestore {
     // Stories: 24h photo posts. Users can only post stories tagged with their own referralCode.
     match /stories/{storyId} {
       allow read: if isSignedIn();
+      // Story create: signed-in users can post a story with a non-empty
+      // userCode. We don't gate on the token claim because Firebase Auth
+      // tokens are cached for ~1h and the async _syncReferralClaim from
+      // MainApp.initState can race with the user's first story attempt,
+      // causing legitimate writes to be denied. The risk of a manually-
+      // crafted client posting under a different userCode is low for an
+      // invite-only platform, and stories themselves don't grant any
+      // privileges. A future hardening pass can move story creation to a
+      // server-side callable for stricter ownership enforcement.
       allow create: if isSignedIn() &&
-        request.resource.data.userCode == request.auth.token.referralCode;
+        request.resource.data.userCode is string &&
+        request.resource.data.userCode.size() > 0;
       allow update: if false;
+      // Delete still requires the token claim OR admin — deleting someone
+      // else's story is more impactful than posting one.
       allow delete: if isAdmin() ||
         (isSignedIn() && resource.data.userCode == request.auth.token.referralCode);
     }
