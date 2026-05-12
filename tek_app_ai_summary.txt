@@ -1,0 +1,60 @@
+# TEK App – Project Summary for AI Assistants
+
+## Overview
+TEK is a Flutter-based mobile app for iOS and Android, designed for a nightclub/membership experience. It uses Firebase for authentication, Firestore for data storage, Firebase Storage for images, and Stripe for payment processing. The app features user sign-in, membership application, referral code login, profile management, XP/rewards, and an admin mode.
+
+## Key Features
+- **User Authentication:** Anonymous and email/password sign-in via Firebase Auth.
+- **Referral Code System:** Users log in or register using a unique referral code.
+- **Membership Application:** Users can apply for membership by submitting name, email, phone, Instagram, bio, and a profile picture.
+- **Profile Management:** Users can view and edit their profile, including uploading a profile picture.
+- **XP & Rewards:** Users earn XP points and unlock rewards (e.g., free drinks) as they participate.
+- **Admin Mode:** Special admin login for managing the app, only accessible to allowlisted accounts.
+- **Stripe Payments:** Stripe is integrated for payment processing (publishable key via environment variable).
+- **Cloud Functions:** Used for session management, admin notifications, and other backend logic.
+
+## Data Collected
+- **Contact Info:**
+  - Name
+  - Email Address
+  - Phone Number
+  - Instagram Username
+  - Profile Picture (optional)
+  - Bio
+- **Authentication:**
+  - Firebase UID
+  - Anonymous or email/password sign-in
+- **Analytics:**
+  - Device and usage data via Firebase Analytics
+- **Payments:**
+  - Payment info processed by Stripe (not stored in app)
+- **XP/Rewards:**
+  - XP points, level, and reward progress
+
+## Third-Party Services
+- **Firebase:** Auth, Firestore, Storage, Analytics, Cloud Functions
+- **Stripe:** Payment processing (PCI-compliant)
+- **Image Picker:** For profile picture uploads
+- **Shared Preferences:** Local storage for session and settings
+
+## App Structure
+- **lib/app_main.dart:** Main app logic, screens, and navigation
+- **lib/main.dart:** Entry point
+- **lib/firebase_options.dart:** Firebase configuration
+- **pubspec.yaml:** Dependencies and project metadata
+
+## Privacy Policy URL
+https://tek-landing.vercel.app/privacy
+
+## Support URL
+https://tek-landing.vercel.app/support
+
+## Notes for AI Assistants
+- The app collects user contact info and analytics, and processes payments via Stripe.
+- All sensitive operations (auth, payments) are handled by Firebase and Stripe; the app does not store payment details.
+- Admin features are protected and only accessible to allowlisted users.
+- The app is designed for a single-device session per user/referral code.
+
+---
+
+**Use this file to help ChatGPT or any AI assistant understand the TEK app’s features, data collection, and architecture for privacy, support, or technical questions.**

@@ -1,0 +1,26 @@
+# TEK Launch State – Project Snapshot
+
+This file marks the current state of your TEK app project as of launch submission (20 February 2026).
+
+## Key Details
+- App submitted to App Store, waiting for review
+- All required privacy, support, and policy URLs are live
+- Project summary and privacy/data collection files created
+- Firebase, Stripe, and core features are implemented
+- Crashlytics and Analytics not yet enabled (can be added post-launch)
+
+## Project Path
+/Users/linolyander/flutter_application_3tek/
+
+## Important Files
+- tek_app_ai_summary.txt (project summary for AI assistants)
+- app_privacy_summary.txt (privacy/data collection summary)
+
+## Next Steps
+- Monitor App Store review
+- Prepare for launch (marketing, support, analytics, crash reporting)
+- Respond to Apple feedback if needed
+
+---
+
+**This file is a snapshot for reference and backup.**

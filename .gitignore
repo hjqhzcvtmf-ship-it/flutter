@@ -1,0 +1,66 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Xcode and macOS build/cache files
+.xcode_derived_data/
+build/
+
+# Local secrets (do not commit)
+stripe.dev.json
+stripe.live.json
+*.secrets.json
+.env.local
+.env*.local
+**/.sent_referral_emails.json
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+.vercel
+
+# Local archive of old dart files (kept for grep, not git history)
+.archive/
+
+# Never commit — runtime deps, separate repos
+**/node_modules/
+landingpage/
+tek_visualizer_display/

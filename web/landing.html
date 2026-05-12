@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEK - Join Our Community</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        header {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #00FF41;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 32px;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: #00FF41;
+        }
+
+        .cta-button {
+            background: #00FF41;
+            color: #000;
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 12px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            margin-left: 16px;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 255, 65, 0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero h1 {
+            font-size: 64px;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00FF41, #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: #ccc;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: #00FF41;
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 255, 65, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #00FF41;
+            border-color: #00FF41;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 255, 65, 0.1);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 80px 40px;
+            background: rgba(255, 255, 255, 0.02);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 36px;
+            text-align: center;
+            margin-bottom: 60px;
+            letter-spacing: 1px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature {
+            padding: 32px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .feature:hover {
+            border-color: #00FF41;
+            background: rgba(0, 255, 65, 0.05);
+            transform: translateY(-8px);
+        }
+
+        .feature-icon {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #00FF41;
+            margin-bottom: 16px;
+        }
+
+        .feature h3 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .feature p {
+            font-size: 14px;
+            color: #999;
+            line-height: 1.6;
+        }
+
+        /* Safety Section */
+        .safety {
+            padding: 80px 40px;
+        }
+
+        .safety-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .safety-text h2 {
+            font-size: 32px;
+            margin-bottom: 24px;
+            letter-spacing: 1px;
+        }
+
+        .safety-text p {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 16px;
+            line-height: 1.8;
+        }
+
+        .safety-features {
+            list-style: none;
+            margin-top: 32px;
+        }
+
+        .safety-features li {
+            padding: 12px 0;
+            font-size: 14px;
+            color: #ccc;
+            display: flex;
+            gap: 12px;
+        }
+
+        .safety-features li:before {
+            content: ">";
+            color: #00FF41;
+            font-weight: bold;
+            min-width: 20px;
+        }
+
+        .safety-visual {
+            background: rgba(0, 255, 65, 0.05);
+            border: 2px solid rgba(0, 255, 65, 0.2);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .safety-visual span {
+            font-size: 48px;
+            font-weight: 800;
+            letter-spacing: 4px;
+            color: #00FF41;
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+        }
+
+        footer a {
+            color: #00FF41;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            nav {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 40px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .safety-content {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">TEK</div>
+        <nav>
+            <a href="#features">Features</a>
+            <a href="#safety">Safety</a>
+            <a href="#apply">Apply</a>
+        </nav>
+        <a href="membership.html" class="cta-button">APPLY NOW</a>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Join TEK</h1>
+            <p>A vibrant community where people connect, share, and grow together. Apply now to become part of something special.</p>
+            <div class="button-group">
+                <a href="membership.html" class="btn btn-primary">Apply for Membership</a>
+                <a href="#features" class="btn btn-secondary">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <h2 class="section-title">Why Join TEK?</h2>
+        <div class="features-grid">
+            <div class="feature">
+                <div class="feature-icon">NET</div>
+                <h3>Connect</h3>
+                <p>Meet like-minded people in a curated community. Build genuine friendships and meaningful connections.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">XP</div>
+                <h3>Grow</h3>
+                <p>Earn XP points and rewards for being an active member. Level up and unlock exclusive features.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">LIVE</div>
+                <h3>Engage</h3>
+                <p>Share your story, discover new perspectives, and be part of a supportive community culture.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">SAFE</div>
+                <h3>Safe</h3>
+                <p>Our community is moderated 24/7 with zero tolerance for abuse. Your safety is our priority.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">APP</div>
+                <h3>Accessible</h3>
+                <p>Available on iOS, Android, and web. Take TEK with you wherever you go.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">VIP</div>
+                <h3>Exclusive</h3>
+                <p>Access exclusive events, content, and features only available to members.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Safety Section -->
+    <section class="safety" id="safety">
+        <div class="safety-content">
+            <div class="safety-text">
+                <h2>Your Safety Matters</h2>
+                <p>We're committed to creating a safe, inclusive space for everyone. Our community is built on respect and mutual support.</p>
+                
+                <ul class="safety-features">
+                    <li>24/7 Community Moderation</li>
+                    <li>Report & Block Features</li>
+                    <li>Zero Tolerance for Abuse</li>
+                    <li>Profanity Filtering</li>
+                    <li>User Privacy Protected</li>
+                    <li>Secure Account Deletion</li>
+                </ul>
+            </div>
+            <div class="safety-visual">
+                <span>TEK</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="hero" id="apply">
+        <div class="hero-content">
+            <h1>Ready to Join?</h1>
+            <p>Complete a quick application and join our thriving community. Applications are reviewed within 24-48 hours.</p>
+            <div class="button-group">
+                <a href="membership.html" class="btn btn-primary">Apply for Membership</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 TEK Community. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+    </footer>
+</body>
+</html>

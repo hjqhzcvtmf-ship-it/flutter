@@ -1,0 +1,33 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Flutter: run (iPhone 16e)",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run",
+				"-d",
+				"F6CD6395-148E-4A81-9C7E-236963C9346F",
+				"--dart-define-from-file=stripe.dev.json"
+			],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Flutter: run (iPhone 17 Pro)",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run",
+				"-d",
+				"733D1A08-6AC9-49B5-A755-073DF08D1FD2",
+				"--dart-define-from-file=stripe.dev.json"
+			],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}

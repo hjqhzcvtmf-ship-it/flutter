@@ -1,0 +1,37 @@
+# App Privacy and Data Collection Summary for ChatGPT
+
+## App Overview
+- Flutter app for iOS
+- Uses Firebase (authentication, analytics, Firestore)
+- Uses Stripe for payments
+- Has user sign-in
+- Collects user email and possibly name
+
+## Data Collected
+- **Contact Info:**
+  - Email Address (for authentication and communication)
+  - Name (if collected during sign-up or profile)
+- **Analytics:**
+  - Device and usage data (via Firebase Analytics)
+- **Payments:**
+  - Payment Info (processed by Stripe; app does not store payment details)
+
+## Third-Party Services
+- **Firebase:** Authentication, Analytics, Firestore (data storage)
+- **Stripe:** Payment processing (PCI-compliant, no sensitive info stored in app)
+
+## Data Usage
+- User authentication and account management
+- Analytics for app improvement
+- Payment processing for in-app purchases or services
+
+## Data Sharing
+- Data is shared with Firebase and Stripe for authentication, analytics, and payment processing.
+- No data is sold to third parties.
+
+## Privacy Policy URL
+- https://tek-landing.vercel.app/privacy
+
+---
+
+**You can give this file to ChatGPT or any privacy assistant to help answer App Store Connect privacy questions accurately.**

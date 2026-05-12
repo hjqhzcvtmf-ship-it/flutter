@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply for Membership</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+            color: #00FF41;
+        }
+
+        .tagline {
+            font-size: 14px;
+            color: #999;
+            letter-spacing: 1px;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 32px;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-title {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            margin-bottom: 32px;
+            color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #999;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #00FF41;
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 12px rgba(0, 255, 65, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .image-upload {
+            margin-bottom: 24px;
+        }
+
+        .upload-area {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 16px;
+            border: 2px solid #00FF41;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 255, 65, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            background: rgba(0, 255, 65, 0.1);
+            box-shadow: 0 0 12px rgba(0, 255, 65, 0.3);
+        }
+
+        .upload-area img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .upload-icon {
+            font-size: 40px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .upload-text {
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .terms {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            min-width: 20px;
+            padding: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2) !important;
+            accent-color: #00FF41;
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:hover {
+            border-color: #00FF41 !important;
+        }
+
+        .terms-text {
+            flex: 1;
+        }
+
+        .terms-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .terms-description {
+            font-size: 11px;
+            color: #999;
+            line-height: 1.5;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        button:enabled {
+            border-color: #00FF41;
+            color: #00FF41;
+        }
+
+        button:enabled:hover {
+            background: rgba(0, 255, 65, 0.1);
+            box-shadow: 0 0 16px rgba(0, 255, 65, 0.3);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top: 3px solid #00FF41;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert.success {
+            background: rgba(0, 255, 65, 0.2);
+            border: 1px solid rgba(0, 255, 65, 0.5);
+            color: #00FF41;
+        }
+
+        .alert.error {
+            background: rgba(255, 65, 65, 0.2);
+            border: 1px solid rgba(255, 65, 65, 0.5);
+            color: #FF4141;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 32px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        @media (max-width: 600px) {
+            .form-container {
+                padding: 24px;
+            }
+
+            .form-title {
+                font-size: 16px;
+            }
+
+            .logo {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">TEK</div>
+            <p class="tagline">JOIN OUR COMMUNITY</p>
+        </div>
+
+        <div class="form-container">
+            <h1 class="form-title">APPLY FOR MEMBERSHIP</h1>
+
+            <div id="alert" class="alert"></div>
+
+            <form id="applicationForm">
+                <!-- Profile Image Upload -->
+                <div class="image-upload">
+                    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                        <div id="imagePreview">
+                            <div class="upload-icon">+</div>
+                        </div>
+                    </div>
+                    <p class="upload-text">TAP TO UPLOAD PROFILE PICTURE</p>
+                    <input type="file" id="fileInput" accept="image/*">
+                </div>
+
+                <!-- Full Name -->
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
+                </div>
+
+                <!-- Phone -->
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" placeholder="+1 (555) 123-4567" required>
+                </div>
+
+                <!-- Instagram -->
+                <div class="form-group">
+                    <label for="instagram">Instagram Username</label>
+                    <input type="text" id="instagram" name="instagram" placeholder="@yourusername" required>
+                </div>
+
+                <!-- Bio -->
+                <div class="form-group">
+                    <label for="bio">Bio</label>
+                    <textarea id="bio" name="bio" placeholder="Tell us about yourself..." required></textarea>
+                </div>
+
+                <!-- Terms Acceptance -->
+                <div class="terms">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="termsAccepted" name="termsAccepted" required>
+                        <div class="terms-text">
+                            <div class="terms-title">Terms of Service & Privacy</div>
+                            <div class="terms-description">
+                                I agree to the Terms of Service and acknowledge the Privacy Policy. I understand there is zero tolerance for abusive, hateful, or inappropriate content.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submitBtn" disabled>
+                    <span id="buttonText">ACCEPT TERMS TO CONTINUE</span>
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <span>SUBMITTING...</span>
+                    </div>
+                </button>
+            </form>
+
+            <div class="footer">
+                <p>Applications are reviewed within 24-48 hours</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
+
+    <script>
+        // Import firebase config from your project
+        // You'll need to replace these with your actual Firebase config
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+        const functions = firebase.functions('us-central1');
+
+        let selectedImageFile = null;
+        let formSubmitting = false;
+
+        // Handle file selection
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                selectedImageFile = file;
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('imagePreview').innerHTML = `<img src="${event.target.result}" alt="Profile preview">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle terms checkbox
+        document.getElementById('termsAccepted').addEventListener('change', function() {
+            const submitBtn = document.getElementById('submitBtn');
+            const buttonText = document.getElementById('buttonText');
+            
+            if (this.checked) {
+                submitBtn.disabled = false;
+                buttonText.textContent = 'SUBMIT APPLICATION';
+            } else {
+                submitBtn.disabled = true;
+                buttonText.textContent = 'ACCEPT TERMS TO CONTINUE';
+            }
+        });
+
+        // Show alert
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('alert');
+            alertDiv.textContent = message;
+            alertDiv.className = `alert ${type}`;
+            alertDiv.style.display = 'block';
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    alertDiv.style.display = 'none';
+                }, 4000);
+            }
+        }
+
+        // Main form submission
+        document.getElementById('applicationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (formSubmitting) return;
+            formSubmitting = true;
+
+            try {
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.disabled = true;
+                document.getElementById('buttonText').style.display = 'none';
+                document.getElementById('loading').style.display = 'block';
+
+                // Collect form data
+                const formData = {
+                    name: document.getElementById('name').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    phone: document.getElementById('phone').value.trim(),
+                    instagram: document.getElementById('instagram').value.trim(),
+                    bio: document.getElementById('bio').value.trim(),
+                };
+
+                // Validate required fields
+                if (!formData.name || !formData.email || !formData.phone || !formData.instagram || !formData.bio) {
+                    showAlert('Please fill in all fields', 'error');
+                    submitBtn.disabled = false;
+                    document.getElementById('buttonText').style.display = 'block';
+                    document.getElementById('loading').style.display = 'none';
+                    formSubmitting = false;
+                    return;
+                }
+
+                // Sign in anonymously if needed
+                if (!firebase.auth().currentUser) {
+                    await firebase.auth().signInAnonymously();
+                }
+
+                // Check if email already exists
+                const emailQuery = await db.collection('applications')
+                    .where('email', '==', formData.email)
+                    .limit(1)
+                    .get();
+
+                if (!emailQuery.empty) {
+                    showAlert('This email is already registered. Please use your existing referral code to log in.', 'error');
+                    submitBtn.disabled = false;
+                    document.getElementById('buttonText').style.display = 'block';
+                    document.getElementById('loading').style.display = 'none';
+                    formSubmitting = false;
+                    return;
+                }
+
+                // Check if phone already exists
+                const phoneQuery = await db.collection('applications')
+                    .where('phone', '==', formData.phone)
+                    .limit(1)
+                    .get();
+
+                if (!phoneQuery.empty) {
+                    showAlert('This phone number is already registered. Please use your existing referral code to log in.', 'error');
+                    submitBtn.disabled = false;
+                    document.getElementById('buttonText').style.display = 'block';
+                    document.getElementById('loading').style.display = 'none';
+                    formSubmitting = false;
+                    return;
+                }
+
+                // Upload profile image if provided
+                let profileImageUrl = null;
+                if (selectedImageFile) {
+                    try {
+                        const timestamp = Date.now();
+                        const storageRef = storage.ref()
+                            .child('profile_images')
+                            .child(`new_${timestamp}_${formData.email}.jpg`);
+
+                        await storageRef.put(selectedImageFile);
+                        profileImageUrl = await storageRef.getDownloadURL();
+                    } catch (error) {
+                        console.error('Image upload error:', error);
+                        // Continue without image
+                    }
+                }
+
+                // Save application to Firestore
+                const applicationData = {
+                    name: formData.name,
+                    email: formData.email,
+                    phone: formData.phone,
+                    instagram: formData.instagram,
+                    bio: formData.bio,
+                    status: 'pending',
+                    submittedAt: new Date(),
+                    friendRequests: [],
+                    friends: [],
+                    xpPoints: 0,
+                };
+
+                if (profileImageUrl) {
+                    applicationData.profileImageUrl = profileImageUrl;
+                }
+
+                await db.collection('applications').add(applicationData);
+
+                // Send admin notification
+                try {
+                    const callable = functions.httpsCallable('notifyAdminNewApplication');
+                    await callable({
+                        name: formData.name,
+                        email: formData.email,
+                        phone: formData.phone,
+                        instagram: formData.instagram,
+                        bio: formData.bio,
+                        adminEmail: 'linolyander@icloud.com',
+                        ...(profileImageUrl && { profileImageUrl })
+                    });
+                } catch (error) {
+                    console.error('Admin notification error:', error);
+                    // Continue - application was saved
+                }
+
+                // Success!
+                showAlert('Application submitted! You will receive an email once approved.', 'success');
+                
+                // Reset form
+                setTimeout(() => {
+                    document.getElementById('applicationForm').reset();
+                    document.getElementById('imagePreview').innerHTML = '<div class="upload-icon">+</div>';
+                    document.getElementById('termsAccepted').checked = false;
+                    submitBtn.disabled = true;
+                    document.getElementById('buttonText').style.display = 'block';
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('buttonText').textContent = 'ACCEPT TERMS TO CONTINUE';
+                    formSubmitting = false;
+                }, 2000);
+
+            } catch (error) {
+                console.error('Submission error:', error);
+                showAlert(`Error submitting application: ${error.message}`, 'error');
+                
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('buttonText').style.display = 'block';
+                document.getElementById('loading').style.display = 'none';
+                formSubmitting = false;
+            }
+        });
+    </script>
+</body>
+</html>

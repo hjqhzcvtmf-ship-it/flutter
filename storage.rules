@@ -1,0 +1,40 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Profile images: public read, authenticated write
+    match /profile_images/{imageId} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // Membership application images: public read, written by Cloud Functions (Admin SDK)
+    // Client writes blocked; Admin SDK bypasses these rules
+    match /membership_applications/{userId}/{imageId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Event images: public read, authenticated write
+    match /event_images/{imageId} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // General uploads: public read, authenticated write with size limit
+    match /tek-nightclub-uploads/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.resource.size < 10 * 1024 * 1024;
+    }
+
+    // Default deny for any other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

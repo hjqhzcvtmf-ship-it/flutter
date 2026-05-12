@@ -1,0 +1,76 @@
+╔════════════════════════════════════════════════════════════════╗
+║         TEK APPLICATION APPROVAL - QUICK REFERENCE             ║
+╚════════════════════════════════════════════════════════════════╝
+
+When someone applies:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. You get an email with their details
+  2. They see: "You will receive an email once approved"
+  3. NO referral code is generated yet
+  4. Application saved with status: "pending"
+
+To Approve (3 ways):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  METHOD 1: Reply to Email (EASIEST)
+  ┌─────────────────────────────────────────┐
+  │ Reply with: YES <appId>                 │
+  │ Example: YES 8xK9mPqW2vN4jLrT5sY        │
+  └─────────────────────────────────────────┘
+
+  METHOD 2: Use Script
+  ┌─────────────────────────────────────────┐
+  │ ./approve.sh <appId> approve            │
+  │ ./approve.sh list  (see pending apps)   │
+  └─────────────────────────────────────────┘
+
+  METHOD 3: Firebase Console
+  ┌─────────────────────────────────────────┐
+  │ 1. Go to Functions → approveApplication │
+  │ 2. Test with: {appId: "...",            │
+  │                action: "approve"}       │
+  └─────────────────────────────────────────┘
+
+To Reject:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Reply with: NO <appId>
+  Or: ./approve.sh <appId> reject
+
+What Happens After Approval:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ✅ Referral code generated (e.g. A7B2X9)
+  ✅ Status changes to "approved"
+  ✅ Welcome email sent with code
+  ✅ User can now log in with the code
+
+What Happens After Rejection:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ❌ Status changes to "rejected"
+  ❌ Polite rejection email sent
+  ❌ No code generated
+
+Check Pending Applications:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ./approve.sh list
+  
+  Or: Firebase Console → Firestore → applications
+      Filter by: status == "pending"
+
+Troubleshooting:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  • "Application not found" → Double-check the App ID
+  • "Already processed" → Check Firestore for current status
+  • Email not sending → Check Functions logs & Gmail settings
+
+Quick Links:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Firebase Console:
+  https://console.firebase.google.com/project/tek-nightclub-app
+  
+  Firestore Database:
+  https://console.firebase.google.com/project/tek-nightclub-app/firestore
+  
+  Functions:
+  https://console.firebase.google.com/project/tek-nightclub-app/functions
+
+For detailed docs, see: APPROVAL_WORKFLOW.md

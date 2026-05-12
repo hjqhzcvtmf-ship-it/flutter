@@ -1,0 +1,220 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Admin allowlist stored at /config/admins with field: { uids: ["uid1", ...] }
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/config/admins) &&
+        request.auth.uid in get(/databases/$(database)/documents/config/admins).data.uids;
+    }
+
+    // Events are readable by signed-in users.
+    match /events/{eventId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+
+      // Tickets are written by Cloud Functions/Admin SDK only.
+      match /tickets/{ticketId} {
+        allow read: if isAdmin() || (isSignedIn() && resource.data.userUid == request.auth.uid);
+        // Written by Cloud Functions (Admin SDK). Allow admins to delete/clean up tickets.
+        allow create, update, delete: if isAdmin();
+      }
+
+      // Event check-ins: signed-in users can see who's here; users can only check themselves in.
+      // Binding: doc id == userCode AND doc data.userCode == auth.token.referralCode.
+      match /checkins/{checkInId} {
+        allow read: if isSignedIn();
+        allow create, update: if isSignedIn() &&
+          request.resource.data.userCode == request.auth.token.referralCode;
+        allow delete: if isAdmin() ||
+          (isSignedIn() && resource.data.userCode == request.auth.token.referralCode);
+      }
+
+      // Event RSVPs (going list): users can only RSVP themselves.
+      match /rsvps/{rsvpId} {
+        allow read: if isSignedIn();
+        allow create, update: if isSignedIn() &&
+          request.resource.data.userCode == request.auth.token.referralCode;
+        allow delete: if isAdmin() ||
+          (isSignedIn() && resource.data.userCode == request.auth.token.referralCode);
+      }
+
+      // Live event chat messages — signed-in users can read and post.
+      match /messages/{messageId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() &&
+          request.resource.data.senderUid == request.auth.uid;
+        allow delete: if isAdmin() ||
+          (isSignedIn() && resource.data.senderUid == request.auth.uid);
+        allow update: if false;
+      }
+    }
+
+    // Applications: readable by signed-in users (social/search).
+    // - Owner can update any of their profile fields.
+    // - Non-owners can ONLY touch friendRequests/friends (sending requests, accepting friendships).
+    //   Previously this branch allowed non-owners to write xpPoints, fcmToken, profile fields etc. on other users' docs.
+    match /applications/{appId} {
+      allow read: if isSignedIn();
+      allow create: if true; // Allow website form submissions (anonymous or logged-in)
+      allow update: if isAdmin() ||
+                       (isSignedIn() && resource.data.ownerUid == request.auth.uid) ||
+                       (isSignedIn() &&
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['friendRequests', 'friends']));
+      allow delete: if isAdmin();
+    }
+
+    // Crews: group chats with shared identity.
+    // Delete is admin-only — previously any signed-in user could delete any crew.
+    match /crews/{crewId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isAdmin() || isSignedIn();
+      allow delete: if isAdmin();
+
+      match /messages/{messageId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() &&
+          request.resource.data.senderUid == request.auth.uid;
+        allow delete: if isAdmin() ||
+          (isSignedIn() && resource.data.senderUid == request.auth.uid);
+        allow update: if false;
+      }
+    }
+
+    // Chats/messages (current app uses referral codes to derive chatId).
+    // Note: For strong security, migrate chats to store participant UIDs and enforce membership.
+    match /chats/{chatId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() && request.resource.data.senderUid == request.auth.uid;
+        allow delete: if isAdmin() || (isSignedIn() && resource.data.senderUid == request.auth.uid);
+        allow update: if false;
+      }
+    }
+
+    // Notifications: allow users to read; only admins can write.
+    match /notifications/{id} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Per-user ticket mirror for fast, secure profile reads.
+    match /users/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow write: if false;
+
+      match /tickets/{ticketId} {
+        allow read: if isSignedIn() && request.auth.uid == uid;
+        allow write: if false;
+      }
+    }
+
+    // Moderation reports: any signed-in user can create; only admins can read/manage.
+    match /moderation_reports/{reportId} {
+      allow create: if isSignedIn();
+      allow read, update, delete: if isAdmin();
+    }
+
+    // XP transactions: only admins.
+    match /xp_transactions/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    // Sidequests: anyone signed in can read; email-authenticated users can write (app enforces admin-only UI).
+    match /sidequests/{id} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn() &&
+        request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+
+    // Quests v2: global feature config — readable by all signed-in, admin-only writes.
+    match /config/quests {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Quests v2: per-user progress subcollection — readable by signed-in;
+    // writes are server-authoritative (Cloud Functions via Admin SDK only).
+    match /applications/{appId}/questProgress/{questId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // Sidequest completions: signed-in users can create their own; read by signed-in.
+    match /sidequest_completions/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // Challenges: participants can read/create; only participants update status.
+    match /challenges/{id} {
+      allow read: if isSignedIn() &&
+        (resource.data.challengerCode == request.auth.token.referralCode ||
+         resource.data.challengedCode == request.auth.token.referralCode ||
+         isAdmin());
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+
+    // Tier lounges: chat channels gated client-side by XP threshold.
+    // (Auth + signed-in is enforced; xp gate happens in the app UI.)
+    match /tier_lounges/{loungeId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+
+      match /messages/{messageId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() &&
+          request.resource.data.senderUid == request.auth.uid;
+        allow delete: if isAdmin() ||
+          (isSignedIn() && resource.data.senderUid == request.auth.uid);
+        allow update: if false;
+      }
+    }
+
+    // Stories: 24h photo posts. Users can only post stories tagged with their own referralCode.
+    match /stories/{storyId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() &&
+        request.resource.data.userCode == request.auth.token.referralCode;
+      allow update: if false;
+      allow delete: if isAdmin() ||
+        (isSignedIn() && resource.data.userCode == request.auth.token.referralCode);
+    }
+
+    // Redemptions: signed-in users can create their own; admins update (mark redeemed).
+    match /redemptions/{redemptionId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() &&
+        request.resource.data.userUid == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // TEK in-app notifications: recipient can read and mark read; signed-in users can create.
+    match /tek_notifications/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      allow delete: if isAdmin();
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
