@@ -3301,6 +3301,22 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen>
 
   Future<void> _checkLoginStatus() async {
     final prefs = await SharedPreferences.getInstance();
+
+    // Admin auto-route: if the device previously entered admin mode AND the
+    // Firebase Auth session is still alive and non-anonymous, skip the
+    // referral-code screen entirely and go straight to CONTROL.
+    final adminMode = prefs.getBool(tekAdminModePrefsKey) ?? false;
+    final fbUser = FirebaseAuth.instance.currentUser;
+    if (adminMode && fbUser != null && !fbUser.isAnonymous && mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const MainApp(isAdmin: true, initialIndex: 5),
+        ),
+      );
+      return;
+    }
+
     final savedCode = prefs.getString('userReferralCode');
 
     if (savedCode != null && mounted) {
@@ -4574,13 +4590,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        toolbarHeight: 78,
+        toolbarHeight: 56,
         automaticallyImplyLeading: false,
         centerTitle: true,
-        title: const Padding(
-          padding: EdgeInsets.only(top: 6),
-          child: TekWordmark(fontSize: 22, letterSpacing: 5.2),
-        ),
+        title: const TekWordmark(fontSize: 22, letterSpacing: 5.2),
         actions: [
           IconButton(
             padding: const EdgeInsets.only(right: 12),
@@ -4606,9 +4619,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(12),
+          preferredSize: const Size.fromHeight(8),
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.only(bottom: 4),
             child: Container(
               width: double.infinity,
               height: 1.5,
@@ -17910,31 +17923,23 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
-          onPressed: () => Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MainApp(initialIndex: 5, isAdmin: true),
-            ),
-          ),
-        ),
+        automaticallyImplyLeading: false,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               Icons.admin_panel_settings,
               color: Color(0xFFFF0000),
-              size: 20,
+              size: 18,
             ),
             SizedBox(width: 8),
             Text(
-              'ADMIN',
+              'TEK CONTROL',
               style: TextStyle(
                 color: Color(0xFFFF0000),
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
-                letterSpacing: 2,
+                letterSpacing: 3,
               ),
             ),
           ],
@@ -17942,7 +17947,50 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.settings, color: Color(0xFFB8B8C0)),
+            icon: Icon(Icons.logout, color: Color(0xFFB8B8C0), size: 20),
+            tooltip: 'Sign out of admin',
+            onPressed: () async {
+              HapticFeedback.lightImpact();
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  backgroundColor: const Color(0xFF0B0B0B),
+                  title: const Text('Sign out of admin?',
+                      style: TextStyle(color: Color(0xFFB8B8C0))),
+                  content: const Text(
+                      'You\'ll need to re-enter admin credentials to access CONTROL again.',
+                      style: TextStyle(color: Colors.white70)),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('Cancel',
+                          style: TextStyle(color: Colors.white54)),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text('Sign out',
+                          style: TextStyle(color: Color(0xFFFF0000))),
+                    ),
+                  ],
+                ),
+              );
+              if (confirm != true) return;
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.remove(tekAdminModePrefsKey);
+              await prefs.remove('isAdmin');
+              try {
+                await FirebaseAuth.instance.signOut();
+                await FirebaseAuth.instance.signInAnonymously();
+              } catch (_) {}
+              if (!context.mounted) return;
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const ReferralCodeScreen()),
+                (route) => false,
+              );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.settings, color: Color(0xFFB8B8C0), size: 20),
             onPressed: () {
               Navigator.push(
                 context,
@@ -17955,74 +18003,9 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(height: 20),
-            const _PushDiagnosticsPanel(),
+            const SizedBox(height: 12),
             const _RedemptionScannerButton(),
-            // Admin Profile Circle with Red Glow
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: 180,
-                  height: 180,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Color(0xFFFF0000), width: 3),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0xFFFF0000).withOpacity(0.5),
-                        blurRadius: 30,
-                        spreadRadius: 10,
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  width: 160,
-                  height: 160,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.black,
-                    border: Border.all(color: Color(0xFFFF0000), width: 2),
-                  ),
-                  child: Icon(
-                    Icons.admin_panel_settings,
-                    size: 80,
-                    color: Color(0xFFFF0000),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-            // Name
-            Text(
-              'ADMIN',
-              style: TextStyle(
-                color: Color(0xFFFF0000),
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 3,
-              ),
-            ),
-            SizedBox(height: 8),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              decoration: BoxDecoration(
-                color: Color(0xFFFF0000).withOpacity(0.2),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Color(0xFFFF0000), width: 1),
-              ),
-              child: Text(
-                'ADMINISTRATOR',
-                style: TextStyle(
-                  color: Color(0xFFFF0000),
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                ),
-              ),
-            ),
-            SizedBox(height: 30),
+            const SizedBox(height: 8),
 
             // Admin Stats
             Padding(
@@ -18062,26 +18045,6 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
                 Icons.people_outline,
                 () => _showAllUsers(),
               ),
-              _buildAdminAction(
-                'Pending Applications',
-                Icons.pending_outlined,
-                () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Application management coming soon'),
-                      backgroundColor: Color(0xFFFF0000),
-                    ),
-                  );
-                },
-              ),
-              _buildAdminAction('Generate Referral Code', Icons.qr_code, () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Code generation coming soon'),
-                    backgroundColor: Color(0xFFFF0000),
-                  ),
-                );
-              }),
             ]),
 
             _buildAdminSection('COMMUNICATIONS', [
