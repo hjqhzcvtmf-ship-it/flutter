@@ -816,10 +816,17 @@ exports.claimApplicationByReferralCode = onCall(
   }
 );
 
-// Idempotent claim-syncing callable. Looks up the caller's application doc by
-// ownerUid, then ensures `referralCode` is attached as a custom auth-token
-// claim. Used by the client on app start as a safety net for existing users
-// whose claim was never set (or got cleared by an Auth migration).
+// Idempotent claim-syncing callable. Tries three strategies in order to find
+// the caller's application doc:
+//   1) ownerUid == uid          (preferred — fully-claimed user)
+//   2) webUid / webUids contains uid  (anonymous session is bound to the doc)
+//   3) referralCode passed by client (saved in client SharedPreferences)
+//
+// If found via #2 or #3 and ownerUid is missing/equal, also sets ownerUid so
+// the claim chain is complete from this point forward.
+//
+// Once located, attaches `referralCode` as a custom auth-token claim so
+// Firestore rules can gate on `request.auth.token.referralCode`.
 exports.syncReferralClaim = onCall(
   {
     region: "us-central1",
@@ -830,32 +837,89 @@ exports.syncReferralClaim = onCall(
       throw new HttpsError("unauthenticated", "Sign in required");
     }
     const uid = request.auth.uid;
+    const data = request.data || {};
+    const passedCode = typeof data.referralCode === "string"
+      ? data.referralCode.trim().toUpperCase()
+      : "";
 
     try {
-      // Find the user's claimed application doc.
-      const snap = await db
+      // Strategy 1: ownerUid match.
+      let appDoc = null;
+      let snap = await db
         .collection("applications")
         .where("ownerUid", "==", uid)
         .limit(1)
         .get();
+      if (!snap.empty) appDoc = snap.docs[0];
 
-      if (snap.empty) {
-        // No claimed application yet — nothing to sync. Not an error.
+      // Strategy 2: webUid match (single-field index).
+      if (!appDoc) {
+        snap = await db
+          .collection("applications")
+          .where("webUid", "==", uid)
+          .limit(1)
+          .get();
+        if (!snap.empty) appDoc = snap.docs[0];
+      }
+
+      // Strategy 3: client passed their saved referralCode — verify the
+      // application is actually accessible to this user before trusting it.
+      if (!appDoc && passedCode) {
+        snap = await db
+          .collection("applications")
+          .where("referralCode", "==", passedCode)
+          .limit(1)
+          .get();
+        if (!snap.empty) {
+          const candidate = snap.docs[0];
+          const cData = candidate.data() || {};
+          const cOwner = cData.ownerUid;
+          const cWebUid = cData.webUid;
+          const cWebUids = Array.isArray(cData.webUids) ? cData.webUids : [];
+          // Accept if: nobody owns it yet (first claim), this uid already owns
+          // it, or this uid is registered as one of the web sessions.
+          const accessible =
+            !cOwner ||
+            cOwner === uid ||
+            cWebUid === uid ||
+            cWebUids.includes(uid);
+          if (accessible) appDoc = candidate;
+        }
+      }
+
+      if (!appDoc) {
         return { synced: false, reason: "no_application" };
       }
 
-      const data = snap.docs[0].data() || {};
-      const referralCode = typeof data.referralCode === "string"
-        ? data.referralCode.trim()
+      const appData = appDoc.data() || {};
+      const referralCode = typeof appData.referralCode === "string"
+        ? appData.referralCode.trim()
         : "";
 
       if (!referralCode) {
         return { synced: false, reason: "no_referral_code" };
       }
 
-      // Read the existing claim. Skip the write if it's already correct —
-      // setCustomUserClaims forces a token-refresh requirement, so avoid it
-      // when nothing changes.
+      // If ownerUid is missing, set it now — this completes the claim so
+      // future syncs find the doc via strategy #1.
+      if (!appData.ownerUid) {
+        try {
+          await appDoc.ref.set(
+            {
+              ownerUid: uid,
+              ownerClaimedAt: admin.firestore.FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
+        } catch (ownerErr) {
+          console.warn("Failed to back-fill ownerUid:", ownerErr);
+          // Non-fatal: claim sync can still succeed.
+        }
+      }
+
+      // Skip the custom-claim write if it's already correct —
+      // setCustomUserClaims forces a token-refresh, so avoid it when nothing
+      // changed.
       const userRecord = await admin.auth().getUser(uid);
       const existing = userRecord.customClaims || {};
       if (existing.referralCode === referralCode) {

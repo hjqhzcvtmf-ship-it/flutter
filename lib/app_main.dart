@@ -3491,6 +3491,21 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen>
         return;
       }
 
+      // Sync the referralCode custom claim BEFORE navigating into MainApp,
+      // so the first check-in / RSVP / story attempt has the claim in the
+      // local token. Without this, freshly-logged-in users would hit
+      // `permission-denied` on their first rule-gated write because the
+      // token issued by anonymous auth doesn't carry the claim yet.
+      try {
+        final callable = FirebaseFunctions.instanceFor(region: 'us-central1')
+            .httpsCallable('syncReferralClaim');
+        await callable.call(<String, dynamic>{'referralCode': code});
+        await FirebaseAuth.instance.currentUser?.getIdToken(true);
+      } catch (e) {
+        // Non-fatal — _MainAppState.initState will retry on next launch.
+        debugPrint('Initial referralCode claim sync failed: $e');
+      }
+
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -7198,20 +7213,33 @@ class _MainAppState extends State<MainApp> {
   /// Firestore rules that gate on `request.auth.token.referralCode`
   /// (check-ins, RSVPs, stories) can authorize the user.
   ///
-  /// Safe to call repeatedly. Calls the server callable to ensure the
-  /// claim is set on the user record, then force-refreshes the local
-  /// ID token if it's missing the claim (local tokens are cached for
-  /// ~1h, so we may need to refresh even when the server already has
-  /// the claim).
+  /// Passes the user's saved referralCode from SharedPreferences as a
+  /// hint, so the server can find the application doc even when
+  /// `ownerUid` hasn't been back-filled yet (most users today).
+  ///
+  /// Safe to call repeatedly. After the server confirms the canonical
+  /// referralCode for this user, force-refreshes the local ID token
+  /// only when the cached claim is stale or missing — avoids a
+  /// network round-trip on every app launch.
   Future<void> _syncReferralClaim() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null || user.isAnonymous) return;
+      if (user == null) return;
+      // Allow anonymous users — most TEK members are signed in
+      // anonymously by Firebase Auth, then bound to their referral
+      // code via the saved pref.
+
+      final prefs = await SharedPreferences.getInstance();
+      final savedCode = prefs.getString('userReferralCode')?.trim() ?? '';
+      // No code yet = user hasn't completed referral entry. Skip silently.
+      if (savedCode.isEmpty) return;
 
       // 1. Ensure server has the claim set on the user record.
       final callable = FirebaseFunctions.instanceFor(region: 'us-central1')
           .httpsCallable('syncReferralClaim');
-      final result = await callable.call(<String, dynamic>{});
+      final result = await callable.call(<String, dynamic>{
+        'referralCode': savedCode,
+      });
       final data = (result.data is Map)
           ? Map<String, dynamic>.from(result.data as Map)
           : <String, dynamic>{};
@@ -7221,8 +7249,7 @@ class _MainAppState extends State<MainApp> {
 
       // 2. Force-refresh the local ID token if our cached claim is
       //    missing or doesn't match the server's. Skip the refresh
-      //    when the local token already matches — this avoids a
-      //    network round-trip on every app launch.
+      //    when the local token already matches.
       final localResult = await user.getIdTokenResult();
       final localCode = localResult.claims?['referralCode'] as String?;
       if (localCode != serverCode) {
