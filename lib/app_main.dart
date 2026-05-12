@@ -24,6 +24,7 @@ import 'package:qr_flutter/qr_flutter.dart' as qr_flutter;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 @pragma('vm:entry-point')
@@ -161,7 +162,7 @@ Future<void> deleteCurrentUserAccount() async {
   try {
     await db.collection('users').doc(uid).delete();
   } catch (e) {
-    print('Error deleting Firestore user document: $e');
+    debugPrint('Error deleting Firestore user document: $e');
   }
 
   // Delete profile image from Firebase Storage (adjust path as needed)
@@ -171,14 +172,14 @@ Future<void> deleteCurrentUserAccount() async {
     );
     await profileImageRef.delete();
   } catch (e) {
-    print('Error deleting profile image from Storage: $e');
+    debugPrint('Error deleting profile image from Storage: $e');
   }
 
   // Optionally sign out and clear local data
   try {
     await FirebaseAuth.instance.signOut();
   } catch (e) {
-    print('Error signing out: $e');
+    debugPrint('Error signing out: $e');
   }
 
   // Clear local app data if needed
@@ -1169,7 +1170,7 @@ class _FriendQrScannerTabState extends State<_FriendQrScannerTab> {
         if (mounted) Navigator.pop(context);
       });
     } catch (e) {
-      _flash('${e.toString().replaceFirst('Exception: ', '').toUpperCase()}', Colors.red);
+      _flash(e.toString().replaceFirst('Exception: ', '').toUpperCase(), Colors.red);
     }
   }
 
@@ -2517,6 +2518,50 @@ class _TekWordmarkState extends State<TekWordmark>
   }
 }
 
+/// Thin glowing horizontal divider used under AppBars. Implements
+/// PreferredSizeWidget so it can drop directly into `AppBar.bottom`.
+class ChromeDivider extends StatelessWidget implements PreferredSizeWidget {
+  const ChromeDivider({super.key});
+
+  @override
+  Size get preferredSize => const Size.fromHeight(8);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Container(
+        width: double.infinity,
+        height: 1.5,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          gradient: const LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              Color(0x66F4F6F9),
+              Color(0xFFF7F9FB),
+              Color(0x66F4F6F9),
+            ],
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x3300FF41),
+              blurRadius: 10,
+              spreadRadius: 0.5,
+            ),
+            BoxShadow(
+              color: Color(0x55FFFFFF),
+              blurRadius: 6,
+              spreadRadius: -1,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class Ps3XpProgressBar extends StatefulWidget {
   final double progress;
   final double height;
@@ -2728,80 +2773,26 @@ class MyApp extends StatelessWidget {
           backgroundColor: Color(0xFF0A0A0A),
         ),
         dialogTheme: const DialogThemeData(backgroundColor: Color(0xFF0A0A0A)),
-        textTheme: const TextTheme(
-          displayLarge: TextStyle(
-            color: _chromeTextColor,
-            fontWeight: FontWeight.bold,
-            shadows: _chromeGlowShadows,
-          ),
-          displayMedium: TextStyle(
-            color: _chromeTextColor,
-            fontWeight: FontWeight.bold,
-            shadows: _chromeGlowShadows,
-          ),
-          displaySmall: TextStyle(
-            color: _chromeTextColor,
-            fontWeight: FontWeight.bold,
-            shadows: _chromeGlowShadows,
-          ),
-          headlineLarge: TextStyle(
-            color: _chromeTextColor,
-            fontWeight: FontWeight.bold,
-            shadows: _chromeGlowShadows,
-          ),
-          headlineMedium: TextStyle(
-            color: _chromeTextColor,
-            fontWeight: FontWeight.w600,
-            shadows: _chromeGlowShadows,
-          ),
-          headlineSmall: TextStyle(
-            color: _chromeTextColor,
-            fontWeight: FontWeight.w600,
-            shadows: _chromeGlowShadows,
-          ),
-          titleLarge: TextStyle(
-            color: _chromeTextColor,
-            fontWeight: FontWeight.w600,
-            shadows: _chromeGlowShadows,
-          ),
-          titleMedium: TextStyle(
-            color: _chromeTextColor,
-            fontWeight: FontWeight.w500,
-            shadows: _chromeGlowShadows,
-          ),
-          titleSmall: TextStyle(
-            color: _chromeTextMuted,
-            fontWeight: FontWeight.w500,
-            shadows: _chromeGlowShadows,
-          ),
-          bodyLarge: TextStyle(
-            color: _chromeTextColor,
-            shadows: _chromeGlowShadows,
-          ),
-          bodyMedium: TextStyle(
-            color: _chromeTextMuted,
-            shadows: _chromeGlowShadows,
-          ),
-          bodySmall: TextStyle(
-            color: Color(0xFF979CA6),
-            shadows: _chromeGlowShadows,
-          ),
-          labelLarge: TextStyle(
-            color: _chromeTextColor,
-            fontWeight: FontWeight.w600,
-            shadows: _chromeGlowShadows,
-          ),
-          labelMedium: TextStyle(
-            color: _chromeTextMuted,
-            fontWeight: FontWeight.w500,
-            shadows: _chromeGlowShadows,
-          ),
-          labelSmall: TextStyle(
-            color: Color(0xFF979CA6),
-            fontWeight: FontWeight.w500,
-            shadows: _chromeGlowShadows,
-          ),
-        ),
+        // TEK typography: Inter for body/UI (clean geometric workhorse) +
+        // Space Grotesk for display headlines (tighter, more industrial —
+        // pairs with the all-caps machined TEK headers).
+        textTheme: GoogleFonts.interTextTheme(const TextTheme(
+          displayLarge: TextStyle(color: _chromeTextColor, fontWeight: FontWeight.bold, letterSpacing: 1.5, shadows: _chromeGlowShadows),
+          displayMedium: TextStyle(color: _chromeTextColor, fontWeight: FontWeight.bold, letterSpacing: 1.5, shadows: _chromeGlowShadows),
+          displaySmall: TextStyle(color: _chromeTextColor, fontWeight: FontWeight.bold, letterSpacing: 1.5, shadows: _chromeGlowShadows),
+          headlineLarge: TextStyle(color: _chromeTextColor, fontWeight: FontWeight.bold, letterSpacing: 1.2, shadows: _chromeGlowShadows),
+          headlineMedium: TextStyle(color: _chromeTextColor, fontWeight: FontWeight.w600, letterSpacing: 1.0, shadows: _chromeGlowShadows),
+          headlineSmall: TextStyle(color: _chromeTextColor, fontWeight: FontWeight.w600, letterSpacing: 0.8, shadows: _chromeGlowShadows),
+          titleLarge: TextStyle(color: _chromeTextColor, fontWeight: FontWeight.w600, letterSpacing: 0.5, shadows: _chromeGlowShadows),
+          titleMedium: TextStyle(color: _chromeTextColor, fontWeight: FontWeight.w500, letterSpacing: 0.3, shadows: _chromeGlowShadows),
+          titleSmall: TextStyle(color: _chromeTextMuted, fontWeight: FontWeight.w500, letterSpacing: 0.3, shadows: _chromeGlowShadows),
+          bodyLarge: TextStyle(color: _chromeTextColor, shadows: _chromeGlowShadows),
+          bodyMedium: TextStyle(color: _chromeTextMuted, shadows: _chromeGlowShadows),
+          bodySmall: TextStyle(color: Color(0xFF979CA6), shadows: _chromeGlowShadows),
+          labelLarge: TextStyle(color: _chromeTextColor, fontWeight: FontWeight.w600, letterSpacing: 0.8, shadows: _chromeGlowShadows),
+          labelMedium: TextStyle(color: _chromeTextMuted, fontWeight: FontWeight.w500, letterSpacing: 0.5, shadows: _chromeGlowShadows),
+          labelSmall: TextStyle(color: Color(0xFF979CA6), fontWeight: FontWeight.w500, letterSpacing: 0.5, shadows: _chromeGlowShadows),
+        )),
       ),
       builder: (context, child) {
         return Stack(
@@ -3388,7 +3379,7 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen>
         _applicationData['isAdmin'] = false;
       }
     } catch (e) {
-      print('Error loading user data: $e');
+      debugPrint('Error loading user data: $e');
     }
   }
 
@@ -3430,16 +3421,16 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen>
       }
 
       // Check if code exists in Firestore
-      print('Checking code in Firestore: $code');
+      debugPrint('Checking code in Firestore: $code');
       final snapshot = await db
           .collection('applications')
           .where('referralCode', isEqualTo: code.trim().toUpperCase())
           .limit(1)
           .get();
 
-      print('Query results: ${snapshot.docs.length} documents found');
+      debugPrint('Query results: ${snapshot.docs.length} documents found');
       if (snapshot.docs.isNotEmpty) {
-        print(
+        debugPrint(
           'Found document with code: ${snapshot.docs.first.data()['referralCode']}',
         );
       }
@@ -3531,7 +3522,7 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen>
         );
       }
     } catch (e) {
-      print('Login error: $e');
+      debugPrint('Login error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -4418,7 +4409,7 @@ class _MembershipApplicationScreenState
       String? profileImageUrl;
       if (_profileImage != null) {
         try {
-          print('Uploading profile image...');
+          debugPrint('Uploading profile image...');
           final file = File(_profileImage!);
           final timestamp = DateTime.now().millisecondsSinceEpoch;
           final storageRef = FirebaseStorage.instance
@@ -4431,12 +4422,12 @@ class _MembershipApplicationScreenState
 
           if (uploadSnapshot.state == TaskState.success) {
             profileImageUrl = await uploadSnapshot.ref.getDownloadURL();
-            print('Profile image uploaded: $profileImageUrl');
+            debugPrint('Profile image uploaded: $profileImageUrl');
           } else {
-            print('Upload failed with state: ${uploadSnapshot.state}');
+            debugPrint('Upload failed with state: ${uploadSnapshot.state}');
           }
         } catch (e) {
-          print('Profile image upload error: $e');
+          debugPrint('Profile image upload error: $e');
           // Continue without image rather than failing the whole application
         }
       }
@@ -4458,7 +4449,7 @@ class _MembershipApplicationScreenState
       };
 
       await db.collection('applications').add(applicationData);
-      print('Application saved to Firestore as pending');
+      debugPrint('Application saved to Firestore as pending');
 
       // Send admin notification email (no welcome email to applicant yet)
       final HttpsCallable callable = FirebaseFunctions.instanceFor(
@@ -4475,7 +4466,7 @@ class _MembershipApplicationScreenState
         if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
       });
 
-      print('Admin notification sent');
+      debugPrint('Admin notification sent');
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -4498,12 +4489,12 @@ class _MembershipApplicationScreenState
         }
       });
     } catch (e) {
-      print('ERROR DETAILS: $e');
-      print('ERROR TYPE: ${e.runtimeType}');
+      debugPrint('ERROR DETAILS: $e');
+      debugPrint('ERROR TYPE: ${e.runtimeType}');
       if (e is FirebaseFunctionsException) {
-        print('Firebase Functions Error Code: ${e.code}');
-        print('Firebase Functions Error Message: ${e.message}');
-        print('Firebase Functions Error Details: ${e.details}');
+        debugPrint('Firebase Functions Error Code: ${e.code}');
+        debugPrint('Firebase Functions Error Message: ${e.message}');
+        debugPrint('Firebase Functions Error Details: ${e.details}');
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -4580,7 +4571,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         }
       }
     } catch (e) {
-      print('Error refreshing profile: $e');
+      debugPrint('Error refreshing profile: $e');
     }
   }
 
@@ -4590,7 +4581,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        toolbarHeight: 56,
+        toolbarHeight: 44,
         automaticallyImplyLeading: false,
         centerTitle: true,
         title: const TekWordmark(fontSize: 22, letterSpacing: 5.2),
@@ -4618,40 +4609,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             ),
           ),
         ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(8),
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Container(
-              width: double.infinity,
-              height: 1.5,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999),
-                gradient: const LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    Color(0x66F4F6F9),
-                    Color(0xFFF7F9FB),
-                    Color(0x66F4F6F9),
-                  ],
-                ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x3300FF41),
-                    blurRadius: 10,
-                    spreadRadius: 0.5,
-                  ),
-                  BoxShadow(
-                    color: Color(0x55FFFFFF),
-                    blurRadius: 6,
-                    spreadRadius: -1,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+        bottom: const ChromeDivider(),
       ),
       body: Stack(
         children: [
@@ -4726,7 +4684,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         }
                       }
                     } catch (e) {
-                      print('Error updating profile picture: $e');
+                      debugPrint('Error updating profile picture: $e');
                       if (mounted) {
                         Navigator.pop(context);
                         AppUtils.showError(
@@ -6039,7 +5997,7 @@ class _BadgeTile extends StatelessWidget {
   final _BadgeDef badge;
   final bool earned;
 
-  _BadgeTile({required this.badge, required this.earned});
+  const _BadgeTile({required this.badge, required this.earned});
 
   @override
   Widget build(BuildContext context) {
@@ -6434,7 +6392,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
         _loading = false;
         _errorMessage = 'Could not load invite data. Please try again.';
       });
-      print('Error loading invite stats: $e');
+      debugPrint('Error loading invite stats: $e');
     }
   }
 
@@ -7214,24 +7172,31 @@ class _MainAppState extends State<MainApp> {
     final maxIndex = _showControl ? 5 : 4;
     _selectedIndex = widget.initialIndex.clamp(0, maxIndex);
 
-    // Keep CONTROL visibility in sync with explicit admin mode + backend allowlist.
+    // Critical-path init (must run immediately so dependent UI is correct):
+    // - admin status decides whether CONTROL tab shows
+    // - quests config feature-flag gates the SIDEQUESTS tab visibility
+    // - single-device session enforcement is a security requirement
+    // - referralCode claim sync is required for any rule-gated action
     unawaited(_refreshAdminState());
-
-    // Start live mirror of config/quests so the SIDEQUESTS feature gate updates in real time.
     QuestsConfigService.instance.start();
-
-    // Enforce single-device session for normal users (referral code based).
     SharedPreferences.getInstance().then((prefs) {
       final code = prefs.getString('userReferralCode');
       if (code != null && code.trim().isNotEmpty) {
         ReferralSessionManager.instance.ensureActiveForReferralCode(code);
       }
     });
-
-    unawaited(_setupPushNotifications());
-    unawaited(_checkDailyStreak());
-    unawaited(TekVipCache.instance.refreshIfStale());
     unawaited(_syncReferralClaim());
+
+    // Deferred init — runs AFTER the first frame so it doesn't compete with
+    // initial paint. These features can tolerate a small delay:
+    // - push notification setup (permission/token registration)
+    // - daily streak check + XP grant
+    // - VIP cache warm-up (badges populate progressively)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_setupPushNotifications());
+      unawaited(_checkDailyStreak());
+      unawaited(TekVipCache.instance.refreshIfStale());
+    });
   }
 
   /// Syncs the `referralCode` custom claim on the user's auth token so
@@ -7815,7 +7780,7 @@ class _SocialScreenState extends State<SocialScreen>
         _searchResults = results;
       });
     } catch (e) {
-      print('Error searching users: $e');
+      debugPrint('Error searching users: $e');
     }
   }
 
@@ -7827,8 +7792,9 @@ class _SocialScreenState extends State<SocialScreen>
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
+          toolbarHeight: 44,
           centerTitle: true,
-          title: const TekWordmark(fontSize: 24, letterSpacing: 5.5),
+          title: const TekWordmark(fontSize: 22, letterSpacing: 5.5),
         ),
         body: Column(
           children: [
@@ -7883,8 +7849,9 @@ class _SocialScreenState extends State<SocialScreen>
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
+          toolbarHeight: 44,
           centerTitle: true,
-          title: const TekWordmark(fontSize: 24, letterSpacing: 5.5),
+          title: const TekWordmark(fontSize: 22, letterSpacing: 5.5),
         ),
         body: Column(
           children: [
@@ -11026,9 +10993,9 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
   }
 
   Future<void> _createEvent() async {
-    print('DEBUG: _createEvent called');
+    debugPrint('DEBUG: _createEvent called');
     if (_titleCtrl.text.isEmpty || _startDate == null) {
-      print(
+      debugPrint(
         'DEBUG: Validation failed - title: ${_titleCtrl.text}, date: $_startDate',
       );
       if (mounted) {
@@ -11045,7 +11012,7 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
       setState(() {
         _isSubmitting = true;
       });
-      print('DEBUG: Starting event creation');
+      debugPrint('DEBUG: Starting event creation');
       final parsedPrice = _tryParsePrice(_priceCtrl.text);
       if (parsedPrice == null) {
         if (mounted) {
@@ -11065,20 +11032,20 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
       }
       final price = parsedPrice;
       final capacity = int.tryParse(_capacityCtrl.text) ?? 0;
-      print('DEBUG: price=$price, capacity=$capacity');
+      debugPrint('DEBUG: price=$price, capacity=$capacity');
 
       String imageUrl = '';
       if (_eventImage != null) {
-        print('DEBUG: Uploading image...');
+        debugPrint('DEBUG: Uploading image...');
         final ref = FirebaseStorage.instance.ref(
           'event_images/${DateTime.now().millisecondsSinceEpoch}',
         );
         await ref.putFile(_eventImage!);
         imageUrl = await ref.getDownloadURL();
-        print('DEBUG: Image uploaded: $imageUrl');
+        debugPrint('DEBUG: Image uploaded: $imageUrl');
       }
 
-      print('DEBUG: Adding to Firestore...');
+      debugPrint('DEBUG: Adding to Firestore...');
       await FirebaseFirestore.instance.collection('events').add({
         'title': _titleCtrl.text.trim(),
         'location': _locationCtrl.text.trim(),
@@ -11090,12 +11057,12 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
         'startAt': Timestamp.fromDate(_startDate!),
         'createdAt': Timestamp.now(),
       });
-      print('DEBUG: Event created successfully');
+      debugPrint('DEBUG: Event created successfully');
       if (mounted) {
         Navigator.of(context).pop(true);
       }
     } catch (e) {
-      print('DEBUG: Error creating event: $e');
+      debugPrint('DEBUG: Error creating event: $e');
       if (mounted) {
         setState(() {
           _isSubmitting = false;
@@ -11536,8 +11503,9 @@ class _EventsScreenState extends State<EventsScreen>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        toolbarHeight: 44,
         centerTitle: true,
-        title: const TekWordmark(fontSize: 24, letterSpacing: 5.5),
+        title: const TekWordmark(fontSize: 22, letterSpacing: 5.5),
       ),
       floatingActionButton: widget.isAdmin
           ? FloatingActionButton(
@@ -12936,87 +12904,72 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        toolbarHeight: 160,
-        leading: Align(
-          alignment: Alignment.topCenter,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
+        toolbarHeight: 44,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
+          onPressed: () => Navigator.pop(context),
         ),
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildFriendPortal(80),
-            const SizedBox(height: 6),
-            Text(
-              widget.friendName,
-              style: const TextStyle(
-                color: Color(0xFFB8B8C0),
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
-              ),
-            ),
-          ],
-        ),
-        centerTitle: true,
         actions: [
-          Align(
-            alignment: Alignment.topCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 4, right: 4),
-              child: IconButton(
-                tooltip: 'Relay XP',
-                icon: const Icon(Icons.bolt_outlined, color: Color(0xFF00FF41)),
-                onPressed: _isBlocked
-                    ? null
-                    : () {
-                        HapticFeedback.lightImpact();
-                        showDialog(
-                          context: context,
-                          barrierDismissible: true,
-                          builder: (_) => _RelayPowerDialog(
-                            recipientCode: widget.friendCode,
-                            recipientName: widget.friendName,
-                          ),
-                        );
-                      },
-              ),
-            ),
+          IconButton(
+            tooltip: 'Relay XP',
+            icon: const Icon(Icons.bolt_outlined, color: Color(0xFF00FF41)),
+            onPressed: _isBlocked
+                ? null
+                : () {
+                    HapticFeedback.lightImpact();
+                    showDialog(
+                      context: context,
+                      barrierDismissible: true,
+                      builder: (_) => _RelayPowerDialog(
+                        recipientCode: widget.friendCode,
+                        recipientName: widget.friendName,
+                      ),
+                    );
+                  },
           ),
-          Align(
-            alignment: Alignment.topCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'report') {
-                    _showReportDialog();
-                  } else if (value == 'block') {
-                    _showBlockDialog();
-                  }
-                },
-                itemBuilder: (BuildContext context) => [
-                  const PopupMenuItem<String>(
-                    value: 'report',
-                    child: Text('Report User'),
-                  ),
-                  const PopupMenuItem<String>(
-                    value: 'block',
-                    child: Text('Block User'),
-                  ),
-                ],
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'report') {
+                _showReportDialog();
+              } else if (value == 'block') {
+                _showBlockDialog();
+              }
+            },
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem<String>(
+                value: 'report',
+                child: Text('Report User'),
               ),
-            ),
+              const PopupMenuItem<String>(
+                value: 'block',
+                child: Text('Block User'),
+              ),
+            ],
           ),
         ],
+        bottom: const ChromeDivider(),
       ),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 12, bottom: 4),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildFriendPortal(80),
+                const SizedBox(height: 6),
+                Text(
+                  widget.friendName,
+                  style: const TextStyle(
+                    color: Color(0xFFB8B8C0),
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ],
+            ),
+          ),
           if (_isBlocked)
             Container(
               width: double.infinity,
@@ -14202,7 +14155,7 @@ class _UserProfileViewState extends State<UserProfileView> {
       await _checkFriendshipStatus();
       await _checkIfBlocked();
     } catch (e) {
-      print('Error loading current user code: $e');
+      debugPrint('Error loading current user code: $e');
     }
   }
 
@@ -14227,7 +14180,7 @@ class _UserProfileViewState extends State<UserProfileView> {
         }
       }
     } catch (e) {
-      print('Error checking request status: $e');
+      debugPrint('Error checking request status: $e');
     }
   }
 
@@ -14253,7 +14206,7 @@ class _UserProfileViewState extends State<UserProfileView> {
         });
       }
     } catch (e) {
-      print('Error checking friendship status: $e');
+      debugPrint('Error checking friendship status: $e');
     }
   }
 
@@ -14271,7 +14224,7 @@ class _UserProfileViewState extends State<UserProfileView> {
         });
       }
     } catch (e) {
-      print('Error checking blocked status: $e');
+      debugPrint('Error checking blocked status: $e');
     }
   }
 
@@ -14324,7 +14277,7 @@ class _UserProfileViewState extends State<UserProfileView> {
         AppUtils.showSuccess(context, 'User blocked successfully');
       }
     } catch (e) {
-      print('Error blocking user: $e');
+      debugPrint('Error blocking user: $e');
       if (mounted) {
         AppUtils.showError(context, 'Error blocking user: $e');
         setState(() => _isLoading = false);
@@ -14416,7 +14369,7 @@ class _UserProfileViewState extends State<UserProfileView> {
         );
       }
     } catch (e) {
-      print('Error reporting user: $e');
+      debugPrint('Error reporting user: $e');
       if (mounted) {
         AppUtils.showError(context, 'Error submitting report: $e');
         setState(() => _isLoading = false);
@@ -14435,7 +14388,7 @@ class _UserProfileViewState extends State<UserProfileView> {
     });
 
     try {
-      print(
+      debugPrint(
         'DEBUG: Sending friend request from $_currentUserCode to ${widget.userData['referralCode']}',
       );
 
@@ -14452,20 +14405,20 @@ class _UserProfileViewState extends State<UserProfileView> {
 
       final targetUserDoc = targetUserSnapshot.docs.first;
       final targetUserData = targetUserDoc.data();
-      print('DEBUG: Target user data: $targetUserData');
+      debugPrint('DEBUG: Target user data: $targetUserData');
 
       List<String> requests =
           (targetUserData['friendRequests'] as List?)?.cast<String>() ?? [];
-      print('DEBUG: Current requests: $requests');
+      debugPrint('DEBUG: Current requests: $requests');
 
       // Add current user to target user's friend requests
       if (_currentUserCode != null && !requests.contains(_currentUserCode)) {
         requests.add(_currentUserCode!);
-        print(
+        debugPrint(
           'DEBUG: Adding $_currentUserCode to requests. New list: $requests',
         );
         await targetUserDoc.reference.update({'friendRequests': requests});
-        print('DEBUG: Updated Firestore with new requests');
+        debugPrint('DEBUG: Updated Firestore with new requests');
       }
 
       setState(() {
@@ -14478,7 +14431,7 @@ class _UserProfileViewState extends State<UserProfileView> {
         'Friend request sent to ${widget.userData['name']}!',
       );
     } catch (e) {
-      print('Error sending friend request: $e');
+      debugPrint('Error sending friend request: $e');
       AppUtils.showError(context, 'Error: ${e.toString()}');
       setState(() {
         _isLoading = false;
@@ -17729,7 +17682,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading stats: $e');
+      debugPrint('Error loading stats: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -18162,7 +18115,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
         return data;
       }).toList();
     } catch (e) {
-      print('Error fetching users: $e');
+      debugPrint('Error fetching users: $e');
       return [];
     }
   }
@@ -18389,7 +18342,7 @@ class _QuestFeatureFlagsPanel extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: const Color(0xFF00FF41),
+            activeThumbColor: const Color(0xFF00FF41),
             activeTrackColor: const Color(0xFF00FF41).withOpacity(0.4),
             inactiveThumbColor: Colors.white38,
             inactiveTrackColor: Colors.white12,
@@ -18488,7 +18441,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading users: $e');
+      debugPrint('Error loading users: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -18565,7 +18518,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
       // Close loading dialog if still open
       if (mounted) Navigator.pop(context);
 
-      print('Error deleting user: $e');
+      debugPrint('Error deleting user: $e');
       if (mounted) {
         AppUtils.showError(context, 'Failed to delete user: ${e.toString()}');
       }
@@ -19013,7 +18966,7 @@ class _SendXPToUsersScreenState extends State<SendXPToUsersScreen> {
         await docRef.update({'xpPoints': newXP});
 
         // Log the transaction
-        print(
+        debugPrint(
           'DEBUG: Sent $xpAmount XP to $userName. Old: $currentXP, New: $newXP',
         );
         await FirebaseFirestore.instance.collection('xp_transactions').add({
@@ -20450,7 +20403,7 @@ class _SendXPDialogState extends State<SendXPDialog> {
         );
       }
     } catch (e) {
-      print('Error sending XP: $e');
+      debugPrint('Error sending XP: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -20708,7 +20661,7 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
               'type': 'admin_broadcast',
             });
           } catch (e) {
-            print('Error sending in-app notification to ${user['email']}: $e');
+            debugPrint('Error sending in-app notification to ${user['email']}: $e');
           }
         }
       }
@@ -20717,9 +20670,9 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
       if (_sendSMS) {
         // TODO: Integrate with SMS service like Twilio
         // For now, just log
-        print('SMS sending requested for ${widget.users.length} users');
+        debugPrint('SMS sending requested for ${widget.users.length} users');
         for (var user in widget.users) {
-          print('Would send SMS to: ${user['phone']} - Message: $message');
+          debugPrint('Would send SMS to: ${user['phone']} - Message: $message');
         }
       }
 
@@ -20738,7 +20691,7 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
             'message': message,
           });
         } catch (e) {
-          print('Error sending emails: $e');
+          debugPrint('Error sending emails: $e');
           // Continue even if email fails
         }
       }
@@ -20762,7 +20715,7 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
         );
       }
     } catch (e) {
-      print('Error sending notifications: $e');
+      debugPrint('Error sending notifications: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -21482,7 +21435,7 @@ class _SidequestCard extends StatelessWidget {
     final mins = diff.inMinutes;
     final secs = diff.inSeconds.remainder(60);
     if (mins > 60) return '${diff.inHours}H';
-    return '${mins}:${secs.toString().padLeft(2, '0')}';
+    return '$mins:${secs.toString().padLeft(2, '0')}';
   }
 
   const _SidequestCard({
@@ -22961,7 +22914,7 @@ class _AiMissionDesignerSheetState extends State<_AiMissionDesignerSheet> {
       setState(() => _generated = data);
       TekSounds.instance.transmission();
     } catch (e) {
-      setState(() => _error = '${e.toString().replaceFirst('Exception: ', '').toUpperCase()}');
+      setState(() => _error = e.toString().replaceFirst('Exception: ', '').toUpperCase());
     } finally {
       if (mounted) setState(() => _generating = false);
     }
@@ -23693,7 +23646,7 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
             _field(_xpController, 'XP REWARD', keyboardType: TextInputType.number),
             const SizedBox(height: 14),
             DropdownButtonFormField<String>(
-              value: _vtype,
+              initialValue: _vtype,
               dropdownColor: const Color(0xFF0D0D1A),
               style: const TextStyle(color: Colors.white, fontSize: 13),
               decoration: InputDecoration(
@@ -23712,7 +23665,7 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
             ),
             const SizedBox(height: 14),
             DropdownButtonFormField<String?>(
-              value: _selectedEventId,
+              initialValue: _selectedEventId,
               dropdownColor: const Color(0xFF0D0D1A),
               style: const TextStyle(color: Colors.white, fontSize: 13),
               decoration: InputDecoration(
@@ -23746,7 +23699,7 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
             ),
             const SizedBox(height: 14),
             DropdownButtonFormField<String?>(
-              value: _selectedPrereqId,
+              initialValue: _selectedPrereqId,
               dropdownColor: const Color(0xFF0D0D1A),
               style: const TextStyle(color: Colors.white, fontSize: 13),
               decoration: InputDecoration(
