@@ -799,10 +799,79 @@ exports.claimApplicationByReferralCode = onCall(
         }
       }
 
+      // Attach referralCode as a custom claim on the auth token so Firestore
+      // rules can gate writes on `request.auth.token.referralCode`.
+      try {
+        await admin.auth().setCustomUserClaims(uid, { referralCode });
+      } catch (claimErr) {
+        console.error("Failed to set referralCode custom claim:", claimErr);
+        // Non-fatal: caller can retry via syncReferralClaim.
+      }
+
       return { success: true, docId: doc.id };
     } catch (error) {
       console.error("claimApplicationByReferralCode error:", error);
       throw new Error("Unable to claim application");
+    }
+  }
+);
+
+// Idempotent claim-syncing callable. Looks up the caller's application doc by
+// ownerUid, then ensures `referralCode` is attached as a custom auth-token
+// claim. Used by the client on app start as a safety net for existing users
+// whose claim was never set (or got cleared by an Auth migration).
+exports.syncReferralClaim = onCall(
+  {
+    region: "us-central1",
+    enforceAppCheck: false,
+  },
+  async (request) => {
+    if (!request.auth || !request.auth.uid) {
+      throw new HttpsError("unauthenticated", "Sign in required");
+    }
+    const uid = request.auth.uid;
+
+    try {
+      // Find the user's claimed application doc.
+      const snap = await db
+        .collection("applications")
+        .where("ownerUid", "==", uid)
+        .limit(1)
+        .get();
+
+      if (snap.empty) {
+        // No claimed application yet — nothing to sync. Not an error.
+        return { synced: false, reason: "no_application" };
+      }
+
+      const data = snap.docs[0].data() || {};
+      const referralCode = typeof data.referralCode === "string"
+        ? data.referralCode.trim()
+        : "";
+
+      if (!referralCode) {
+        return { synced: false, reason: "no_referral_code" };
+      }
+
+      // Read the existing claim. Skip the write if it's already correct —
+      // setCustomUserClaims forces a token-refresh requirement, so avoid it
+      // when nothing changes.
+      const userRecord = await admin.auth().getUser(uid);
+      const existing = userRecord.customClaims || {};
+      if (existing.referralCode === referralCode) {
+        return { synced: true, referralCode, changed: false };
+      }
+
+      // Merge with any existing claims (admin flag, etc.) so we don't clobber.
+      await admin.auth().setCustomUserClaims(uid, {
+        ...existing,
+        referralCode,
+      });
+
+      return { synced: true, referralCode, changed: true };
+    } catch (e) {
+      console.error("syncReferralClaim error:", e);
+      throw new HttpsError("internal", `Failed to sync claim: ${e.message || e}`);
     }
   }
 );

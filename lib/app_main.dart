@@ -7191,6 +7191,48 @@ class _MainAppState extends State<MainApp> {
     unawaited(_setupPushNotifications());
     unawaited(_checkDailyStreak());
     unawaited(TekVipCache.instance.refreshIfStale());
+    unawaited(_syncReferralClaim());
+  }
+
+  /// Syncs the `referralCode` custom claim on the user's auth token so
+  /// Firestore rules that gate on `request.auth.token.referralCode`
+  /// (check-ins, RSVPs, stories) can authorize the user.
+  ///
+  /// Safe to call repeatedly. Calls the server callable to ensure the
+  /// claim is set on the user record, then force-refreshes the local
+  /// ID token if it's missing the claim (local tokens are cached for
+  /// ~1h, so we may need to refresh even when the server already has
+  /// the claim).
+  Future<void> _syncReferralClaim() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null || user.isAnonymous) return;
+
+      // 1. Ensure server has the claim set on the user record.
+      final callable = FirebaseFunctions.instanceFor(region: 'us-central1')
+          .httpsCallable('syncReferralClaim');
+      final result = await callable.call(<String, dynamic>{});
+      final data = (result.data is Map)
+          ? Map<String, dynamic>.from(result.data as Map)
+          : <String, dynamic>{};
+      final serverCode = data['referralCode'] as String?;
+
+      if (serverCode == null || serverCode.isEmpty) return;
+
+      // 2. Force-refresh the local ID token if our cached claim is
+      //    missing or doesn't match the server's. Skip the refresh
+      //    when the local token already matches — this avoids a
+      //    network round-trip on every app launch.
+      final localResult = await user.getIdTokenResult();
+      final localCode = localResult.claims?['referralCode'] as String?;
+      if (localCode != serverCode) {
+        await user.getIdToken(true);
+        debugPrint('referralCode claim refreshed: $serverCode');
+      }
+    } catch (e) {
+      // Non-fatal — rules just won't authorize until next try.
+      debugPrint('syncReferralClaim failed: $e');
+    }
   }
 
   Future<void> _checkDailyStreak() async {
