@@ -960,18 +960,52 @@ exports.sendInviteEmail = onCall(
       throw new HttpsError("invalid-argument", "Please enter a valid email address.");
     }
 
-    // Find user's application
-    const appSnap = await db
+    // 3-strategy app-doc lookup (matches getInviteStats / syncReferralClaim).
+    const passedCode = typeof (request.data && request.data.referralCode) === "string"
+      ? request.data.referralCode.trim().toUpperCase()
+      : "";
+
+    let appDoc = null;
+    let appSnap = await db
       .collection("applications")
       .where("ownerUid", "==", uid)
       .limit(1)
       .get();
+    if (!appSnap.empty) appDoc = appSnap.docs[0];
 
-    if (appSnap.empty) {
+    if (!appDoc) {
+      appSnap = await db
+        .collection("applications")
+        .where("webUid", "==", uid)
+        .limit(1)
+        .get();
+      if (!appSnap.empty) appDoc = appSnap.docs[0];
+    }
+
+    if (!appDoc && passedCode) {
+      appSnap = await db
+        .collection("applications")
+        .where("referralCode", "==", passedCode)
+        .limit(1)
+        .get();
+      if (!appSnap.empty) {
+        const candidate = appSnap.docs[0];
+        const cData = candidate.data() || {};
+        const cWebUids = Array.isArray(cData.webUids) ? cData.webUids : [];
+        const accessible =
+          !cData.ownerUid ||
+          cData.ownerUid === uid ||
+          cData.webUid === uid ||
+          cWebUids.includes(uid);
+        if (accessible) appDoc = candidate;
+      }
+    }
+
+    if (!appDoc) {
       throw new HttpsError("not-found", "No application found");
     }
 
-    const appData = appSnap.docs[0].data() || {};
+    const appData = appDoc.data() || {};
     let inviteCode = appData.inviteCode || null;
     if (!inviteCode) {
       throw new HttpsError("failed-precondition", "No invite code available");
@@ -1074,19 +1108,54 @@ exports.getInviteStats = onCall(
       throw new HttpsError("unauthenticated", "Unauthenticated");
     }
     const uid = request.auth.uid;
+    const data = request.data || {};
+    const passedCode = typeof data.referralCode === "string"
+      ? data.referralCode.trim().toUpperCase()
+      : "";
 
-    // Find user's application
-    const appSnap = await db
+    // 3-strategy lookup: ownerUid → webUid → client-passed referralCode.
+    // Mirrors syncReferralClaim so we don't race the async claim-sync on
+    // app start when the user navigates here before back-fill completes.
+    let appDoc = null;
+    let appSnap = await db
       .collection("applications")
       .where("ownerUid", "==", uid)
       .limit(1)
       .get();
+    if (!appSnap.empty) appDoc = appSnap.docs[0];
 
-    if (appSnap.empty) {
+    if (!appDoc) {
+      appSnap = await db
+        .collection("applications")
+        .where("webUid", "==", uid)
+        .limit(1)
+        .get();
+      if (!appSnap.empty) appDoc = appSnap.docs[0];
+    }
+
+    if (!appDoc && passedCode) {
+      appSnap = await db
+        .collection("applications")
+        .where("referralCode", "==", passedCode)
+        .limit(1)
+        .get();
+      if (!appSnap.empty) {
+        const candidate = appSnap.docs[0];
+        const cData = candidate.data() || {};
+        const cWebUids = Array.isArray(cData.webUids) ? cData.webUids : [];
+        const accessible =
+          !cData.ownerUid ||
+          cData.ownerUid === uid ||
+          cData.webUid === uid ||
+          cWebUids.includes(uid);
+        if (accessible) appDoc = candidate;
+      }
+    }
+
+    if (!appDoc) {
       throw new HttpsError("not-found", "No application found for this user");
     }
 
-    const appDoc = appSnap.docs[0];
     const appData = appDoc.data() || {};
     let inviteCode = appData.inviteCode || null;
     let referralCode = appData.referralCode || null;

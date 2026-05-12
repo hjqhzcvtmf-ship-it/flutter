@@ -6384,10 +6384,17 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
     });
 
     try {
+      // Pass the user's saved referralCode so the server can find their
+      // application doc even when ownerUid hasn't been back-filled yet
+      // (race with _syncReferralClaim on app start).
+      final prefs = await SharedPreferences.getInstance();
+      final savedCode = prefs.getString('userReferralCode')?.trim() ?? '';
       final callable = FirebaseFunctions.instanceFor(
         region: 'us-central1',
       ).httpsCallable('getInviteStats');
-      final result = await callable.call();
+      final result = await callable.call(<String, dynamic>{
+        'referralCode': savedCode,
+      });
       final data = result.data as Map<String, dynamic>? ?? {};
 
       setState(() {
@@ -6448,10 +6455,15 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
     setState(() => _sendingEmail = true);
 
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedCode = prefs.getString('userReferralCode')?.trim() ?? '';
       final callable = FirebaseFunctions.instanceFor(
         region: 'us-central1',
       ).httpsCallable('sendInviteEmail');
-      await callable.call({'friendEmail': email});
+      await callable.call({
+        'friendEmail': email,
+        'referralCode': savedCode,
+      });
 
       _emailController.clear();
       if (mounted) {
