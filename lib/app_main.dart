@@ -5633,9 +5633,9 @@ const List<_TekReward> _tekRewards = [
   _TekReward(
     id: 'welcome_drink',
     name: 'WELCOME DRINK',
-    description: 'A drink on the house, on us.',
-    xpRequired: 200,
-    level: 2,
+    description: 'A drink on the house, on us. Welcome to TEK.',
+    xpRequired: 0,
+    level: 1,
     icon: Icons.local_cafe,
     color: Color(0xFFCD7F32),
   ),
@@ -9616,8 +9616,11 @@ class _MissionControlHero extends StatefulWidget {
 }
 
 class _MissionControlHeroState extends State<_MissionControlHero> {
+  static const String _dismissedHeroPrefsKey = 'hero_dismissed_missions';
+
   String? _userCode;
   Set<String> _completedIds = {};
+  Set<String> _dismissedHeroes = {};
 
   @override
   void initState() {
@@ -9629,6 +9632,7 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
     final prefs = await SharedPreferences.getInstance();
     final code = prefs.getString('userReferralCode');
     if (code == null || code.isEmpty) return;
+    final dismissed = (prefs.getStringList(_dismissedHeroPrefsKey) ?? const <String>[]).toSet();
     final snap = await FirebaseFirestore.instance
         .collection('applications')
         .where('referralCode', isEqualTo: code)
@@ -9637,11 +9641,23 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
     if (!mounted) return;
     setState(() {
       _userCode = code;
+      _dismissedHeroes = dismissed;
       if (snap.docs.isNotEmpty) {
         _completedIds = ((snap.docs.first.data()['completedSidequests'] as List?) ?? [])
             .cast<String>()
             .toSet();
       }
+    });
+  }
+
+  Future<void> _dismissHero(String questId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final dismissed = (prefs.getStringList(_dismissedHeroPrefsKey) ?? const <String>[]).toSet();
+    dismissed.add(questId);
+    await prefs.setStringList(_dismissedHeroPrefsKey, dismissed.toList());
+    if (!mounted) return;
+    setState(() {
+      _dismissedHeroes = dismissed;
     });
   }
 
@@ -9731,9 +9747,11 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
               return _heroUpcoming(upcoming, upcomingAt);
             }
 
-            // 3) Highlight a ready mission (active, not completed, no unmet prereq)
+            // 3) Highlight a ready mission (active, not completed, not
+            //    previously dismissed by the user, no unmet prereq).
             for (final m in missions) {
               if (_completedIds.contains(m.id)) continue;
+              if (_dismissedHeroes.contains(m.id)) continue;
               final data = m.data() as Map<String, dynamic>;
               final prereq = data['requiresQuestId'] as String?;
               if (prereq != null && prereq.isNotEmpty && !_completedIds.contains(prereq)) continue;
@@ -9894,29 +9912,49 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
             ],
           ),
           const SizedBox(height: 10),
-          PressScale(
-            child: ElevatedButton(
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                TekSounds.instance.tap();
-                Navigator.push(
-                  context,
-                  cinematicRoute(SidequestDetailPage(
-                    questId: mission.id,
-                    data: data,
-                    completed: false,
-                    userCode: _userCode,
-                  )),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00FF41),
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          Row(
+            children: [
+              Expanded(
+                child: PressScale(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      TekSounds.instance.tap();
+                      // Mark as dismissed so the hero rolls to the
+                      // next mission after the user comes back.
+                      unawaited(_dismissHero(mission.id));
+                      Navigator.push(
+                        context,
+                        cinematicRoute(SidequestDetailPage(
+                          questId: mission.id,
+                          data: data,
+                          completed: false,
+                          userCode: _userCode,
+                        )),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF00FF41),
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: const Text('OPEN BRIEF',
+                        style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 12)),
+                  ),
+                ),
               ),
-              child: const Text('OPEN BRIEF',
-                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 12)),
-            ),
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  _dismissHero(mission.id);
+                },
+                icon: const Icon(Icons.close, color: Colors.white38, size: 20),
+                tooltip: 'Hide',
+                padding: const EdgeInsets.all(8),
+                constraints: const BoxConstraints(),
+              ),
+            ],
           ),
         ],
       ),
