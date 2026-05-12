@@ -32,6 +32,34 @@ service firebase.storage {
                    && request.resource.size < 10 * 1024 * 1024;
     }
 
+    // Stories: 24h photo posts.
+    // Path is stories/{userCode}/{filename}.
+    // Users can only write under their own referralCode (via the
+    // request.auth.token.referralCode custom claim set by syncReferralClaim).
+    match /stories/{userCode}/{filename} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && request.auth.token.referralCode == userCode
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+      allow delete: if request.auth != null
+                    && request.auth.token.referralCode == userCode;
+    }
+
+    // Chat photo messages.
+    // Path is chat_photos/{chatId}/{filename} where chatId is derived from
+    // participant referralCodes. Any signed-in user can write images here;
+    // the corresponding Firestore message rule enforces senderUid == auth.uid
+    // so an orphaned image can't be referenced in a message under a different
+    // sender's identity.
+    match /chat_photos/{chatId}/{filename} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+      allow delete: if request.auth != null;
+    }
+
     // Default deny for any other paths
     match /{allPaths=**} {
       allow read, write: if false;

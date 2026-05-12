@@ -10026,7 +10026,7 @@ class _StoriesRowState extends State<_StoriesRow> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 92,
+      height: 96,
       child: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('stories')
