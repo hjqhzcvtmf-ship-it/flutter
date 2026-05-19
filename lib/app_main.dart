@@ -17,6 +17,7 @@ import 'package:share_plus/share_plus.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:ui' as ui show ImageFilter, BlurStyle, MaskFilter, Shader, FontFeature, FontVariation, TextDirection, Image;
 import 'dart:ui';
 import 'package:intl/intl.dart';
 import 'firebase_options.dart';
@@ -25,6 +26,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:flutter_compass/flutter_compass.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 @pragma('vm:entry-point')
@@ -12503,6 +12506,46 @@ class _CheckInSectionState extends State<_CheckInSection> {
             ),
           ),
         ),
+        // TEK Radar — only visible when checked in. Opens the friend
+        // finder; location is only written/read while this page is open.
+        if (_checkedIn) ...[
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: PressScale(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  TekSounds.instance.tap();
+                  Navigator.push(
+                    context,
+                    cinematicRoute(_TekRadarPage(
+                      eventId: widget.eventId,
+                      userCode: widget.userCode!,
+                    )),
+                  );
+                },
+                icon: const Icon(Icons.radar, size: 16, color: Colors.black),
+                label: const Text(
+                  'OPEN TEK RADAR',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF00FF41),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  elevation: 0,
+                ),
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: 16),
         StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
@@ -12579,6 +12622,555 @@ class _CheckInSectionState extends State<_CheckInSection> {
       ],
     );
   }
+}
+
+// ==================== TEK RADAR ====================
+//
+// Friend finder for users checked into the same event. Each blip is a
+// friend's relative bearing from your current GPS, rotated by your phone's
+// heading so the arrow always points at where they physically ARE.
+//
+// Privacy model: location is only WRITTEN while this page is open. On dispose
+// the user's location doc is deleted from events/{eventId}/locations. There
+// is no continuous background tracking. Friends only appear if they (a) are
+// checked into the same event AND (b) have the radar open themselves.
+
+class _RadarBlip {
+  final String userCode;
+  final String userName;
+  final String imageUrl;
+  final double distanceMeters;
+  final double absoluteBearingDeg;
+  const _RadarBlip({
+    required this.userCode,
+    required this.userName,
+    required this.imageUrl,
+    required this.distanceMeters,
+    required this.absoluteBearingDeg,
+  });
+}
+
+class _TekRadarPage extends StatefulWidget {
+  final String eventId;
+  final String userCode;
+  const _TekRadarPage({required this.eventId, required this.userCode});
+
+  @override
+  State<_TekRadarPage> createState() => _TekRadarPageState();
+}
+
+class _TekRadarPageState extends State<_TekRadarPage>
+    with SingleTickerProviderStateMixin {
+  static const Duration _writeInterval = Duration(seconds: 5);
+  // Radar shows blips up to this far away. Beyond, friends just clamp to
+  // the outer ring with a distance label, so you still know which way to go.
+  static const double _maxRangeMeters = 500;
+
+  StreamSubscription<Position>? _positionSub;
+  StreamSubscription<CompassEvent>? _compassSub;
+  late final AnimationController _sweepCtrl;
+
+  Position? _myPos;
+  double _headingDeg = 0;
+  Set<String> _friendCodes = {};
+  String _userName = '';
+  String _userImageUrl = '';
+  DateTime? _lastWriteAt;
+  String? _error;
+  bool _starting = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _sweepCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat();
+    _start();
+  }
+
+  @override
+  void dispose() {
+    _positionSub?.cancel();
+    _compassSub?.cancel();
+    _sweepCtrl.dispose();
+    // Stop sharing: delete our location slot for this event.
+    FirebaseFirestore.instance
+        .collection('events')
+        .doc(widget.eventId)
+        .collection('locations')
+        .doc(widget.userCode)
+        .delete()
+        .catchError((_) {});
+    super.dispose();
+  }
+
+  Future<void> _start() async {
+    try {
+      // 1. Permission gate.
+      LocationPermission perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+      if (perm == LocationPermission.denied ||
+          perm == LocationPermission.deniedForever) {
+        if (!mounted) return;
+        setState(() {
+          _error = 'Location permission required for TEK Radar';
+          _starting = false;
+        });
+        return;
+      }
+
+      final serviceOn = await Geolocator.isLocationServiceEnabled();
+      if (!serviceOn) {
+        if (!mounted) return;
+        setState(() {
+          _error = 'Turn on Location Services in iOS Settings';
+          _starting = false;
+        });
+        return;
+      }
+
+      // 2. Load my profile + friend list.
+      final mySnap = await FirebaseFirestore.instance
+          .collection('applications')
+          .where('referralCode', isEqualTo: widget.userCode)
+          .limit(1)
+          .get();
+      if (mySnap.docs.isNotEmpty) {
+        final d = mySnap.docs.first.data();
+        _userName = (d['name'] as String?) ?? widget.userCode;
+        _userImageUrl = (d['profileImageUrl'] as String?) ?? '';
+        _friendCodes = ((d['friends'] as List?) ?? const [])
+            .cast<String>()
+            .toSet();
+      }
+
+      // 3. Position stream.
+      _positionSub = Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 3,
+        ),
+      ).listen((pos) {
+        if (!mounted) return;
+        setState(() => _myPos = pos);
+        _throttledWrite(pos);
+      });
+
+      // 4. Compass stream (magnetometer).
+      _compassSub = FlutterCompass.events?.listen((event) {
+        if (!mounted || event.heading == null) return;
+        setState(() => _headingDeg = event.heading!);
+      });
+
+      if (mounted) setState(() => _starting = false);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = 'Radar init failed: $e';
+        _starting = false;
+      });
+    }
+  }
+
+  void _throttledWrite(Position pos) {
+    final now = DateTime.now();
+    if (_lastWriteAt != null &&
+        now.difference(_lastWriteAt!) < _writeInterval) {
+      return;
+    }
+    _lastWriteAt = now;
+    FirebaseFirestore.instance
+        .collection('events')
+        .doc(widget.eventId)
+        .collection('locations')
+        .doc(widget.userCode)
+        .set({
+      'userCode': widget.userCode,
+      'userName': _userName,
+      'profileImageUrl': _userImageUrl,
+      'lat': pos.latitude,
+      'lng': pos.longitude,
+      'accuracy': pos.accuracy,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }).catchError((e) {
+      debugPrint('Radar location write failed: $e');
+    });
+  }
+
+  /// Great-circle bearing from (lat1, lng1) → (lat2, lng2), in degrees
+  /// clockwise from true north.
+  double _bearingTo(double lat1, double lng1, double lat2, double lng2) {
+    final phi1 = lat1 * math.pi / 180.0;
+    final phi2 = lat2 * math.pi / 180.0;
+    final dLng = (lng2 - lng1) * math.pi / 180.0;
+    final y = math.sin(dLng) * math.cos(phi2);
+    final x = math.cos(phi1) * math.sin(phi2) -
+        math.sin(phi1) * math.cos(phi2) * math.cos(dLng);
+    return (math.atan2(y, x) * 180.0 / math.pi + 360.0) % 360.0;
+  }
+
+  List<_RadarBlip> _computeBlips(List<QueryDocumentSnapshot> docs) {
+    final me = _myPos;
+    if (me == null) return [];
+    final blips = <_RadarBlip>[];
+    for (final d in docs) {
+      final data = d.data() as Map<String, dynamic>;
+      final code = data['userCode'] as String?;
+      if (code == null || code == widget.userCode) continue;
+      if (!_friendCodes.contains(code)) continue; // friends only
+      final lat = (data['lat'] as num?)?.toDouble();
+      final lng = (data['lng'] as num?)?.toDouble();
+      if (lat == null || lng == null) continue;
+      final dist = Geolocator.distanceBetween(
+          me.latitude, me.longitude, lat, lng);
+      final bearing = _bearingTo(me.latitude, me.longitude, lat, lng);
+      blips.add(_RadarBlip(
+        userCode: code,
+        userName: (data['userName'] as String?) ?? code,
+        imageUrl: (data['profileImageUrl'] as String?) ?? '',
+        distanceMeters: dist,
+        absoluteBearingDeg: bearing,
+      ));
+    }
+    blips.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
+    return blips;
+  }
+
+  String _fmtDistance(double m) {
+    if (m < 1000) return '${m.round()}m';
+    return '${(m / 1000).toStringAsFixed(1)}km';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Color(0xFF00FF41)),
+        title: const Text(
+          'TEK RADAR',
+          style: TextStyle(
+            color: Color(0xFF00FF41),
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 3,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_starting) {
+      return const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(color: Color(0xFF00FF41)),
+            SizedBox(height: 16),
+            Text(
+              'ACQUIRING SIGNAL...',
+              style: TextStyle(
+                color: Colors.white54,
+                fontSize: 11,
+                letterSpacing: 3,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    if (_error != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.location_disabled,
+                  color: Colors.redAccent, size: 48),
+              const SizedBox(height: 16),
+              Text(
+                _error!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('events')
+          .doc(widget.eventId)
+          .collection('locations')
+          .snapshots(),
+      builder: (context, snap) {
+        final docs = snap.data?.docs ?? const [];
+        final blips = _computeBlips(docs);
+        return Column(
+          children: [
+            Expanded(
+              child: Center(
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: AnimatedBuilder(
+                    animation: _sweepCtrl,
+                    builder: (context, _) {
+                      return CustomPaint(
+                        painter: _RadarPainter(
+                          blips: blips,
+                          headingDeg: _headingDeg,
+                          maxRangeMeters: _maxRangeMeters,
+                          sweepProgress: _sweepCtrl.value,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+            // Friend list under the radar
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.people,
+                          color: Color(0xFF00FF41), size: 14),
+                      const SizedBox(width: 6),
+                      Text(
+                        blips.isEmpty
+                            ? 'NO FRIENDS ON RADAR'
+                            : '${blips.length} FRIEND${blips.length == 1 ? "" : "S"} ON RADAR',
+                        style: const TextStyle(
+                          color: Color(0xFF00FF41),
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  if (blips.isEmpty)
+                    const Text(
+                      'No friends have opened the radar yet. They\'ll appear here once they do.',
+                      style: TextStyle(color: Colors.white54, fontSize: 11),
+                    )
+                  else
+                    ...blips.take(5).map((b) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.adjust,
+                                  color: Color(0xFF00FF41), size: 10),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  b.userName.toUpperCase(),
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                _fmtDistance(b.distanceMeters),
+                                style: const TextStyle(
+                                  color: Color(0xFF00FF41),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'monospace',
+                                ),
+                              ),
+                            ],
+                          ),
+                        )),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _RadarPainter extends CustomPainter {
+  final List<_RadarBlip> blips;
+  final double headingDeg;
+  final double maxRangeMeters;
+  final double sweepProgress;
+  _RadarPainter({
+    required this.blips,
+    required this.headingDeg,
+    required this.maxRangeMeters,
+    required this.sweepProgress,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final maxRadius = math.min(size.width, size.height) * 0.42;
+    const green = Color(0xFF00FF41);
+
+    // Concentric rings (4 rings).
+    final ringPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = green.withValues(alpha: 0.15);
+    for (int i = 1; i <= 4; i++) {
+      canvas.drawCircle(center, maxRadius * i / 4, ringPaint);
+    }
+
+    // Cross hairs.
+    final hairPaint = Paint()
+      ..color = green.withValues(alpha: 0.08)
+      ..strokeWidth = 0.8;
+    canvas.drawLine(Offset(center.dx - maxRadius, center.dy),
+        Offset(center.dx + maxRadius, center.dy), hairPaint);
+    canvas.drawLine(Offset(center.dx, center.dy - maxRadius),
+        Offset(center.dx, center.dy + maxRadius), hairPaint);
+
+    // Outer glow ring.
+    final outerPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..color = green.withValues(alpha: 0.7)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 6);
+    canvas.drawCircle(center, maxRadius, outerPaint);
+
+    // Sweep arc.
+    final sweepAngle = sweepProgress * 2 * math.pi - math.pi / 2;
+    final sweepRect = Rect.fromCircle(center: center, radius: maxRadius);
+    final sweepPaint = Paint()
+      ..shader = SweepGradient(
+        startAngle: sweepAngle - 0.6,
+        endAngle: sweepAngle,
+        colors: [
+          green.withValues(alpha: 0),
+          green.withValues(alpha: 0.45),
+        ],
+      ).createShader(sweepRect)
+      ..style = PaintingStyle.fill;
+    canvas.drawArc(sweepRect, sweepAngle - 0.6, 0.6, true, sweepPaint);
+
+    // Heading label (N).
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: 'N',
+        style: TextStyle(
+          color: green.withValues(alpha: 0.6),
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: ui.TextDirection.ltr,
+    )..layout();
+    // North relative to phone heading: rotate by -heading from top.
+    final northAngle = (-headingDeg) * math.pi / 180.0 - math.pi / 2;
+    final northOffset = Offset(
+      center.dx + math.cos(northAngle) * (maxRadius + 14) - textPainter.width / 2,
+      center.dy + math.sin(northAngle) * (maxRadius + 14) - textPainter.height / 2,
+    );
+    textPainter.paint(canvas, northOffset);
+
+    // Center dot (you).
+    final youPaint = Paint()..color = green;
+    canvas.drawCircle(center, 6, youPaint);
+    canvas.drawCircle(
+      center,
+      10,
+      Paint()
+        ..color = green.withValues(alpha: 0.35)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5,
+    );
+
+    // Blips.
+    for (final b in blips) {
+      // Relative bearing = absoluteBearing - phone heading.
+      final relBearing = (b.absoluteBearingDeg - headingDeg) % 360.0;
+      // Convert to canvas angle: 0deg = up (north), clockwise positive.
+      final canvasAngle = (relBearing - 90.0) * math.pi / 180.0;
+
+      // Clamp distance to maxRange (further blips sit on the outer ring).
+      final distFrac = (b.distanceMeters / maxRangeMeters).clamp(0.0, 1.0);
+      final r = maxRadius * distFrac;
+
+      final blipCenter = Offset(
+        center.dx + math.cos(canvasAngle) * r,
+        center.dy + math.sin(canvasAngle) * r,
+      );
+
+      // Halo
+      canvas.drawCircle(
+        blipCenter,
+        10,
+        Paint()
+          ..color = green.withValues(alpha: 0.25)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+      );
+      // Blip core
+      canvas.drawCircle(blipCenter, 5, Paint()..color = green);
+      // Arrow pointing outward from center (direction of friend)
+      final arrowEnd = Offset(
+        blipCenter.dx + math.cos(canvasAngle) * 12,
+        blipCenter.dy + math.sin(canvasAngle) * 12,
+      );
+      canvas.drawLine(
+        blipCenter,
+        arrowEnd,
+        Paint()
+          ..color = green
+          ..strokeWidth = 2
+          ..strokeCap = StrokeCap.round,
+      );
+
+      // Distance label
+      final distText = TextPainter(
+        text: TextSpan(
+          text: b.distanceMeters < 1000
+              ? '${b.distanceMeters.round()}m'
+              : '${(b.distanceMeters / 1000).toStringAsFixed(1)}km',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        textDirection: ui.TextDirection.ltr,
+      )..layout();
+      distText.paint(
+        canvas,
+        Offset(
+          blipCenter.dx - distText.width / 2,
+          blipCenter.dy + 14,
+        ),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_RadarPainter old) =>
+      old.blips != blips ||
+      old.headingDeg != headingDeg ||
+      old.sweepProgress != sweepProgress;
 }
 
 // ==================== CHAT SCREEN ====================

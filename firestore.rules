@@ -44,6 +44,22 @@ service cloud.firestore {
           (isSignedIn() && resource.data.userCode == request.auth.token.referralCode);
       }
 
+      // TEK Radar: live location of users checked into THIS event so
+      // friends can find each other at the venue. Doc id == userCode.
+      // Writes are gated to the user's own slot. Reads are open to any
+      // signed-in user (filtering to friends happens client-side based on
+      // the user's friend list).
+      // Note: location is never stored at the top level — it's only
+      // attached to the event slot, so leaving an event (deleting the
+      // checkin doc) implicitly stops sharing.
+      match /locations/{userCode} {
+        allow read: if isSignedIn();
+        allow create, update: if isSignedIn() &&
+          request.resource.data.userCode == request.auth.token.referralCode;
+        allow delete: if isAdmin() ||
+          (isSignedIn() && resource.data.userCode == request.auth.token.referralCode);
+      }
+
       // Live event chat messages — signed-in users can read and post.
       match /messages/{messageId} {
         allow read: if isSignedIn();

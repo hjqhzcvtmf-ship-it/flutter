@@ -52,6 +52,8 @@
 	<string>This app may record audio when creating media; microphone access is required for that functionality.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app needs access to your photo library to upload a profile picture for your membership application.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>TEK uses your location only while you're checked into an event so you can find friends at the same venue on the TEK Radar. Location is never shared outside events.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
