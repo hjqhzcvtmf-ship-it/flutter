@@ -5743,7 +5743,8 @@ class TekTier {
 }
 
 const _tierFounder = TekTier(TekIdentityTier.founder, 'FOUNDER', Icons.shield, Color(0xFFC0C0C0));
-const _tierVip = TekTier(TekIdentityTier.vip, 'VIP', Icons.star, Color(0xFFFFD700));
+// Cold steel-blue, not gold — premium accent #2 stays metallic per the brand.
+const _tierVip = TekTier(TekIdentityTier.vip, 'VIP', Icons.star, Color(0xFF9FB1BD));
 const _tierBlackCard = TekTier(TekIdentityTier.blackCard, 'BLACK CARD', Icons.workspace_premium, Color(0xFFE63946));
 const _tierInnerCircle = TekTier(TekIdentityTier.innerCircle, 'INNER CIRCLE', Icons.diamond, Color(0xFF9F59FF));
 
@@ -5805,29 +5806,27 @@ class TekTierBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: height,
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      decoration: BoxDecoration(
-        color: tier.color.withValues(alpha: 0.18),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: tier.color, width: 0.8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(tier.icon, size: height * 0.55, color: tier.color),
-          const SizedBox(width: 4),
-          Text(
-            tier.label,
-            style: TextStyle(
-              color: tier.color,
-              fontSize: height * 0.5,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
+    return CustomPaint(
+      painter: _TierChipPainter(tierColor: tier.color),
+      child: Container(
+        height: height,
+        padding: EdgeInsets.only(left: 6, right: height * 0.52),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(tier.icon, size: height * 0.55, color: tier.color),
+            const SizedBox(width: 4),
+            Text(
+              tier.label,
+              style: TextStyle(
+                color: tier.color,
+                fontSize: height * 0.5,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -5894,15 +5893,12 @@ class TieredAvatar extends StatelessWidget {
             Positioned(
               right: -2,
               bottom: -2,
-              child: Container(
-                width: size * 0.35,
-                height: size * 0.35,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.black,
-                  border: Border.all(color: tier!.color, width: 1.2),
-                ),
-                child: Icon(tier!.icon, size: size * 0.18, color: tier!.color),
+              child: _EngravedDisc(
+                icon: tier!.icon,
+                color: tier!.color,
+                size: size * 0.42,
+                notches: 8,
+                glow: false,
               ),
             ),
         ],
@@ -6352,6 +6348,202 @@ class _BadgeMedallionPainter extends CustomPainter {
       old.earned != earned;
 }
 
+// Shared engraved-metal disc — the circular frame behind tier glyphs,
+// verification seals, and reward icons. Same rim / notch / recess language
+// as _BadgeMedallionPainter, without the achievement sigils.
+class _EngravedDiscPainter extends CustomPainter {
+  final Color tierColor;
+  final bool active;
+  final int notches;
+  final bool glow;
+
+  const _EngravedDiscPainter({
+    required this.tierColor,
+    this.active = true,
+    this.notches = 12,
+    this.glow = true,
+  });
+
+  static const Color _steel = Color(0xFF4A4D55);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final r = math.min(size.width, size.height) / 2;
+    final rim = active ? tierColor : _steel;
+
+    if (active && glow) {
+      canvas.drawCircle(
+        center,
+        r * 0.88,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.0
+          ..color = tierColor.withValues(alpha: 0.5)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 5),
+      );
+    }
+
+    // Brushed-metal rim.
+    canvas.drawCircle(
+      center,
+      r * 0.88,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = r * 0.16
+        ..shader = SweepGradient(
+          colors: [
+            rim.withValues(alpha: active ? 0.95 : 0.7),
+            rim.withValues(alpha: 0.22),
+            rim.withValues(alpha: active ? 0.95 : 0.7),
+            rim.withValues(alpha: 0.22),
+            rim.withValues(alpha: active ? 0.95 : 0.7),
+          ],
+          stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
+        ).createShader(Rect.fromCircle(center: center, radius: r)),
+    );
+
+    // Radial circuit notches.
+    if (notches > 0) {
+      final notch = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0
+        ..color = rim.withValues(alpha: active ? 0.55 : 0.3);
+      for (int i = 0; i < notches; i++) {
+        final a = i * 2 * math.pi / notches;
+        final dir = Offset(math.cos(a), math.sin(a));
+        canvas.drawLine(
+            center + dir * (r * 0.80), center + dir * (r * 0.96), notch);
+      }
+    }
+
+    // Recessed inner plate.
+    canvas.drawCircle(
+      center,
+      r * 0.80,
+      Paint()
+        ..shader = const RadialGradient(
+          colors: [Color(0xFF131313), Color(0xFF000000)],
+        ).createShader(Rect.fromCircle(center: center, radius: r * 0.80)),
+    );
+
+    // Hairline ring.
+    canvas.drawCircle(
+      center,
+      r * 0.80,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0
+        ..color = rim.withValues(alpha: active ? 0.7 : 0.35),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_EngravedDiscPainter old) =>
+      old.tierColor != tierColor ||
+      old.active != active ||
+      old.notches != notches ||
+      old.glow != glow;
+}
+
+// Engraved metal disc with a centered icon — reused for tier glyphs,
+// verification seals, and reward medallions.
+class _EngravedDisc extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final double size;
+  final bool active;
+  final int notches;
+  final bool glow;
+
+  const _EngravedDisc({
+    required this.icon,
+    required this.color,
+    required this.size,
+    this.active = true,
+    this.notches = 12,
+    this.glow = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: CustomPaint(
+        painter: _EngravedDiscPainter(
+          tierColor: color,
+          active: active,
+          notches: notches,
+          glow: glow,
+        ),
+        child: Center(
+          child: Icon(
+            icon,
+            size: size * 0.42,
+            color: active ? color : const Color(0xFF6C7079),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Machined metal tag behind a TekTierBadge — a chamfered plate with a
+// metallic vertical gradient and a crisp tier-colored edge.
+class _TierChipPainter extends CustomPainter {
+  final Color tierColor;
+  const _TierChipPainter({required this.tierColor});
+
+  Path _plate(Size size) {
+    final cut = size.height * 0.42; // 45deg chamfer on the top-right corner
+    return Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width - cut, 0)
+      ..lineTo(size.width, cut)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = _plate(size);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            tierColor.withValues(alpha: 0.30),
+            tierColor.withValues(alpha: 0.06),
+            const Color(0xFF000000),
+          ],
+          stops: const [0.0, 0.55, 1.0],
+        ).createShader(Offset.zero & size),
+    );
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0
+        ..color = tierColor.withValues(alpha: 0.85),
+    );
+    // Thin machined bevel along the top edge.
+    canvas.drawLine(
+      const Offset(2, 1.4),
+      Offset(size.width - size.height * 0.42 - 1, 1.4),
+      Paint()
+        ..strokeWidth = 1.0
+        ..color = tierColor.withValues(alpha: 0.35),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_TierChipPainter old) => old.tierColor != tierColor;
+}
+
 // ==================== REWARDS PROGRESS PAGE ====================
 class RewardsProgressPage extends StatelessWidget {
   final int currentLevel;
@@ -6555,24 +6747,12 @@ class RewardsProgressPage extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: locked
-                  ? Colors.white.withValues(alpha: 0.05)
-                  : reward.color.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                  color: locked
-                      ? Colors.white12
-                      : reward.color.withValues(alpha: 0.5)),
-            ),
-            child: Icon(
-              locked ? Icons.lock : reward.icon,
-              color: locked ? Colors.white38 : reward.color,
-              size: 28,
-            ),
+          _EngravedDisc(
+            icon: locked ? Icons.lock : reward.icon,
+            color: reward.color,
+            size: 56,
+            active: !locked,
+            glow: !locked,
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -22297,8 +22477,14 @@ class _VerificationBadge extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 10, color: color),
-        const SizedBox(width: 3),
+        _EngravedDisc(
+          icon: icon,
+          color: color,
+          size: 18,
+          notches: 0,
+          glow: false,
+        ),
+        const SizedBox(width: 5),
         Text(
           label,
           style: TextStyle(
