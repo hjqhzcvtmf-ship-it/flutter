@@ -5726,13 +5726,12 @@ _TekReward? _nextTekReward(int xp) {
   return null;
 }
 
-// ==================== TEK IDENTITY TIERS (Founder / VIP / Member) ====================
+// ==================== TEK IDENTITY TIERS (Founder / Member) ====================
 
 /// Identity tags layered ON TOP of the reward ladder.
 /// - FOUNDER: among the first 100 approved members (by createdAt). Permanent.
-/// - VIP: top 10 by xpPoints right now. Rotating.
 /// - INNER CIRCLE / BLACK CARD: derived from reward ladder when they hit those tiers.
-enum TekIdentityTier { founder, vip, blackCard, innerCircle, member }
+enum TekIdentityTier { founder, blackCard, innerCircle, member }
 
 class TekTier {
   final TekIdentityTier kind;
@@ -5743,51 +5742,19 @@ class TekTier {
 }
 
 const _tierFounder = TekTier(TekIdentityTier.founder, 'FOUNDER', Icons.shield, Color(0xFFC0C0C0));
-// Cold steel-blue, not gold — premium accent #2 stays metallic per the brand.
-const _tierVip = TekTier(TekIdentityTier.vip, 'VIP', Icons.star, Color(0xFF9FB1BD));
 const _tierBlackCard = TekTier(TekIdentityTier.blackCard, 'BLACK CARD', Icons.workspace_premium, Color(0xFFE63946));
 const _tierInnerCircle = TekTier(TekIdentityTier.innerCircle, 'INNER CIRCLE', Icons.diamond, Color(0xFF9F59FF));
 
 /// Resolve the highest-priority tier badge for a user given their data + flags.
-/// Priority: Black Card > Inner Circle > Founder > VIP > none
+/// Priority: Black Card > Inner Circle > Founder > none
 TekTier? resolveTier({
   required int xp,
   required bool isFounder,
-  required bool isVip,
 }) {
   if (xp >= 6000) return _tierBlackCard;
   if (xp >= 4000) return _tierInnerCircle;
   if (isFounder) return _tierFounder;
-  if (isVip) return _tierVip;
   return null;
-}
-
-/// Live cache of the top-10 VIP referralCodes, refreshed periodically.
-class TekVipCache {
-  TekVipCache._();
-  static final TekVipCache instance = TekVipCache._();
-
-  Set<String> _vipCodes = {};
-  DateTime? _lastFetch;
-
-  Set<String> get codes => _vipCodes;
-
-  Future<void> refreshIfStale() async {
-    final now = DateTime.now();
-    if (_lastFetch != null && now.difference(_lastFetch!) < const Duration(minutes: 10)) return;
-    try {
-      final snap = await FirebaseFirestore.instance
-          .collection('applications')
-          .orderBy('xpPoints', descending: true)
-          .limit(10)
-          .get();
-      _vipCodes = snap.docs
-          .map((d) => (d.data()['referralCode'] as String?) ?? '')
-          .where((c) => c.isNotEmpty)
-          .toSet();
-      _lastFetch = now;
-    } catch (_) {}
-  }
 }
 
 bool isFounderFromData(Map<String, dynamic> appData) {
@@ -7676,11 +7643,9 @@ class _MainAppState extends State<MainApp> {
     // initial paint. These features can tolerate a small delay:
     // - push notification setup (permission/token registration)
     // - daily streak check + XP grant
-    // - VIP cache warm-up (badges populate progressively)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_setupPushNotifications());
       unawaited(_checkDailyStreak());
-      unawaited(TekVipCache.instance.refreshIfStale());
     });
   }
 
@@ -8705,11 +8670,9 @@ class _SocialScreenState extends State<SocialScreen>
                             Expanded(
                               child: Builder(builder: (context) {
                                 final friendXp = ((friendData['xpPoints'] ?? 0) as num).toInt();
-                                final friendCodeStr = (friendData['referralCode'] as String?) ?? '';
                                 final friendTier = resolveTier(
                                   xp: friendXp,
                                   isFounder: isFounderFromData(friendData),
-                                  isVip: TekVipCache.instance.codes.contains(friendCodeStr),
                                 );
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -10072,7 +10035,7 @@ class _ReportRow extends StatelessWidget {
 ///  - LIVE: user is checked into an event
 ///  - TONIGHT / THIS WEEK: upcoming event
 ///  - READY MISSION: an unlocked, uncompleted mission
-///  - STAND BY: nothing new — quiet state with a transmission ping
+///  - nothing to surface: the hero is hidden entirely
 class _MissionControlHero extends StatefulWidget {
   const _MissionControlHero();
 
@@ -10223,8 +10186,8 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
               return _heroMission(m);
             }
 
-            // 4) Default: stand-by
-            return _heroStandBy();
+            // 4) Default: nothing to surface — show no hero card at all.
+            return const SizedBox.shrink();
           },
         );
       },
@@ -10421,24 +10384,6 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
               ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _heroStandBy() {
-    return _shell(
-      accent: Colors.white24,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _heroLabel('● STAND BY  //  TRANSMISSION SILENT', color: Colors.white54),
-          const SizedBox(height: 6),
-          const Text('NO ACTIVE OBJECTIVES',
-              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
-          const SizedBox(height: 4),
-          const Text('A new transmission will reach you when there is one.',
-              style: TextStyle(color: Colors.white38, fontSize: 11, height: 1.4)),
         ],
       ),
     );
@@ -13985,6 +13930,17 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         actions: [
           IconButton(
+            tooltip: 'Challenges',
+            icon: const Icon(Icons.sports_kabaddi, color: Color(0xFF00FF41)),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.push(
+                context,
+                cinematicRoute(const SidequestScreen(initialTab: 1)),
+              );
+            },
+          ),
+          IconButton(
             tooltip: 'Relay XP',
             icon: const Icon(Icons.bolt_outlined, color: Color(0xFF00FF41)),
             onPressed: _isBlocked
@@ -15542,6 +15498,29 @@ class _UserProfileViewState extends State<UserProfileView> {
             letterSpacing: 1,
           ),
         ),
+        actions: [
+          if (referralCode != null &&
+              referralCode.isNotEmpty &&
+              referralCode != _currentUserCode)
+            IconButton(
+              tooltip: 'Send message',
+              icon: const Icon(Icons.chat_bubble_outline,
+                  color: Color(0xFF00FF41)),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                Navigator.push(
+                  context,
+                  cinematicRoute(ChatScreen(
+                    friendCode: referralCode,
+                    friendName:
+                        widget.userData['name']?.toString() ?? 'Member',
+                    friendImageUrl:
+                        widget.userData['profileImageUrl']?.toString(),
+                  )),
+                );
+              },
+            ),
+        ],
       ),
       backgroundColor: Colors.transparent,
       body: stream == null
@@ -21946,7 +21925,9 @@ class TermsOfServiceScreen extends StatelessWidget {
 // ─────────────────────────────────────────────
 
 class SidequestScreen extends StatefulWidget {
-  const SidequestScreen({super.key});
+  /// Tab to open on: 0 = MISSIONS, 1 = CHALLENGES, 2 = RANKS.
+  final int initialTab;
+  const SidequestScreen({super.key, this.initialTab = 0});
 
   @override
   State<SidequestScreen> createState() => _SidequestScreenState();
@@ -21962,7 +21943,8 @@ class _SidequestScreenState extends State<SidequestScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(
+        length: 3, initialIndex: widget.initialTab.clamp(0, 2), vsync: this);
     _loadUserData();
   }
 
@@ -22025,6 +22007,15 @@ class _SidequestScreenState extends State<SidequestScreen>
             backgroundColor: Colors.transparent,
             elevation: 0,
             automaticallyImplyLeading: false,
+            // Show a back button only when pushed as a route (e.g. from the
+            // chat-screen Challenges shortcut); hidden when used as a tab.
+            leading: Navigator.canPop(context)
+                ? IconButton(
+                    icon: const Icon(Icons.arrow_back,
+                        color: Color(0xFF00FF41)),
+                    onPressed: () => Navigator.pop(context),
+                  )
+                : null,
             title: const Text(
               'SIDEQUESTS',
               style: TextStyle(
