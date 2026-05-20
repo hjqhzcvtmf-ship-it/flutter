@@ -5474,11 +5474,29 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
 // ==================== TROPHY WALL ====================
 
+// Distinct hand-built sigil for each achievement badge. The enum is only a
+// switch key — the geometry lives in _BadgeMedallionPainter._paintSigil.
+enum _BadgeSigil {
+  bolt,
+  chevrons,
+  shield,
+  crescent,
+  node,
+  triad,
+  mesh,
+  spark,
+  halfStar,
+  star,
+  vortex,
+  laurelCrown,
+}
+
 class _BadgeDef {
   final String name;
   final String subtitle;
   final IconData icon;
   final Color color;
+  final _BadgeSigil sigil;
   final bool Function(Map<String, dynamic>) earned;
 
   _BadgeDef({
@@ -5486,6 +5504,7 @@ class _BadgeDef {
     required this.subtitle,
     required this.icon,
     required this.color,
+    required this.sigil,
     required this.earned,
   });
 }
@@ -5496,6 +5515,7 @@ final List<_BadgeDef> _tekBadges = [
     subtitle: 'Complete 1 mission',
     icon: Icons.bolt,
     color: const Color(0xFFCD7F32),
+    sigil: _BadgeSigil.bolt,
     earned: (d) => ((d['completedSidequests'] as List?)?.length ?? 0) >= 1,
   ),
   _BadgeDef(
@@ -5503,6 +5523,7 @@ final List<_BadgeDef> _tekBadges = [
     subtitle: 'Complete 5 missions',
     icon: Icons.military_tech,
     color: const Color(0xFFC0C0C0),
+    sigil: _BadgeSigil.chevrons,
     earned: (d) => ((d['completedSidequests'] as List?)?.length ?? 0) >= 5,
   ),
   _BadgeDef(
@@ -5510,6 +5531,7 @@ final List<_BadgeDef> _tekBadges = [
     subtitle: 'Complete 10 missions',
     icon: Icons.shield,
     color: const Color(0xFFFFD700),
+    sigil: _BadgeSigil.shield,
     earned: (d) => ((d['completedSidequests'] as List?)?.length ?? 0) >= 10,
   ),
   _BadgeDef(
@@ -5517,6 +5539,7 @@ final List<_BadgeDef> _tekBadges = [
     subtitle: 'Complete 18 missions',
     icon: Icons.nights_stay,
     color: const Color(0xFF00FF41),
+    sigil: _BadgeSigil.crescent,
     earned: (d) => ((d['completedSidequests'] as List?)?.length ?? 0) >= 18,
   ),
   _BadgeDef(
@@ -5524,6 +5547,7 @@ final List<_BadgeDef> _tekBadges = [
     subtitle: 'Make 1 friend',
     icon: Icons.person_add,
     color: const Color(0xFFCD7F32),
+    sigil: _BadgeSigil.node,
     earned: (d) => ((d['friends'] as List?)?.length ?? 0) >= 1,
   ),
   _BadgeDef(
@@ -5531,6 +5555,7 @@ final List<_BadgeDef> _tekBadges = [
     subtitle: 'Have 5 friends',
     icon: Icons.group,
     color: const Color(0xFFC0C0C0),
+    sigil: _BadgeSigil.triad,
     earned: (d) => ((d['friends'] as List?)?.length ?? 0) >= 5,
   ),
   _BadgeDef(
@@ -5538,6 +5563,7 @@ final List<_BadgeDef> _tekBadges = [
     subtitle: 'Have 10 friends',
     icon: Icons.hub,
     color: const Color(0xFFFFD700),
+    sigil: _BadgeSigil.mesh,
     earned: (d) => ((d['friends'] as List?)?.length ?? 0) >= 10,
   ),
   _BadgeDef(
@@ -5545,6 +5571,7 @@ final List<_BadgeDef> _tekBadges = [
     subtitle: 'Reach 100 XP',
     icon: Icons.star_border,
     color: const Color(0xFFCD7F32),
+    sigil: _BadgeSigil.spark,
     earned: (d) => ((d['xpPoints'] as num?)?.toInt() ?? 0) >= 100,
   ),
   _BadgeDef(
@@ -5552,6 +5579,7 @@ final List<_BadgeDef> _tekBadges = [
     subtitle: 'Reach 500 XP',
     icon: Icons.star_half,
     color: const Color(0xFFC0C0C0),
+    sigil: _BadgeSigil.halfStar,
     earned: (d) => ((d['xpPoints'] as num?)?.toInt() ?? 0) >= 500,
   ),
   _BadgeDef(
@@ -5559,6 +5587,7 @@ final List<_BadgeDef> _tekBadges = [
     subtitle: 'Reach 1000 XP',
     icon: Icons.star,
     color: const Color(0xFFFFD700),
+    sigil: _BadgeSigil.star,
     earned: (d) => ((d['xpPoints'] as num?)?.toInt() ?? 0) >= 1000,
   ),
   _BadgeDef(
@@ -5566,6 +5595,7 @@ final List<_BadgeDef> _tekBadges = [
     subtitle: 'Reach 2500 XP',
     icon: Icons.auto_awesome,
     color: const Color(0xFF00FF41),
+    sigil: _BadgeSigil.vortex,
     earned: (d) => ((d['xpPoints'] as num?)?.toInt() ?? 0) >= 2500,
   ),
   _BadgeDef(
@@ -5573,6 +5603,7 @@ final List<_BadgeDef> _tekBadges = [
     subtitle: 'Win a challenge',
     icon: Icons.emoji_events,
     color: const Color(0xFFFFD700),
+    sigil: _BadgeSigil.laurelCrown,
     earned: (d) => ((d['challengesWon'] as num?)?.toInt() ?? 0) >= 1,
   ),
 ];
@@ -6018,10 +6049,16 @@ class _BadgeTile extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            badge.icon,
-            color: earned ? badge.color : Colors.white24,
-            size: 22,
+          SizedBox(
+            width: 40,
+            height: 40,
+            child: CustomPaint(
+              painter: _BadgeMedallionPainter(
+                sigil: badge.sigil,
+                tierColor: badge.color,
+                earned: earned,
+              ),
+            ),
           ),
           const SizedBox(height: 6),
           Text(
@@ -6048,6 +6085,271 @@ class _BadgeTile extends StatelessWidget {
       ),
     );
   }
+}
+
+// Procedural medallion art for the 12 achievement badges. One painter renders
+// the engraved metal frame for all of them; only the central sigil differs.
+class _BadgeMedallionPainter extends CustomPainter {
+  final _BadgeSigil sigil;
+  final Color tierColor;
+  final bool earned;
+
+  const _BadgeMedallionPainter({
+    required this.sigil,
+    required this.tierColor,
+    required this.earned,
+  });
+
+  // Cold steel used for locked badges — no warmth, per the TEK aesthetic.
+  static const Color _steel = Color(0xFF4A4D55);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final r = math.min(size.width, size.height) / 2;
+    final rim = earned ? tierColor : _steel;
+
+    // 1. Earned outer glow — neon energy bleed behind the rim.
+    if (earned) {
+      canvas.drawCircle(
+        center,
+        r * 0.88,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.5
+          ..color = tierColor.withValues(alpha: 0.55)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 6),
+      );
+    }
+
+    // 2. Engraved rim — brushed-metal bevel via a sweep gradient.
+    final rimPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = r * 0.14
+      ..shader = SweepGradient(
+        colors: [
+          rim.withValues(alpha: earned ? 0.95 : 0.7),
+          rim.withValues(alpha: 0.22),
+          rim.withValues(alpha: earned ? 0.95 : 0.7),
+          rim.withValues(alpha: 0.22),
+          rim.withValues(alpha: earned ? 0.95 : 0.7),
+        ],
+        stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
+      ).createShader(Rect.fromCircle(center: center, radius: r));
+    canvas.drawCircle(center, r * 0.88, rimPaint);
+
+    // 3. Radial circuit notches around the rim.
+    final notch = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..color = rim.withValues(alpha: earned ? 0.6 : 0.35);
+    for (int i = 0; i < 12; i++) {
+      final a = i * math.pi / 6;
+      final dir = Offset(math.cos(a), math.sin(a));
+      canvas.drawLine(
+          center + dir * (r * 0.81), center + dir * (r * 0.95), notch);
+    }
+
+    // 4. Recessed inner plate — a dark vault recess for the sigil.
+    canvas.drawCircle(
+      center,
+      r * 0.81,
+      Paint()
+        ..shader = const RadialGradient(
+          colors: [Color(0xFF131313), Color(0xFF000000)],
+        ).createShader(Rect.fromCircle(center: center, radius: r * 0.81)),
+    );
+
+    // 5. Inner hairline ring crisping the recess edge.
+    canvas.drawCircle(
+      center,
+      r * 0.81,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0
+        ..color = rim.withValues(alpha: earned ? 0.7 : 0.35),
+    );
+
+    // 6. Central sigil.
+    _paintSigil(canvas, center, r * 0.46,
+        earned ? tierColor : _steel.withValues(alpha: 0.85));
+  }
+
+  // n-point star path, shared by spark / halfStar / star sigils.
+  void _star(Canvas canvas, Offset c, double s, int points, double innerRatio,
+      Paint paint) {
+    final path = Path();
+    for (int i = 0; i < points * 2; i++) {
+      final rad = i.isEven ? s : s * innerRatio;
+      final a = -math.pi / 2 + i * math.pi / points;
+      final p = c + Offset(math.cos(a), math.sin(a)) * rad;
+      i == 0 ? path.moveTo(p.dx, p.dy) : path.lineTo(p.dx, p.dy);
+    }
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  void _paintSigil(Canvas canvas, Offset c, double s, Color color) {
+    final stroke = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = math.max(1.4, s * 0.16)
+      ..strokeJoin = StrokeJoin.miter
+      ..strokeCap = StrokeCap.square
+      ..color = color;
+    final fill = Paint()
+      ..style = PaintingStyle.fill
+      ..color = color;
+
+    switch (sigil) {
+      case _BadgeSigil.bolt:
+        canvas.drawPath(
+          Path()
+            ..moveTo(c.dx + s * 0.15, c.dy - s)
+            ..lineTo(c.dx - s * 0.55, c.dy + s * 0.1)
+            ..lineTo(c.dx - s * 0.05, c.dy + s * 0.1)
+            ..lineTo(c.dx - s * 0.15, c.dy + s)
+            ..lineTo(c.dx + s * 0.55, c.dy - s * 0.1)
+            ..lineTo(c.dx + s * 0.05, c.dy - s * 0.1)
+            ..close(),
+          fill,
+        );
+        break;
+      case _BadgeSigil.chevrons:
+        for (int i = 0; i < 3; i++) {
+          final y = c.dy - s * 0.5 + i * s * 0.55;
+          canvas.drawPath(
+            Path()
+              ..moveTo(c.dx - s * 0.72, y)
+              ..lineTo(c.dx, y - s * 0.5)
+              ..lineTo(c.dx + s * 0.72, y),
+            stroke,
+          );
+        }
+        break;
+      case _BadgeSigil.shield:
+        canvas.drawPath(
+          Path()
+            ..moveTo(c.dx, c.dy - s)
+            ..lineTo(c.dx + s * 0.82, c.dy - s * 0.5)
+            ..lineTo(c.dx + s * 0.66, c.dy + s * 0.4)
+            ..lineTo(c.dx, c.dy + s)
+            ..lineTo(c.dx - s * 0.66, c.dy + s * 0.4)
+            ..lineTo(c.dx - s * 0.82, c.dy - s * 0.5)
+            ..close(),
+          stroke,
+        );
+        canvas.drawLine(Offset(c.dx, c.dy - s * 0.45),
+            Offset(c.dx, c.dy + s * 0.55), stroke);
+        break;
+      case _BadgeSigil.crescent:
+        canvas.drawPath(
+          Path.combine(
+            PathOperation.difference,
+            Path()..addOval(Rect.fromCircle(center: c, radius: s * 0.92)),
+            Path()
+              ..addOval(Rect.fromCircle(
+                  center: c + Offset(s * 0.5, -s * 0.18), radius: s * 0.82)),
+          ),
+          fill,
+        );
+        canvas.drawCircle(c + Offset(s * 0.72, -s * 0.62), s * 0.18, fill);
+        break;
+      case _BadgeSigil.node:
+        canvas.drawCircle(c, s * 0.34, fill);
+        for (int i = 0; i < 4; i++) {
+          final a = math.pi / 4 + i * math.pi / 2;
+          final dir = Offset(math.cos(a), math.sin(a));
+          canvas.drawLine(c + dir * (s * 0.46), c + dir * s, stroke);
+        }
+        break;
+      case _BadgeSigil.triad:
+        final pts = List.generate(3, (i) {
+          final a = -math.pi / 2 + i * 2 * math.pi / 3;
+          return c + Offset(math.cos(a), math.sin(a)) * (s * 0.78);
+        });
+        for (int i = 0; i < 3; i++) {
+          canvas.drawLine(pts[i], pts[(i + 1) % 3], stroke);
+        }
+        for (final p in pts) {
+          canvas.drawCircle(p, s * 0.26, fill);
+        }
+        break;
+      case _BadgeSigil.mesh:
+        final hex = Path();
+        for (int i = 0; i < 6; i++) {
+          final a = -math.pi / 2 + i * math.pi / 3;
+          final p = c + Offset(math.cos(a), math.sin(a)) * s;
+          i == 0 ? hex.moveTo(p.dx, p.dy) : hex.lineTo(p.dx, p.dy);
+          canvas.drawLine(c, p, stroke);
+        }
+        hex.close();
+        canvas.drawPath(hex, stroke);
+        canvas.drawCircle(c, s * 0.22, fill);
+        break;
+      case _BadgeSigil.spark:
+        _star(canvas, c, s, 4, 0.32, fill);
+        break;
+      case _BadgeSigil.halfStar:
+        canvas.save();
+        canvas.clipRect(Rect.fromLTRB(
+            c.dx - s * 1.3, c.dy - s * 1.3, c.dx, c.dy + s * 1.3));
+        _star(canvas, c, s, 5, 0.45, fill);
+        canvas.restore();
+        _star(
+          canvas,
+          c,
+          s,
+          5,
+          0.45,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = stroke.strokeWidth
+            ..strokeJoin = StrokeJoin.miter
+            ..color = color,
+        );
+        break;
+      case _BadgeSigil.star:
+        _star(canvas, c, s, 5, 0.45, fill);
+        break;
+      case _BadgeSigil.vortex:
+        final arc = Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = stroke.strokeWidth
+          ..strokeCap = StrokeCap.round
+          ..color = color;
+        for (int i = 0; i < 4; i++) {
+          canvas.drawArc(
+            Rect.fromCircle(center: c, radius: s * (1.0 - i * 0.22)),
+            i * math.pi / 2.2,
+            math.pi * 1.35,
+            false,
+            arc,
+          );
+        }
+        canvas.drawCircle(c, s * 0.14, fill);
+        break;
+      case _BadgeSigil.laurelCrown:
+        canvas.drawPath(
+          Path()
+            ..moveTo(c.dx - s, c.dy + s * 0.55)
+            ..lineTo(c.dx - s, c.dy - s * 0.5)
+            ..lineTo(c.dx - s * 0.5, c.dy + s * 0.05)
+            ..lineTo(c.dx, c.dy - s * 0.85)
+            ..lineTo(c.dx + s * 0.5, c.dy + s * 0.05)
+            ..lineTo(c.dx + s, c.dy - s * 0.5)
+            ..lineTo(c.dx + s, c.dy + s * 0.55)
+            ..close(),
+          fill,
+        );
+        break;
+    }
+  }
+
+  @override
+  bool shouldRepaint(_BadgeMedallionPainter old) =>
+      old.sigil != sigil ||
+      old.tierColor != tierColor ||
+      old.earned != earned;
 }
 
 // ==================== REWARDS PROGRESS PAGE ====================
