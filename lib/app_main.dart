@@ -10119,7 +10119,11 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
         if (!snap.hasData) {
           return _buildSkeleton();
         }
-        final events = snap.data![0].docs;
+        // Filter admin-hidden events from the hero stream.
+        final events = snap.data![0].docs.where((d) {
+          final data = d.data() as Map<String, dynamic>;
+          return data['hidden'] != true;
+        }).toList();
         final missions = snap.data![1].docs;
         final now = DateTime.now();
 
@@ -11288,6 +11292,7 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
   DateTime? _startDate;
   File? _eventImage;
   bool _isSubmitting = false;
+  bool _hidden = false;
 
   double? _tryParsePrice(String raw) {
     final trimmed = raw.trim();
@@ -11486,6 +11491,7 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
         'imageUrl': imageUrl,
         'startAt': Timestamp.fromDate(_startDate!),
         'createdAt': Timestamp.now(),
+        'hidden': _hidden,
       });
       debugPrint('DEBUG: Event created successfully');
       if (mounted) {
@@ -11586,6 +11592,66 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
               ),
               const SizedBox(height: 12),
               _buildTextField(_descriptionCtrl, 'Description', maxLines: 3),
+              const SizedBox(height: 8),
+              // Hidden toggle — admins can stage test events without
+              // them appearing in the public events list.
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.04),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: _hidden
+                        ? const Color(0xFFFF8800).withValues(alpha: 0.6)
+                        : Colors.white12,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _hidden ? Icons.visibility_off : Icons.visibility,
+                      color: _hidden
+                          ? const Color(0xFFFF8800)
+                          : Colors.white54,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _hidden ? 'HIDDEN FROM USERS' : 'VISIBLE TO USERS',
+                            style: TextStyle(
+                              color: _hidden
+                                  ? const Color(0xFFFF8800)
+                                  : Colors.white70,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          const Text(
+                            'Use for staging / test events. Only admins see hidden events.',
+                            style: TextStyle(
+                                color: Colors.white38, fontSize: 10),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Switch(
+                      value: _hidden,
+                      onChanged: (v) => setState(() => _hidden = v),
+                      activeColor: const Color(0xFFFF8800),
+                      activeTrackColor:
+                          const Color(0xFFFF8800).withValues(alpha: 0.4),
+                      inactiveThumbColor: Colors.white38,
+                      inactiveTrackColor: Colors.white12,
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -12018,7 +12084,10 @@ class _EventsScreenState extends State<EventsScreen>
         }
 
         final docs = snapshot.data!.docs.where((doc) {
-          final ts = doc.data()['startAt'] as Timestamp?;
+          final data = doc.data();
+          // Skip admin-hidden events from the user-facing list.
+          if (data['hidden'] == true) return false;
+          final ts = data['startAt'] as Timestamp?;
           final start = ts?.toDate();
           if (start == null) return false;
           return upcoming ? start.isAfter(now) : start.isBefore(now);
@@ -14588,26 +14657,56 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      if (isPast)
-                        Container(
-                          margin: const EdgeInsets.only(top: 4),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white24,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            'PAST',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                      Row(
+                        children: [
+                          if (isPast)
+                            Container(
+                              margin: const EdgeInsets.only(top: 4, right: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white24,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'PAST',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
+                          if (eventData['hidden'] == true)
+                            Container(
+                              margin: const EdgeInsets.only(top: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFF8800)
+                                    .withValues(alpha: 0.25),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                  color: const Color(0xFFFF8800)
+                                      .withValues(alpha: 0.6),
+                                ),
+                              ),
+                              child: const Text(
+                                'HIDDEN',
+                                style: TextStyle(
+                                  color: Color(0xFFFF8800),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
