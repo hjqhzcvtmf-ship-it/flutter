@@ -27,19 +27,24 @@ service cloud.firestore {
 
       // Event check-ins: signed-in users can see who's here; users can only check themselves in.
       // Binding: doc id == userCode AND doc data.userCode == auth.token.referralCode.
+      // Admins are exempt from the referralCode binding so they can test
+      // event-scoped flows (radar, RSVPs, etc.) from an admin login.
       match /checkins/{checkInId} {
         allow read: if isSignedIn();
-        allow create, update: if isSignedIn() &&
-          request.resource.data.userCode == request.auth.token.referralCode;
+        allow create, update: if isAdmin() ||
+          (isSignedIn() &&
+           request.resource.data.userCode == request.auth.token.referralCode);
         allow delete: if isAdmin() ||
           (isSignedIn() && resource.data.userCode == request.auth.token.referralCode);
       }
 
       // Event RSVPs (going list): users can only RSVP themselves.
+      // Admins exempt for same reason as check-ins.
       match /rsvps/{rsvpId} {
         allow read: if isSignedIn();
-        allow create, update: if isSignedIn() &&
-          request.resource.data.userCode == request.auth.token.referralCode;
+        allow create, update: if isAdmin() ||
+          (isSignedIn() &&
+           request.resource.data.userCode == request.auth.token.referralCode);
         allow delete: if isAdmin() ||
           (isSignedIn() && resource.data.userCode == request.auth.token.referralCode);
       }
@@ -54,8 +59,10 @@ service cloud.firestore {
       // checkin doc) implicitly stops sharing.
       match /locations/{userCode} {
         allow read: if isSignedIn();
-        allow create, update: if isSignedIn() &&
-          request.resource.data.userCode == request.auth.token.referralCode;
+        // Admins exempt from the referralCode binding for testing.
+        allow create, update: if isAdmin() ||
+          (isSignedIn() &&
+           request.resource.data.userCode == request.auth.token.referralCode);
         allow delete: if isAdmin() ||
           (isSignedIn() && resource.data.userCode == request.auth.token.referralCode);
       }
