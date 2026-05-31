@@ -8687,6 +8687,8 @@ class _SocialScreenState extends State<SocialScreen>
                           ),
                         );
                       },
+                      onLongPress: () =>
+                          showMemberQuickActions(context, friendData),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -15359,6 +15361,186 @@ class _EditEventScreenState extends State<EditEventScreen> {
 }
 
 // ==================== USER PROFILE VIEW ====================
+/// Quick-actions bottom sheet shown on long-press over a member's row.
+/// One gesture for the four most common actions on another member:
+/// message, challenge, view profile, relay XP.
+Future<void> showMemberQuickActions(
+  BuildContext context,
+  Map<String, dynamic> memberData,
+) async {
+  final code = (memberData['referralCode'] as String?) ?? '';
+  final name = (memberData['name'] as String?) ?? 'Member';
+  final imageUrl = memberData['profileImageUrl']?.toString();
+
+  HapticFeedback.mediumImpact();
+
+  await showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: const Color(0xFF0A0A0A),
+    barrierColor: Colors.black.withValues(alpha: 0.6),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+    ),
+    builder: (sheetCtx) {
+      Widget actionRow({
+        required IconData icon,
+        required String label,
+        required bool enabled,
+        required VoidCallback onTap,
+      }) {
+        final accent = enabled ? const Color(0xFF00FF41) : Colors.white24;
+        return InkWell(
+          onTap: enabled
+              ? () {
+                  HapticFeedback.lightImpact();
+                  Navigator.pop(sheetCtx);
+                  onTap();
+                }
+              : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            child: Row(
+              children: [
+                Icon(icon, color: accent, size: 22),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: enabled
+                          ? const Color(0xFFE7E8ED)
+                          : Colors.white24,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+                Icon(Icons.chevron_right,
+                    color: enabled ? Colors.white38 : Colors.white12,
+                    size: 18),
+              ],
+            ),
+          ),
+        );
+      }
+
+      final hasCode = code.isNotEmpty;
+
+      return SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 8),
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                        color: const Color(0xFF00FF41), width: 1.5),
+                  ),
+                  child: ClipOval(
+                    child: (imageUrl != null && imageUrl.isNotEmpty)
+                        ? Image.network(imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => const Icon(
+                                Icons.person,
+                                color: Colors.white30,
+                                size: 20))
+                        : const Icon(Icons.person,
+                            color: Colors.white30, size: 20),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  name.toUpperCase(),
+                  style: const TextStyle(
+                    color: Color(0xFFE7E8ED),
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            const Divider(color: Colors.white12, height: 1),
+            actionRow(
+              icon: Icons.chat_bubble_outline,
+              label: 'MESSAGE',
+              enabled: hasCode,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  cinematicRoute(ChatScreen(
+                    friendCode: code,
+                    friendName: name,
+                    friendImageUrl: imageUrl,
+                  )),
+                );
+              },
+            ),
+            actionRow(
+              icon: Icons.sports_kabaddi,
+              label: 'CHALLENGES',
+              enabled: true,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  cinematicRoute(const SidequestScreen(initialTab: 1)),
+                );
+              },
+            ),
+            actionRow(
+              icon: Icons.person_outline,
+              label: 'VIEW PROFILE',
+              enabled: true,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => UserProfileView(userData: memberData),
+                  ),
+                );
+              },
+            ),
+            actionRow(
+              icon: Icons.bolt_outlined,
+              label: 'RELAY XP',
+              enabled: hasCode,
+              onTap: () {
+                showDialog(
+                  context: context,
+                  barrierDismissible: true,
+                  builder: (_) => _RelayPowerDialog(
+                    recipientCode: code,
+                    recipientName: name,
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 class UserProfileView extends StatefulWidget {
   final Map<String, dynamic> userData;
 
