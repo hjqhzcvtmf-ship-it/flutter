@@ -5888,3 +5888,86 @@ Generate ${count} distinct quest concepts in TEK voice. Return ONLY the JSON obj
   }
 );
 
+// ---------------------------------------------------------------------------
+// AI hero subtitle — Anthropic SDK
+//
+// Given the Mission Control hero's current item (LIVE / UPCOMING / MISSION)
+// and a small set of signals, return one terse TEK-voice subtitle explaining
+// WHY this is the operator's best next move right now. Cached aggressively
+// on the client because the hero rebuilds frequently.
+// ---------------------------------------------------------------------------
+
+const TEK_HERO_SYSTEM_PROMPT = `You write one-line HUD subtitles for TEK, an invite-only nightclub & community platform.
+
+VOICE: cyber-noir, terse, operator HUD. Mission-control register, not friendly.
+
+CONSTRAINTS:
+- Output ONE sentence, 6-14 words, no trailing period unless the sentence demands it.
+- No emoji, no markdown, no hashtags.
+- Never use the words "you", "your", "we", "let's", "tap", "click".
+- Reference the specific signal you were given (friend names, hours, counts) — don't be generic.
+- Sentence case OR caps; never title case.
+
+OUTPUT FORMAT — return ONLY JSON, no preamble:
+{"subtitle": "..."}`;
+
+exports.heroSubtitle = onCall(
+  {
+    region: "us-central1",
+    enforceAppCheck: false,
+    secrets: [ANTHROPIC_API_KEY],
+    timeoutSeconds: 20,
+  },
+  async (request) => {
+    if (!request.auth || !request.auth.uid) {
+      throw new HttpsError("unauthenticated", "Sign in required");
+    }
+
+    const data = request.data || {};
+    const kind = typeof data.kind === "string" ? data.kind : "mission";
+    const title = typeof data.title === "string" ? data.title.trim() : "";
+    const signals = (data.signals && typeof data.signals === "object") ? data.signals : {};
+
+    if (!title) {
+      throw new HttpsError("invalid-argument", "title required");
+    }
+
+    const userPrompt = `KIND: ${kind}
+TITLE: ${title}
+SIGNALS: ${JSON.stringify(signals)}
+
+Write the subtitle. Return ONLY the JSON.`;
+
+    const Anthropic = require("@anthropic-ai/sdk");
+    const client = new Anthropic({apiKey: ANTHROPIC_API_KEY.value()});
+
+    let response;
+    try {
+      response = await client.messages.create({
+        model: "claude-haiku-4-5",
+        max_tokens: 120,
+        system: TEK_HERO_SYSTEM_PROMPT,
+        messages: [{role: "user", content: userPrompt}],
+      });
+    } catch (e) {
+      console.error("heroSubtitle Anthropic call failed:", e);
+      throw new HttpsError("internal", `AI subtitle failed: ${e.message || e}`);
+    }
+
+    const textBlock = (response.content || []).find((b) => b.type === "text");
+    const raw = textBlock ? textBlock.text : "";
+    const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+    let parsed;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch (e) {
+      console.warn("heroSubtitle returned non-JSON. Raw:", raw);
+      throw new HttpsError("internal", "AI returned malformed JSON");
+    }
+
+    return {
+      subtitle: typeof parsed.subtitle === "string" ? parsed.subtitle.trim() : "",
+    };
+  }
+);
+

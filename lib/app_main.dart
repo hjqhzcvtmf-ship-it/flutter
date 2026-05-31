@@ -5891,6 +5891,58 @@ class TekSocialProof {
   }
 }
 
+// In-memory cache for Claude-generated hero subtitles.
+// Keyed by a stable item id; warm() is idempotent (no-op when cached or
+// in-flight) so it's safe to call from inside build().
+class HeroSubtitleCache {
+  HeroSubtitleCache._();
+  static final HeroSubtitleCache instance = HeroSubtitleCache._();
+
+  final Map<String, String> _cache = <String, String>{};
+  final Set<String> _inFlight = <String>{};
+  final ValueNotifier<int> rev = ValueNotifier<int>(0);
+
+  String? get(String key) => _cache[key];
+
+  void warm({
+    required String key,
+    required String kind,
+    required String title,
+    required Map<String, dynamic> signals,
+  }) {
+    if (_cache.containsKey(key) || _inFlight.contains(key)) return;
+    _inFlight.add(key);
+    unawaited(_fetch(key: key, kind: kind, title: title, signals: signals));
+  }
+
+  Future<void> _fetch({
+    required String key,
+    required String kind,
+    required String title,
+    required Map<String, dynamic> signals,
+  }) async {
+    try {
+      final functions = FirebaseFunctions.instanceFor(region: 'us-central1');
+      final res = await functions.httpsCallable('heroSubtitle').call(
+        <String, dynamic>{
+          'kind': kind,
+          'title': title,
+          'signals': signals,
+        },
+      );
+      final subtitle = (res.data as Map?)?['subtitle'] as String?;
+      if (subtitle != null && subtitle.isNotEmpty) {
+        _cache[key] = subtitle;
+        rev.value++;
+      }
+    } catch (_) {
+      // Silent fallback — hero continues to render without the AI subtitle.
+    } finally {
+      _inFlight.remove(key);
+    }
+  }
+}
+
 /// Visible tier badge: a small icon + label chip.
 /// Use beside name in chat headers, friend lists, profile, RANKS, stories.
 class TekTierBadge extends StatelessWidget {
@@ -10447,6 +10499,18 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
     final data = mission.data() as Map<String, dynamic>;
     final title = (data['title'] as String? ?? 'MISSION').toUpperCase();
     final xp = (data['xpReward'] as num?)?.toInt() ?? 0;
+    final friendsDone =
+        TekSocialProof.instance.friendsCompletedQuest(mission.id);
+    final aiKey = 'mission:${mission.id}';
+    HeroSubtitleCache.instance.warm(
+      key: aiKey,
+      kind: 'mission',
+      title: title,
+      signals: <String, dynamic>{
+        if (xp > 0) 'xpReward': xp,
+        if (friendsDone > 0) 'friendsCompleted': friendsDone,
+      },
+    );
     return _shell(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -10472,6 +10536,26 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
                     style: const TextStyle(color: Color(0xFF00FF41), fontWeight: FontWeight.bold, fontSize: 11)),
               ),
             ],
+          ),
+          ValueListenableBuilder<int>(
+            valueListenable: HeroSubtitleCache.instance.rev,
+            builder: (_, _, _) {
+              final subtitle = HeroSubtitleCache.instance.get(aiKey);
+              if (subtitle == null || subtitle.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(
+                  subtitle,
+                  style: const TextStyle(
+                    color: Color(0xFFB8B8C0),
+                    fontSize: 11,
+                    height: 1.3,
+                  ),
+                ),
+              );
+            },
           ),
           ValueListenableBuilder<int>(
             valueListenable: TekSocialProof.instance.rev,
