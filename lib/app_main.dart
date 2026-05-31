@@ -4532,6 +4532,7 @@ class UserProfilePage extends StatefulWidget {
 
 class _UserProfilePageState extends State<UserProfilePage> {
   late Map<String, dynamic> profileData;
+  bool _isAdminAllowlisted = false;
 
   @override
   void initState() {
@@ -4547,12 +4548,39 @@ class _UserProfilePageState extends State<UserProfilePage> {
           'profileImage': null,
         };
     _refreshProfileData();
+    _checkAdminAllowlist();
 
     final code = profileData['referralCode'];
     if (code is String && code.trim().isNotEmpty) {
       // Fire-and-forget; this will also start the session listener.
       ReferralSessionManager.instance.ensureActiveForReferralCode(code);
     }
+  }
+
+  Future<void> _checkAdminAllowlist() async {
+    try {
+      final allowed = await AdminStatusManager.instance.isCurrentUserAdmin();
+      if (mounted) setState(() => _isAdminAllowlisted = allowed);
+    } catch (_) {}
+  }
+
+  Future<void> _enterControl() async {
+    HapticFeedback.mediumImpact();
+    TekSounds.instance.tap();
+    final prefs = await SharedPreferences.getInstance();
+    // Flip the admin-mode flag WITHOUT removing userReferralCode, so the
+    // user keeps their identity (referralCode + friends list) while gaining
+    // access to the CONTROL tab. Differs from the admin email/password
+    // login flow, which intentionally wipes referralCode.
+    await prefs.setBool(tekAdminModePrefsKey, true);
+    if (!mounted) return;
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const MainApp(initialIndex: 5, isAdmin: true),
+      ),
+      (route) => false,
+    );
   }
 
   Future<void> _refreshProfileData() async {
@@ -4589,6 +4617,29 @@ class _UserProfilePageState extends State<UserProfilePage> {
         centerTitle: true,
         title: const TekWordmark(fontSize: 22, letterSpacing: 5.2),
         actions: [
+          if (_isAdminAllowlisted)
+            IconButton(
+              padding: EdgeInsets.zero,
+              icon: Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black.withValues(alpha: 0.35),
+                  border: Border.all(
+                    color: const Color(0xFF00FF41).withValues(alpha: 0.55),
+                    width: 0.8,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.admin_panel_settings,
+                  color: Color(0xFF00FF41),
+                  size: 20,
+                ),
+              ),
+              tooltip: 'CONTROL',
+              onPressed: _enterControl,
+            ),
           IconButton(
             padding: const EdgeInsets.only(right: 12),
             icon: Container(
@@ -13564,11 +13615,46 @@ class _TekRadarPageState extends State<_TekRadarPage>
                     ],
                   ),
                   const SizedBox(height: 6),
-                  if (blips.isEmpty)
+                  if (blips.isEmpty) ...[
                     const Text(
-                      'No friends have opened the radar yet. They\'ll appear here once they do.',
-                      style: TextStyle(color: Colors.white54, fontSize: 11),
-                    )
+                      'Friends only show on radar when they open this screen at the same venue. Bring more operators in to see signal.',
+                      style: TextStyle(color: Colors.white54, fontSize: 11, height: 1.4),
+                    ),
+                    const SizedBox(height: 10),
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const InviteFriendsPage(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.person_add_alt_1,
+                          color: Color(0xFF00FF41), size: 16),
+                      label: const Text(
+                        'INVITE A FRIEND',
+                        style: TextStyle(
+                          color: Color(0xFF00FF41),
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: const Color(0xFF00FF41).withValues(alpha: 0.5),
+                          width: 0.8,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                    ),
+                  ]
                   else
                     ...blips.take(5).map((b) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4),
@@ -22558,9 +22644,13 @@ class _MissionsTab extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 8),
-                Text(
-                  'New transmissions inbound. Stand by, operator.',
-                  style: TextStyle(color: Colors.white54, fontSize: 13),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 32),
+                  child: Text(
+                    'New ops drop around events. Nothing live right now — check back tonight.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white54, fontSize: 13, height: 1.4),
+                  ),
                 ),
               ],
             ),
@@ -25359,17 +25449,55 @@ class _ChallengesTab extends StatelessWidget {
 
             if (incoming.isEmpty && outgoing.isEmpty) {
               return Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.person_add, color: Colors.white24, size: 48),
-                    SizedBox(height: 16),
-                    Text('No challenges yet.',
-                        style: TextStyle(color: Colors.white54, fontSize: 15)),
-                    SizedBox(height: 8),
-                    Text('Go to a mission and challenge a friend.',
-                        style: TextStyle(color: Colors.white38, fontSize: 12)),
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.sports_kabaddi,
+                          color: Color(0xFF00FF41), size: 48),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'NO ACTIVE CHALLENGES',
+                        style: TextStyle(
+                          color: Color(0xFF00FF41),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Challenge a friend to push them up the ranks. Two ways in:',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+                      ),
+                      const SizedBox(height: 14),
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.touch_app_outlined,
+                              color: Color(0xFF00FF41), size: 14),
+                          SizedBox(width: 6),
+                          Text(
+                            'LONG-PRESS A FRIEND ROW',
+                            style: TextStyle(
+                              color: Color(0xFFB8B8C0),
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'or open a mission and pick one from the brief.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white54, fontSize: 11, height: 1.4),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }
