@@ -12301,19 +12301,24 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   void initState() {
     super.initState();
     _loadUserData();
-    _checkAdmin();
-  }
-
-  Future<void> _checkAdmin() async {
-    final admin = await AdminStatusManager.instance.isCurrentUserAdmin();
-    if (mounted) setState(() => _isAdmin = admin);
   }
 
   Future<void> _loadUserData() async {
+    final admin = await AdminStatusManager.instance.isCurrentUserAdmin();
     final prefs = await SharedPreferences.getInstance();
-    final code = prefs.getString('userReferralCode');
+    var code = prefs.getString('userReferralCode');
+    // Admin without a referralCode (email/password login) gets a synthetic
+    // code from their auth UID so check-in / radar / missions are reachable
+    // for testing. Firestore rules already bypass the referralCode binding
+    // for admins, so writes succeed.
+    if (code == null && admin) {
+      code = FirebaseAuth.instance.currentUser?.uid;
+    }
     if (!mounted) return;
-    setState(() => _userCode = code);
+    setState(() {
+      _isAdmin = admin;
+      _userCode = code;
+    });
     if (code == null) return;
     final snap = await FirebaseFirestore.instance
         .collection('applications')
@@ -14581,6 +14586,7 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
         return Card(
           color: Colors.white.withValues(alpha: 0.05),
           margin: const EdgeInsets.only(bottom: 12),
+          clipBehavior: Clip.antiAlias,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(
@@ -14589,7 +14595,19 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
                   : const Color(0xFF00FF41).withValues(alpha: 0.3),
             ),
           ),
-          child: Padding(
+          child: InkWell(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => EventDetailScreen(
+                  eventId: event.id,
+                  eventData: eventData,
+                ),
+              ),
+            ),
+            splashColor: const Color(0xFF00FF41).withValues(alpha: 0.1),
+            highlightColor: const Color(0xFF00FF41).withValues(alpha: 0.05),
+            child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
@@ -14728,6 +14746,7 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
                 ),
               ],
             ),
+          ),
           ),
         );
       },
