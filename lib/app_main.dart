@@ -5764,6 +5764,82 @@ bool isFounderFromData(Map<String, dynamic> appData) {
   return false;
 }
 
+// Friend-context counts used for social proof on quest/mission cards.
+// Listen on [rev] to rebuild when the cache refreshes. Cache TTL ~5 min.
+class TekSocialProof {
+  TekSocialProof._();
+  static final TekSocialProof instance = TekSocialProof._();
+
+  final ValueNotifier<int> rev = ValueNotifier<int>(0);
+
+  Set<String> _friendCodes = <String>{};
+  Map<String, int> _questCompletionByFriends = <String, int>{};
+  DateTime? _lastFetch;
+  String? _lastUserCode;
+
+  int friendsCompletedQuest(String questId) =>
+      _questCompletionByFriends[questId] ?? 0;
+
+  Set<String> get friendCodes => _friendCodes;
+
+  Future<void> refreshIfStale(String userCode) async {
+    final now = DateTime.now();
+    if (_lastUserCode == userCode &&
+        _lastFetch != null &&
+        now.difference(_lastFetch!) < const Duration(minutes: 5)) return;
+    try {
+      final selfSnap = await FirebaseFirestore.instance
+          .collection('applications')
+          .where('referralCode', isEqualTo: userCode)
+          .limit(1)
+          .get();
+      if (selfSnap.docs.isEmpty) return;
+      final friends = ((selfSnap.docs.first.data()['friends'] as List?) ??
+              const [])
+          .cast<String>()
+          .toSet();
+      if (friends.isEmpty) {
+        _friendCodes = <String>{};
+        _questCompletionByFriends = <String, int>{};
+        _lastFetch = now;
+        _lastUserCode = userCode;
+        rev.value++;
+        return;
+      }
+      final friendList = friends.toList();
+      final newCounts = <String, int>{};
+      final fetched = <String>{};
+      // whereIn caps at 30 — chunk for users with larger friend lists.
+      for (int i = 0; i < friendList.length; i += 30) {
+        final chunk =
+            friendList.sublist(i, math.min(i + 30, friendList.length));
+        final snap = await FirebaseFirestore.instance
+            .collection('applications')
+            .where('referralCode', whereIn: chunk)
+            .get();
+        for (final d in snap.docs) {
+          final data = d.data();
+          final code = (data['referralCode'] as String?) ?? '';
+          if (code.isNotEmpty) {
+            fetched.add(code);
+          }
+          final completed =
+              ((data['completedSidequests'] as List?) ?? const [])
+                  .cast<String>();
+          for (final q in completed) {
+            newCounts[q] = (newCounts[q] ?? 0) + 1;
+          }
+        }
+      }
+      _friendCodes = fetched;
+      _questCompletionByFriends = newCounts;
+      _lastFetch = now;
+      _lastUserCode = userCode;
+      rev.value++;
+    } catch (_) {}
+  }
+}
+
 /// Visible tier badge: a small icon + label chip.
 /// Use beside name in chat headers, friend lists, profile, RANKS, stories.
 class TekTierBadge extends StatelessWidget {
@@ -10060,6 +10136,7 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
     final prefs = await SharedPreferences.getInstance();
     final code = prefs.getString('userReferralCode');
     if (code == null || code.isEmpty) return;
+    unawaited(TekSocialProof.instance.refreshIfStale(code));
     final dismissed = (prefs.getStringList(_dismissedHeroPrefsKey) ?? const <String>[]).toSet();
     final snap = await FirebaseFirestore.instance
         .collection('applications')
@@ -10342,6 +10419,26 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
                     style: const TextStyle(color: Color(0xFF00FF41), fontWeight: FontWeight.bold, fontSize: 11)),
               ),
             ],
+          ),
+          ValueListenableBuilder<int>(
+            valueListenable: TekSocialProof.instance.rev,
+            builder: (_, _, _) {
+              final n = TekSocialProof.instance
+                  .friendsCompletedQuest(mission.id);
+              if (n <= 0) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(
+                  '● $n OP${n == 1 ? '' : 'S'} HIT THIS',
+                  style: const TextStyle(
+                    color: Color(0xFF00FF41),
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
+                ),
+              );
+            },
           ),
           const SizedBox(height: 10),
           Row(
@@ -22235,6 +22332,10 @@ class _MissionsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final uc = userCode;
+    if (uc != null && uc.isNotEmpty) {
+      unawaited(TekSocialProof.instance.refreshIfStale(uc));
+    }
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('sidequests')
@@ -22817,6 +22918,41 @@ class _SidequestCard extends StatelessWidget {
                   ],
                 ),
               ],
+                ),
+                ValueListenableBuilder<int>(
+                  valueListenable: TekSocialProof.instance.rev,
+                  builder: (_, _, _) {
+                    final n = TekSocialProof.instance
+                        .friendsCompletedQuest(questId);
+                    if (n <= 0 || chainLocked) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 5,
+                            height: 5,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Color(0xFF00FF41),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '$n OP${n == 1 ? '' : 'S'} HIT THIS',
+                            style: const TextStyle(
+                              color: Color(0xFF00FF41),
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
                 if (!chainLocked && appId != null)
                   _QuestProgressBar(
