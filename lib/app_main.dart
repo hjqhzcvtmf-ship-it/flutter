@@ -5898,6 +5898,10 @@ class HeroSubtitleCache {
   HeroSubtitleCache._();
   static final HeroSubtitleCache instance = HeroSubtitleCache._();
 
+  // Master kill switch. Flip to true to re-enable per-user AI subtitles.
+  // The Cloud Function heroSubtitle remains deployed and is free when idle.
+  static const bool enabled = false;
+
   final Map<String, String> _cache = <String, String>{};
   final Set<String> _inFlight = <String>{};
   final ValueNotifier<int> rev = ValueNotifier<int>(0);
@@ -5910,6 +5914,7 @@ class HeroSubtitleCache {
     required String title,
     required Map<String, dynamic> signals,
   }) {
+    if (!enabled) return;
     if (_cache.containsKey(key) || _inFlight.contains(key)) return;
     _inFlight.add(key);
     unawaited(_fetch(key: key, kind: kind, title: title, signals: signals));
