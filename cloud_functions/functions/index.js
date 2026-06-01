@@ -625,6 +625,12 @@ async function isAdminUid(uid) {
 
 // Callable: return whether the current authenticated uid is an admin.
 // Client: no args. Response: { isAdmin: boolean }
+//
+// Most TEK users sign in anonymously, so request.auth.uid is an ephemeral
+// anonymous UID — NOT the persistent ownerUid stamped on the application
+// doc. To grant admin to the human behind the anonymous session, we also
+// resolve the user's application doc via the referralCode custom claim
+// and treat the doc's ownerUid as the admin-eligibility key.
 exports.getAdminStatus = onCall(
   {
     region: "us-central1",
@@ -635,8 +641,52 @@ exports.getAdminStatus = onCall(
     if (!uid) {
       throw new HttpsError("unauthenticated", "Unauthenticated");
     }
-    const isAdmin = await isAdminUid(uid);
-    return {isAdmin};
+    const referralCodeFromClaim =
+      request.auth.token && request.auth.token.referralCode
+        ? String(request.auth.token.referralCode)
+        : "";
+    const referralCodeFromData =
+      request.data && typeof request.data.referralCode === "string"
+        ? request.data.referralCode.trim()
+        : "";
+    const referralCode = referralCodeFromClaim || referralCodeFromData;
+    console.log("getAdminStatus call", {
+      uid,
+      anon: !!(request.auth.token && request.auth.token.firebase &&
+        request.auth.token.firebase.sign_in_provider === "anonymous"),
+      referralCodeFromClaim,
+      referralCodeFromData,
+    });
+    // Direct match: caller's auth UID is on the allowlist.
+    if (await isAdminUid(uid)) {
+      console.log("getAdminStatus direct UID match");
+      return {isAdmin: true};
+    }
+    if (!referralCode) {
+      console.log("getAdminStatus no referralCode available");
+      return {isAdmin: false};
+    }
+    const appSnap = await db
+      .collection("applications")
+      .where("referralCode", "==", referralCode)
+      .limit(1)
+      .get();
+    if (appSnap.empty) {
+      console.log("getAdminStatus no application doc for referralCode",
+        referralCode);
+      return {isAdmin: false};
+    }
+    const appData = appSnap.docs[0].data() || {};
+    const candidateUids = [appData.ownerUid, appData.webUid].filter(Boolean);
+    console.log("getAdminStatus candidateUids", candidateUids);
+    for (const u of candidateUids) {
+      if (await isAdminUid(u)) {
+        console.log("getAdminStatus matched via candidate", u);
+        return {isAdmin: true};
+      }
+    }
+    console.log("getAdminStatus no candidate matched");
+    return {isAdmin: false};
   }
 );
 

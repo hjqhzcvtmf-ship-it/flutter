@@ -8061,9 +8061,14 @@ class _MainAppState extends State<MainApp> {
     final prefs = await SharedPreferences.getInstance();
     final persistedAdminMode = prefs.getBool(tekAdminModePrefsKey) ?? false;
 
-    // CONTROL should only be possible for a non-anonymous account AND when admin mode was explicitly entered.
-    final effectiveAdminMode =
-        (widget.isAdmin || persistedAdminMode) && !user.isAnonymous;
+    // CONTROL requires explicit admin-mode entry (widget.isAdmin from the
+    // email/password login flow, or persistedAdminMode from tapping the
+    // profile shield). We intentionally do NOT gate on non-anonymous auth:
+    // TEK admins sign in via referral code, which uses anonymous Firebase
+    // Auth. The real security gate is the isCurrentUserAdmin() allowlist
+    // callable below — an anonymous session whose UID isn't allowlisted is
+    // revoked there.
+    final effectiveAdminMode = widget.isAdmin || persistedAdminMode;
 
     if (!effectiveAdminMode) {
       if (persistedAdminMode) {
@@ -13404,7 +13409,13 @@ class _TekRadarPageState extends State<_TekRadarPage>
   static const Duration _writeInterval = Duration(seconds: 5);
   // Radar shows blips up to this far away. Beyond, friends just clamp to
   // the outer ring with a distance label, so you still know which way to go.
-  static const double _maxRangeMeters = 500;
+  // Venue-scale range: most check-in crowds are within ~150m of each other,
+  // so a friend 50m away sits a third of the way out instead of a dot glued
+  // to the center. Anyone beyond this pins to the outer ring.
+  static const double _maxRangeMeters = 150;
+  // Ignore location docs older than this — a friend who left (or whose app
+  // backgrounded/crashed without disposing) shouldn't linger as a ghost blip.
+  static const Duration _staleLocationAfter = Duration(minutes: 2);
 
   StreamSubscription<Position>? _positionSub;
   StreamSubscription<CompassEvent>? _compassSub;
@@ -13487,7 +13498,25 @@ class _TekRadarPageState extends State<_TekRadarPage>
             .toSet();
       }
 
-      // 3. Position stream.
+      // 3. Seed an immediate one-shot fix. The position stream below only
+      // emits after the user MOVES (distanceFilter), so a user who opens the
+      // radar standing still would otherwise never get a fix — _myPos stays
+      // null (no blips render) and their location is never written (friends
+      // can't see them). Grabbing a current fix up front fixes both.
+      try {
+        final seed = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+          ),
+        ).timeout(const Duration(seconds: 8));
+        if (!mounted) return;
+        setState(() => _myPos = seed);
+        _throttledWrite(seed);
+      } catch (_) {
+        // Non-fatal — the stream below will still deliver a fix once it can.
+      }
+
+      // 4. Position stream.
       _positionSub = Geolocator.getPositionStream(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
@@ -13499,7 +13528,7 @@ class _TekRadarPageState extends State<_TekRadarPage>
         _throttledWrite(pos);
       });
 
-      // 4. Compass stream (magnetometer).
+      // 5. Compass stream (magnetometer).
       _compassSub = FlutterCompass.events?.listen((event) {
         if (!mounted || event.heading == null) return;
         setState(() => _headingDeg = event.heading!);
@@ -13561,6 +13590,12 @@ class _TekRadarPageState extends State<_TekRadarPage>
       final code = data['userCode'] as String?;
       if (code == null || code == widget.userCode) continue;
       if (!_friendCodes.contains(code)) continue; // friends only
+      // Skip stale locations (friend left / app backgrounded without dispose).
+      final updatedAt = (data['updatedAt'] as Timestamp?)?.toDate();
+      if (updatedAt != null &&
+          DateTime.now().difference(updatedAt) > _staleLocationAfter) {
+        continue;
+      }
       final lat = (data['lat'] as num?)?.toDouble();
       final lng = (data['lng'] as num?)?.toDouble();
       if (lat == null || lng == null) continue;
@@ -13878,15 +13913,90 @@ class _RadarPainter extends CustomPainter {
     );
 
     // Blips.
+    // Below this range, GPS can't resolve a reliable bearing (accuracy is
+    // ~5-10m), so we stop drawing a precise direction and show a "CLOSE"
+    // state instead of a jittery arrow.
+    const closeRangeMeters = 10.0;
+    // Keep a friend's blip from collapsing into the center "you" dot so it's
+    // always visually distinct, even at point-blank distance.
+    const minBlipRadius = 26.0;
+
     for (final b in blips) {
       // Relative bearing = absoluteBearing - phone heading.
       final relBearing = (b.absoluteBearingDeg - headingDeg) % 360.0;
       // Convert to canvas angle: 0deg = up (north), clockwise positive.
       final canvasAngle = (relBearing - 90.0) * math.pi / 180.0;
+      final isClose = b.distanceMeters < closeRangeMeters;
 
-      // Clamp distance to maxRange (further blips sit on the outer ring).
+      // Clamp distance to maxRange (further blips sit on the outer ring),
+      // and floor it so the blip clears the center dot.
       final distFrac = (b.distanceMeters / maxRangeMeters).clamp(0.0, 1.0);
-      final r = maxRadius * distFrac;
+      final r = math.max(maxRadius * distFrac, minBlipRadius);
+
+      // ---- TARGET-LOCK perimeter arc ----------------------------------
+      // A bright, tapered glow segment riding the outer ring at the friend's
+      // bearing. Decoupled from distance, so it always shows "walk this way"
+      // even when the friend is sitting near the center. When too close to
+      // trust the bearing, the whole rim breathes instead of pointing.
+      if (isClose) {
+        // Honest "you're basically on top of each other" pulse: a soft full
+        // rim glow that breathes with the sweep.
+        final pulse = 0.25 + 0.20 * (0.5 + 0.5 * math.sin(sweepProgress * 2 * math.pi));
+        canvas.drawCircle(
+          center,
+          maxRadius,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 3
+            ..color = green.withValues(alpha: pulse)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 8),
+        );
+      } else {
+        const lockSpan = 0.42; // radians (~24deg) of arc
+        final lockRect = Rect.fromCircle(center: center, radius: maxRadius);
+        // Outer glow pass.
+        canvas.drawArc(
+          lockRect,
+          canvasAngle - lockSpan / 2,
+          lockSpan,
+          false,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 7
+            ..strokeCap = StrokeCap.round
+            ..color = green.withValues(alpha: 0.35)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+        );
+        // Bright core arc.
+        canvas.drawArc(
+          lockRect,
+          canvasAngle - lockSpan / 2,
+          lockSpan,
+          false,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 4
+            ..strokeCap = StrokeCap.round
+            ..color = green,
+        );
+        // A small tick on the rim at the exact bearing.
+        final tickInner = Offset(
+          center.dx + math.cos(canvasAngle) * (maxRadius - 9),
+          center.dy + math.sin(canvasAngle) * (maxRadius - 9),
+        );
+        final tickOuter = Offset(
+          center.dx + math.cos(canvasAngle) * (maxRadius + 4),
+          center.dy + math.sin(canvasAngle) * (maxRadius + 4),
+        );
+        canvas.drawLine(
+          tickInner,
+          tickOuter,
+          Paint()
+            ..color = green
+            ..strokeWidth = 2.5
+            ..strokeCap = StrokeCap.round,
+        );
+      }
 
       final blipCenter = Offset(
         center.dx + math.cos(canvasAngle) * r,
@@ -13903,26 +14013,40 @@ class _RadarPainter extends CustomPainter {
       );
       // Blip core
       canvas.drawCircle(blipCenter, 5, Paint()..color = green);
-      // Arrow pointing outward from center (direction of friend)
-      final arrowEnd = Offset(
-        blipCenter.dx + math.cos(canvasAngle) * 12,
-        blipCenter.dy + math.sin(canvasAngle) * 12,
-      );
-      canvas.drawLine(
-        blipCenter,
-        arrowEnd,
-        Paint()
-          ..color = green
-          ..strokeWidth = 2
-          ..strokeCap = StrokeCap.round,
-      );
 
-      // Distance label
+      // Name label (first name) above the blip.
+      final firstName = b.userName.trim().split(' ').first;
+      if (firstName.isNotEmpty) {
+        final nameText = TextPainter(
+          text: TextSpan(
+            text: firstName.toUpperCase(),
+            style: TextStyle(
+              color: green,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
+          ),
+          textDirection: ui.TextDirection.ltr,
+        )..layout();
+        nameText.paint(
+          canvas,
+          Offset(
+            blipCenter.dx - nameText.width / 2,
+            blipCenter.dy - 22,
+          ),
+        );
+      }
+
+      // Distance / proximity label below the blip.
+      final distLabel = isClose
+          ? 'CLOSE'
+          : (b.distanceMeters < 1000
+              ? '${b.distanceMeters.round()}m'
+              : '${(b.distanceMeters / 1000).toStringAsFixed(1)}km');
       final distText = TextPainter(
         text: TextSpan(
-          text: b.distanceMeters < 1000
-              ? '${b.distanceMeters.round()}m'
-              : '${(b.distanceMeters / 1000).toStringAsFixed(1)}km',
+          text: distLabel,
           style: const TextStyle(
             color: Colors.white,
             fontSize: 10,
