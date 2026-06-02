@@ -2813,7 +2813,14 @@ class MyApp extends StatelessWidget {
           ],
         );
       },
-      home: const BootstrapGate(),
+      // Design-iteration harness: launch with
+      //   flutter run --dart-define=RADAR_PREVIEW=true
+      // to boot straight into the radar look-and-feel preview (simulated
+      // heading + fake blips) without check-in / GPS / compass. Never active
+      // in normal builds.
+      home: const bool.fromEnvironment('RADAR_PREVIEW')
+          ? const _RadarPreviewPage()
+          : const BootstrapGate(),
     );
   }
 }
@@ -13395,6 +13402,114 @@ class _RadarBlip {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Design-iteration harness (gated by --dart-define=RADAR_PREVIEW=true).
+// Renders the real _RadarPainter with a simulated, slowly-rotating heading
+// and fake blips so the look can be tuned with hot reload — no check-in,
+// GPS, or compass required. Not reachable in normal builds.
+// ---------------------------------------------------------------------------
+class _RadarPreviewPage extends StatefulWidget {
+  const _RadarPreviewPage();
+  @override
+  State<_RadarPreviewPage> createState() => _RadarPreviewPageState();
+}
+
+class _RadarPreviewPageState extends State<_RadarPreviewPage>
+    with TickerProviderStateMixin {
+  late final AnimationController _sweepCtrl;
+  late final AnimationController _headingCtrl; // simulates turning the phone
+  double _headingDeg = 0;
+  double _rawHeadingDeg = 0;
+
+  // Fake friends: one mid-range (shows the lock arc) + one close (CLOSE rim).
+  final List<_RadarBlip> _blips = const [
+    _RadarBlip(
+      userCode: 'AAA',
+      userName: 'Dev',
+      imageUrl: '',
+      distanceMeters: 52,
+      absoluteBearingDeg: 35,
+    ),
+    _RadarBlip(
+      userCode: 'BBB',
+      userName: 'Nova',
+      imageUrl: '',
+      distanceMeters: 120,
+      absoluteBearingDeg: 200,
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _sweepCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )
+      ..addListener(_tickHeading)
+      ..repeat();
+    // Simulated compass: full rotation every 24s so we can watch the arc and
+    // N-marker glide as if turning the phone.
+    _headingCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 24),
+    )
+      ..addListener(() => _rawHeadingDeg = _headingCtrl.value * 360.0)
+      ..repeat();
+  }
+
+  void _tickHeading() {
+    var diff = (_rawHeadingDeg - _headingDeg) % 360.0;
+    if (diff > 180.0) diff -= 360.0;
+    if (diff < -180.0) diff += 360.0;
+    _headingDeg = (_headingDeg + diff * 0.18) % 360.0;
+  }
+
+  @override
+  void dispose() {
+    _sweepCtrl.dispose();
+    _headingCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: const Text(
+          'TEK RADAR',
+          style: TextStyle(
+            color: Color(0xFF00FF41),
+            letterSpacing: 4,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: Center(
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: AnimatedBuilder(
+            animation: _sweepCtrl,
+            builder: (context, _) {
+              return CustomPaint(
+                painter: _RadarPainter(
+                  blips: _blips,
+                  headingDeg: _headingDeg,
+                  maxRangeMeters: 150,
+                  sweepProgress: _sweepCtrl.value,
+                ),
+                size: Size.infinite,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _TekRadarPage extends StatefulWidget {
   final String eventId;
   final String userCode;
@@ -13418,11 +13533,13 @@ class _TekRadarPageState extends State<_TekRadarPage>
   static const Duration _staleLocationAfter = Duration(minutes: 2);
 
   StreamSubscription<Position>? _positionSub;
+  Timer? _heartbeat;
   StreamSubscription<CompassEvent>? _compassSub;
   late final AnimationController _sweepCtrl;
 
   Position? _myPos;
-  double _headingDeg = 0;
+  double _headingDeg = 0; // smoothed/displayed heading
+  double _rawHeadingDeg = 0; // latest raw magnetometer reading
   Set<String> _friendCodes = {};
   String _userName = '';
   String _userImageUrl = '';
@@ -13436,13 +13553,36 @@ class _TekRadarPageState extends State<_TekRadarPage>
     _sweepCtrl = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
-    )..repeat();
+    )
+      // Smooth the heading every frame so the compass (N marker, blips, and
+      // the target-lock arc) glides instead of snapping with magnetometer
+      // jitter. The CustomPaint already rebuilds on this controller, so we
+      // only need to advance the smoothed value here.
+      ..addListener(_tickHeading)
+      ..repeat();
     _start();
+  }
+
+  void _tickHeading() {
+    final next = _lerpAngleDeg(_headingDeg, _rawHeadingDeg, 0.18);
+    if ((next - _headingDeg).abs() > 0.01) {
+      _headingDeg = next;
+    }
+  }
+
+  /// Lerp between two angles (degrees) along the shortest arc, handling the
+  /// 360->0 wraparound so the needle never spins the long way round.
+  double _lerpAngleDeg(double from, double to, double t) {
+    var diff = (to - from) % 360.0;
+    if (diff > 180.0) diff -= 360.0;
+    if (diff < -180.0) diff += 360.0;
+    return (from + diff * t) % 360.0;
   }
 
   @override
   void dispose() {
     _positionSub?.cancel();
+    _heartbeat?.cancel();
     _compassSub?.cancel();
     _sweepCtrl.dispose();
     // Stop sharing: delete our location slot for this event.
@@ -13528,10 +13668,24 @@ class _TekRadarPageState extends State<_TekRadarPage>
         _throttledWrite(pos);
       });
 
-      // 5. Compass stream (magnetometer).
+      // 5. Heartbeat re-write. The position stream above only emits when the
+      // user MOVES (distanceFilter), so a stationary user would stop writing
+      // and get dropped by the staleness filter on friends' radars. Re-write
+      // the last known position on a fixed cadence to stay "alive". The write
+      // is throttled, so this is cheap.
+      _heartbeat = Timer.periodic(const Duration(seconds: 45), (_) {
+        final pos = _myPos;
+        if (pos == null) return;
+        _lastWriteAt = null; // force the throttle to allow this keep-alive
+        _throttledWrite(pos);
+      });
+
+      // 6. Compass stream (magnetometer).
       _compassSub = FlutterCompass.events?.listen((event) {
         if (!mounted || event.heading == null) return;
-        setState(() => _headingDeg = event.heading!);
+        // Store the raw reading; _tickHeading eases _headingDeg toward it
+        // each frame. No setState — the sweep controller drives the repaint.
+        _rawHeadingDeg = event.heading!;
       });
 
       if (mounted) setState(() => _starting = false);
@@ -13838,207 +13992,220 @@ class _RadarPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final maxRadius = math.min(size.width, size.height) * 0.42;
     const green = Color(0xFF00FF41);
+    final t = sweepProgress * 2 * math.pi;
+    final breathe = 0.5 + 0.5 * math.sin(t);
 
-    // Concentric rings (4 rings).
-    final ringPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1
-      ..color = green.withValues(alpha: 0.15);
-    for (int i = 1; i <= 4; i++) {
-      canvas.drawCircle(center, maxRadius * i / 4, ringPaint);
-    }
-
-    // Cross hairs.
-    final hairPaint = Paint()
-      ..color = green.withValues(alpha: 0.08)
-      ..strokeWidth = 0.8;
-    canvas.drawLine(Offset(center.dx - maxRadius, center.dy),
-        Offset(center.dx + maxRadius, center.dy), hairPaint);
-    canvas.drawLine(Offset(center.dx, center.dy - maxRadius),
-        Offset(center.dx, center.dy + maxRadius), hairPaint);
-
-    // Outer glow ring.
-    final outerPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5
-      ..color = green.withValues(alpha: 0.7)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 6);
-    canvas.drawCircle(center, maxRadius, outerPaint);
-
-    // Sweep arc.
-    final sweepAngle = sweepProgress * 2 * math.pi - math.pi / 2;
-    final sweepRect = Rect.fromCircle(center: center, radius: maxRadius);
-    final sweepPaint = Paint()
-      ..shader = SweepGradient(
-        startAngle: sweepAngle - 0.6,
-        endAngle: sweepAngle,
-        colors: [
-          green.withValues(alpha: 0),
-          green.withValues(alpha: 0.45),
-        ],
-      ).createShader(sweepRect)
-      ..style = PaintingStyle.fill;
-    canvas.drawArc(sweepRect, sweepAngle - 0.6, 0.6, true, sweepPaint);
-
-    // Heading label (N).
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: 'N',
-        style: TextStyle(
-          color: green.withValues(alpha: 0.6),
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      textDirection: ui.TextDirection.ltr,
-    )..layout();
-    // North relative to phone heading: rotate by -heading from top.
-    final northAngle = (-headingDeg) * math.pi / 180.0 - math.pi / 2;
-    final northOffset = Offset(
-      center.dx + math.cos(northAngle) * (maxRadius + 14) - textPainter.width / 2,
-      center.dy + math.sin(northAngle) * (maxRadius + 14) - textPainter.height / 2,
-    );
-    textPainter.paint(canvas, northOffset);
-
-    // Center dot (you).
-    final youPaint = Paint()..color = green;
-    canvas.drawCircle(center, 6, youPaint);
+    // ---- 1. Atmospheric field: a soft green core haze melting into black,
+    // giving depth instead of a flat grid.
     canvas.drawCircle(
       center,
-      10,
+      maxRadius * 1.25,
       Paint()
-        ..color = green.withValues(alpha: 0.35)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5,
+        ..shader = RadialGradient(
+          colors: [
+            green.withValues(alpha: 0.10),
+            green.withValues(alpha: 0.025),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.55, 1.0],
+        ).createShader(
+          Rect.fromCircle(center: center, radius: maxRadius * 1.25),
+        ),
     );
 
-    // Blips.
-    // Below this range, GPS can't resolve a reliable bearing (accuracy is
-    // ~5-10m), so we stop drawing a precise direction and show a "CLOSE"
-    // state instead of a jittery arrow.
-    const closeRangeMeters = 10.0;
-    // Keep a friend's blip from collapsing into the center "you" dot so it's
-    // always visually distinct, even at point-blank distance.
-    const minBlipRadius = 26.0;
+    // ---- 2. Boundary + depth: one breathing edge halo and two faint inner
+    // rings, all heavily blurred so they read as glow, never as a grid.
+    canvas.drawCircle(
+      center,
+      maxRadius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5
+        ..color = green.withValues(alpha: 0.10 + 0.06 * breathe)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+    );
+    for (final frac in const [0.4, 0.72]) {
+      canvas.drawCircle(
+        center,
+        maxRadius * frac,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5
+          ..color = green.withValues(alpha: 0.05)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+      );
+    }
 
+    // ---- 3. Sweep: a soft comet glow trailing a gentle leading edge —
+    // an aurora, not a wedge. Blurred and low-alpha so no banding.
+    final sweepAngle = t - math.pi / 2;
+    final sweepRect = Rect.fromCircle(center: center, radius: maxRadius);
+    canvas.drawArc(
+      sweepRect,
+      sweepAngle - 1.4,
+      1.4,
+      true,
+      Paint()
+        ..shader = SweepGradient(
+          startAngle: sweepAngle - 1.4,
+          endAngle: sweepAngle,
+          colors: [green.withValues(alpha: 0), green.withValues(alpha: 0.13)],
+        ).createShader(sweepRect)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 16),
+    );
+    final edge = Offset(
+      center.dx + math.cos(sweepAngle) * maxRadius,
+      center.dy + math.sin(sweepAngle) * maxRadius,
+    );
+    canvas.drawLine(
+      center,
+      edge,
+      Paint()
+        ..color = green.withValues(alpha: 0.22)
+        ..strokeWidth = 2
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+    );
+
+    // ---- 4. North cue: a tiny soft bud on the rim (no hard "N" letter).
+    final northAngle = (-headingDeg) * math.pi / 180.0 - math.pi / 2;
+    canvas.drawCircle(
+      Offset(
+        center.dx + math.cos(northAngle) * maxRadius,
+        center.dy + math.sin(northAngle) * maxRadius,
+      ),
+      2.5,
+      Paint()
+        ..color = green.withValues(alpha: 0.5)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
+    );
+
+    // ---- 5. You: a breathing core orb (soft halo + hot white center).
+    canvas.drawCircle(
+      center,
+      18 + 5 * breathe,
+      Paint()
+        ..color = green.withValues(alpha: 0.14 + 0.10 * breathe)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14),
+    );
+    canvas.drawCircle(
+      center,
+      9,
+      Paint()
+        ..shader = const RadialGradient(
+          colors: [Colors.white, green],
+        ).createShader(Rect.fromCircle(center: center, radius: 9)),
+    );
+
+    // ---- 6. Friends as glowing entities: tether + rim bloom + pulsing blob.
+    const closeRangeMeters = 10.0;
+    const minBlipRadius = 30.0;
+    var phase = 0.0;
     for (final b in blips) {
-      // Relative bearing = absoluteBearing - phone heading.
       final relBearing = (b.absoluteBearingDeg - headingDeg) % 360.0;
-      // Convert to canvas angle: 0deg = up (north), clockwise positive.
       final canvasAngle = (relBearing - 90.0) * math.pi / 180.0;
       final isClose = b.distanceMeters < closeRangeMeters;
-
-      // Clamp distance to maxRange (further blips sit on the outer ring),
-      // and floor it so the blip clears the center dot.
       final distFrac = (b.distanceMeters / maxRangeMeters).clamp(0.0, 1.0);
       final r = math.max(maxRadius * distFrac, minBlipRadius);
+      final blipCenter = Offset(
+        center.dx + math.cos(canvasAngle) * r,
+        center.dy + math.sin(canvasAngle) * r,
+      );
+      // Each entity pulses on its own phase so the field feels alive.
+      final pulse = 0.5 + 0.5 * math.sin(t + phase);
+      phase += 2.1;
 
-      // ---- TARGET-LOCK perimeter arc ----------------------------------
-      // A bright, tapered glow segment riding the outer ring at the friend's
-      // bearing. Decoupled from distance, so it always shows "walk this way"
-      // even when the friend is sitting near the center. When too close to
-      // trust the bearing, the whole rim breathes instead of pointing.
+      // Faint energy thread from the core to the entity.
+      canvas.drawLine(
+        center,
+        blipCenter,
+        Paint()
+          ..color = green.withValues(alpha: 0.16)
+          ..strokeWidth = 1.5
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
+      );
+
+      // Rim bloom pointing at the friend (6% of the ring), or a breathing
+      // full rim when too close for GPS to resolve a direction.
       if (isClose) {
-        // Honest "you're basically on top of each other" pulse: a soft full
-        // rim glow that breathes with the sweep.
-        final pulse = 0.25 + 0.20 * (0.5 + 0.5 * math.sin(sweepProgress * 2 * math.pi));
         canvas.drawCircle(
           center,
           maxRadius,
           Paint()
             ..style = PaintingStyle.stroke
-            ..strokeWidth = 3
-            ..color = green.withValues(alpha: pulse)
-            ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 8),
+            ..strokeWidth = 4
+            ..color = green.withValues(alpha: 0.12 + 0.12 * pulse)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10),
         );
       } else {
-        const lockSpan = 0.42; // radians (~24deg) of arc
-        final lockRect = Rect.fromCircle(center: center, radius: maxRadius);
-        // Outer glow pass.
+        const lockSpan = 0.06 * 2 * math.pi;
         canvas.drawArc(
-          lockRect,
+          Rect.fromCircle(center: center, radius: maxRadius),
           canvasAngle - lockSpan / 2,
           lockSpan,
           false,
           Paint()
             ..style = PaintingStyle.stroke
-            ..strokeWidth = 7
+            ..strokeWidth = 9
             ..strokeCap = StrokeCap.round
-            ..color = green.withValues(alpha: 0.35)
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+            ..color = green.withValues(alpha: 0.30 + 0.20 * pulse)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 7),
         );
-        // Bright core arc.
-        canvas.drawArc(
-          lockRect,
-          canvasAngle - lockSpan / 2,
-          lockSpan,
-          false,
+        canvas.drawCircle(
+          Offset(
+            center.dx + math.cos(canvasAngle) * maxRadius,
+            center.dy + math.sin(canvasAngle) * maxRadius,
+          ),
+          6.5,
           Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 4
-            ..strokeCap = StrokeCap.round
-            ..color = green,
-        );
-        // A small tick on the rim at the exact bearing.
-        final tickInner = Offset(
-          center.dx + math.cos(canvasAngle) * (maxRadius - 9),
-          center.dy + math.sin(canvasAngle) * (maxRadius - 9),
-        );
-        final tickOuter = Offset(
-          center.dx + math.cos(canvasAngle) * (maxRadius + 4),
-          center.dy + math.sin(canvasAngle) * (maxRadius + 4),
-        );
-        canvas.drawLine(
-          tickInner,
-          tickOuter,
-          Paint()
-            ..color = green
-            ..strokeWidth = 2.5
-            ..strokeCap = StrokeCap.round,
+            ..color = green.withValues(alpha: 0.9)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
         );
       }
 
-      final blipCenter = Offset(
-        center.dx + math.cos(canvasAngle) * r,
-        center.dy + math.sin(canvasAngle) * r,
-      );
-
-      // Halo
+      // The entity blob: layered soft halos + a hot core, gently pulsing.
       canvas.drawCircle(
         blipCenter,
-        10,
+        20 + 4 * pulse,
         Paint()
-          ..color = green.withValues(alpha: 0.25)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+          ..color = green.withValues(alpha: 0.10)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
       );
-      // Blip core
-      canvas.drawCircle(blipCenter, 5, Paint()..color = green);
+      canvas.drawCircle(
+        blipCenter,
+        11,
+        Paint()
+          ..color = green.withValues(alpha: 0.26)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
+      );
+      canvas.drawCircle(
+        blipCenter,
+        5.5,
+        Paint()
+          ..shader = const RadialGradient(
+            colors: [Colors.white, green],
+          ).createShader(Rect.fromCircle(center: blipCenter, radius: 5.5)),
+      );
 
-      // Name label (first name) above the blip.
+      // Labels: soft name above, distance below.
       final firstName = b.userName.trim().split(' ').first;
       if (firstName.isNotEmpty) {
         final nameText = TextPainter(
           text: TextSpan(
             text: firstName.toUpperCase(),
             style: TextStyle(
-              color: green,
+              color: green.withValues(alpha: 0.95),
               fontSize: 10,
               fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
+              letterSpacing: 1.0,
             ),
           ),
           textDirection: ui.TextDirection.ltr,
         )..layout();
         nameText.paint(
           canvas,
-          Offset(
-            blipCenter.dx - nameText.width / 2,
-            blipCenter.dy - 22,
-          ),
+          Offset(blipCenter.dx - nameText.width / 2, blipCenter.dy - 26),
         );
       }
-
-      // Distance / proximity label below the blip.
       final distLabel = isClose
           ? 'CLOSE'
           : (b.distanceMeters < 1000
@@ -14047,20 +14214,18 @@ class _RadarPainter extends CustomPainter {
       final distText = TextPainter(
         text: TextSpan(
           text: distLabel,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.75),
+            fontSize: 9.5,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
           ),
         ),
         textDirection: ui.TextDirection.ltr,
       )..layout();
       distText.paint(
         canvas,
-        Offset(
-          blipCenter.dx - distText.width / 2,
-          blipCenter.dy + 14,
-        ),
+        Offset(blipCenter.dx - distText.width / 2, blipCenter.dy + 16),
       );
     }
   }
