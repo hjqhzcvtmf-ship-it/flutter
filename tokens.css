@@ -1,0 +1,65 @@
+/* TEK — Design Tokens
+ * Single source of truth for web/Claude Design surfaces.
+ * Mirror of lib/tek_tokens.dart — keep both in sync.
+ * Visual formula: black void + metallic structure + green energy + symmetry/vortex.
+ */
+
+:root {
+  /* ── Surfaces (~85–90% of every screen) ───────────────────────── */
+  --tek-void: #0d0d1a;        /* app background, deepest surface */
+  --tek-black: #000000;       /* pure black, overlays, scrims */
+  --tek-surface: #1a1a1a;     /* raised cards, sheets, dialogs */
+  --tek-surface-2: #131313;   /* inset / pressed surface */
+
+  /* ── Signal green (~8–12%) — ENERGY, not decoration ───────────── */
+  --tek-signal: #00ff41;      /* PRIMARY: active, focus, brand, CTA */
+
+  /* ── Chrome / steel (~3–5%) ───────────────────────────────────── */
+  --tek-steel: #b8b8c0;       /* primary body / secondary text (cool) */
+  --tek-chrome: #7a7a7a;      /* borders, dividers, muted labels */
+  --tek-silver: #c0c0c0;      /* polished-metal highlights, premium */
+
+  /* ── State ────────────────────────────────────────────────────── */
+  --tek-danger: #ff0000;      /* errors, destructive, expired */
+
+  /* ── Signal glow alphas (glow, not fill) ──────────────────────── */
+  --tek-glow-soft: rgb(0 255 65 / 0.25);
+  --tek-glow-mid: rgb(0 255 65 / 0.40);
+  --tek-glow-strong: rgb(0 255 65 / 0.60);
+  --tek-border-signal: rgb(0 255 65 / 0.70);
+  --tek-border-chrome: rgb(122 122 122 / 0.35);
+
+  /* ── Typography ───────────────────────────────────────────────── */
+  --tek-font-ui: 'Inter', system-ui, sans-serif;
+  --tek-font-mono: 'SF Mono', ui-monospace, monospace;
+
+  /* Letter-spacing — uppercase, machined */
+  --tek-track-label: 0.16em;   /* labels, tabs, status */
+  --tek-track-cta: 0.20em;     /* hero / primary CTA */
+  --tek-track-body: 0;
+
+  --tek-weight-label: 700;
+  --tek-weight-body: 400;
+
+  /* Type scale */
+  --tek-text-micro: 0.6875rem; /* 11px */
+  --tek-text-label: 0.8125rem; /* 13px */
+  --tek-text-body: 0.9375rem;  /* 15px */
+  --tek-text-title: 1.375rem;  /* 22px */
+
+  /* ── Motion — vault door, not bouncy spring ───────────────────── */
+  --tek-duration-fast: 120ms;
+  --tek-duration-normal: 240ms;
+  --tek-ease-mechanical: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ── Border / radius — engineered, minimal ────────────────────── */
+  --tek-radius: 4px;
+  --tek-hairline: 0.6px;
+}
+
+/* Active CTA / "live" energy element */
+.tek-glow {
+  box-shadow: 0 0 24px var(--tek-glow-strong), 0 0 2px var(--tek-glow-mid);
+}
+
+/* 🚫 Banned: gold (#FFD700) / bronze as luxury. Premium = chrome/silver only. */
