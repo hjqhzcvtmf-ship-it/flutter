@@ -46,11 +46,11 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDemoKeyForTesting123456789',
-    appId: '1:123456789:android:abcdef1234567890',
-    messagingSenderId: '123456789',
+    apiKey: 'AIzaSyAEkcQni3p84cvl_NM4hoA7E1crEYuV5lI',
+    appId: '1:501085259012:android:37b956765023ea89563c51',
+    messagingSenderId: '501085259012',
     projectId: 'tek-nightclub-app',
-    storageBucket: 'tek-nightclub-app.appspot.com',
+    storageBucket: 'tek-nightclub-app.firebasestorage.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(

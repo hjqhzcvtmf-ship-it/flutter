@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "501085259012",
+    "project_id": "tek-nightclub-app",
+    "storage_bucket": "tek-nightclub-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:501085259012:android:37b956765023ea89563c51",
+        "android_client_info": {
+          "package_name": "com.linolyander.tek"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "501085259012-q3umhvkhcf4avi1lis6fm1srslstostd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEkcQni3p84cvl_NM4hoA7E1crEYuV5lI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "501085259012-q3umhvkhcf4avi1lis6fm1srslstostd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "501085259012-shptjid3okv404nf5hmplqeboec5eb91.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "GoogleService-Info.plist"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,13 +1,1 @@
-{
-  "functions": {
-    "source": "cloud_functions",
-    "runtime": "nodejs22"
-  },
-  "firestore": {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
-  },
-  "storage": {
-    "rules": "storage.rules"
-  }
-}
+{"functions":{"source":"cloud_functions","runtime":"nodejs22"},"firestore":{"rules":"firestore.rules","indexes":"firestore.indexes.json"},"storage":{"rules":"storage.rules"},"flutter":{"platforms":{"android":{"default":{"projectId":"tek-nightclub-app","appId":"1:501085259012:android:37b956765023ea89563c51","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"tek-nightclub-app","configurations":{"android":"1:501085259012:android:37b956765023ea89563c51"}}}}}}
