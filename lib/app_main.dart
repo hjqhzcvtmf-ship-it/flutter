@@ -6,6 +6,7 @@ import 'tek_sounds.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_functions/cloud_functions.dart';
@@ -1319,6 +1320,9 @@ class _RelayPowerDialogState extends State<_RelayPowerDialog> {
         }),
         FirebaseFirestore.instance.collection('tek_notifications').add({
           'recipientCode': widget.recipientCode,
+          // Bind the notification to its creator so rules can reject spoofed
+          // notifications sent under another user's identity.
+          'createdByUid': FirebaseAuth.instance.currentUser?.uid,
           'type': 'relay_received',
           'title': 'POWER RELAYED',
           'body': '${senderDoc.data()['name'] ?? senderCode} sent you +$_selected XP',
@@ -2349,6 +2353,29 @@ Future<void> _bootstrapApp({bool skipAuth = false}) async {
     } else {
       rethrow;
     }
+  }
+
+  // App Check: attest that requests come from a genuine build of this app, not
+  // a script hitting the (public-by-design) Firebase config. Activate after
+  // Firebase init and before any auth/Firestore/callable traffic so the
+  // attestation token rides along. Debug builds use the debug provider (token
+  // must be registered in the Firebase console); release builds use platform
+  // attestation. Never let App Check init block startup.
+  //
+  // NOTE: server-side `enforceAppCheck` on callables stays false until a build
+  // with this activation is live in the stores — flipping it earlier would lock
+  // out the currently-shipping app.
+  try {
+    await FirebaseAppCheck.instance
+        .activate(
+          appleProvider:
+              kDebugMode ? AppleProvider.debug : AppleProvider.appAttest,
+          androidProvider:
+              kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
+        )
+        .timeout(const Duration(seconds: 20));
+  } on Exception catch (e) {
+    debugPrint('App Check activation failed (continuing): $e');
   }
 
   // Ensure we have an auth session (required by firestore.rules and callable functions).
@@ -26111,6 +26138,7 @@ class _ChallengeCardState extends State<_ChallengeCard> {
       if (challengerCode.isNotEmpty) {
         await FirebaseFirestore.instance.collection('tek_notifications').add({
           'recipientCode': challengerCode,
+          'createdByUid': FirebaseAuth.instance.currentUser?.uid,
           'type': status == 'accepted'
               ? 'challenge_accepted'
               : 'challenge_denied',
@@ -26370,6 +26398,7 @@ class _ChallengeFriendDialogState extends State<ChallengeFriendDialog> {
 
       await FirebaseFirestore.instance.collection('tek_notifications').add({
         'recipientCode': targetCode,
+        'createdByUid': FirebaseAuth.instance.currentUser?.uid,
         'type': 'challenge_received',
         'title': 'CHALLENGE INCOMING',
         'body':

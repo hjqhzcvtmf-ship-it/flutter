@@ -97,7 +97,9 @@ service cloud.firestore {
     match /crews/{crewId} {
       allow read: if isSignedIn();
       allow create: if isSignedIn();
-      allow update: if isAdmin() || isSignedIn();
+      // Client never updates crew docs; xpTotal is bumped by a Cloud Function
+      // via the Admin SDK (bypasses rules). So crew-doc updates are admin-only.
+      allow update: if isAdmin();
       allow delete: if isAdmin();
 
       match /messages/{messageId} {
@@ -239,9 +241,17 @@ service cloud.firestore {
     }
 
     // TEK in-app notifications: recipient can read and mark read; signed-in users can create.
+    // Anti-spoof: when the client supplies createdByUid it must equal the
+    // caller's uid. The field-absent branch keeps the currently-shipping app
+    // (which doesn't send createdByUid) working; this rule is safe to deploy
+    // any time. TODO(post-release): once the App-Check/createdByUid build is
+    // live in the stores, drop the absent branch and require
+    // request.resource.data.createdByUid == request.auth.uid.
     match /tek_notifications/{id} {
       allow read: if isSignedIn();
-      allow create: if isSignedIn();
+      allow create: if isSignedIn() &&
+        (!('createdByUid' in request.resource.data) ||
+         request.resource.data.createdByUid == request.auth.uid);
       allow update: if isSignedIn() &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
       allow delete: if isAdmin();

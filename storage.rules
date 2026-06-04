@@ -10,10 +10,12 @@ service firebase.storage {
                    && request.resource.contentType.matches('image/.*');
     }
 
-    // Membership application images: public read, written by Cloud Functions (Admin SDK)
-    // Client writes blocked; Admin SDK bypasses these rules
+    // Membership application images: contain applicant photos / personal docs,
+    // so reads require auth (admins review them while signed in; getDownloadURL
+    // tokens still work for in-app display). Written by Cloud Functions (Admin
+    // SDK); client writes blocked. Admin SDK bypasses these rules.
     match /membership_applications/{userId}/{imageId} {
-      allow read: if true;
+      allow read: if request.auth != null;
       allow write: if false;
     }
 
