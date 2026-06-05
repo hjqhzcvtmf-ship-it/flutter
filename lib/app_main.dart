@@ -14040,57 +14040,62 @@ class _RadarPainter extends CustomPainter {
         ),
     );
 
-    // ---- 2. Boundary + depth: one breathing edge halo and two faint inner
-    // rings, all heavily blurred so they read as glow, never as a grid.
+    // ---- 2. Portal vortex: a slowly rotating sweep-gradient haze inside the
+    // boundary, so the field reads as a churning portal rather than a grid.
+    // One full turn per cycle keeps the loop seamless (no snap on wrap).
+    final rect = Rect.fromCircle(center: center, radius: maxRadius);
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+    canvas.rotate(t);
+    canvas.translate(-center.dx, -center.dy);
+    canvas.drawCircle(
+      center,
+      maxRadius,
+      Paint()
+        ..shader = SweepGradient(
+          colors: [
+            Colors.transparent,
+            green.withValues(alpha: 0.12),
+            Colors.transparent,
+            green.withValues(alpha: 0.08),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.2, 0.45, 0.72, 1.0],
+        ).createShader(rect)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 34),
+    );
+    canvas.restore();
+
+    // ---- 3. Machined rim: a crisp green edge, a soft breathing halo, and a
+    // single cold-chrome highlight arc — light glinting off polished metal.
     canvas.drawCircle(
       center,
       maxRadius,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.5
-        ..color = green.withValues(alpha: 0.10 + 0.06 * breathe)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+        ..strokeWidth = 1.5
+        ..color = green.withValues(alpha: 0.45),
     );
-    for (final frac in const [0.4, 0.72]) {
-      canvas.drawCircle(
-        center,
-        maxRadius * frac,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.5
-          ..color = green.withValues(alpha: 0.05)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
-      );
-    }
-
-    // ---- 3. Sweep: a soft comet glow trailing a gentle leading edge —
-    // an aurora, not a wedge. Blurred and low-alpha so no banding.
-    final sweepAngle = t - math.pi / 2;
-    final sweepRect = Rect.fromCircle(center: center, radius: maxRadius);
-    canvas.drawArc(
-      sweepRect,
-      sweepAngle - 1.4,
-      1.4,
-      true,
-      Paint()
-        ..shader = SweepGradient(
-          startAngle: sweepAngle - 1.4,
-          endAngle: sweepAngle,
-          colors: [green.withValues(alpha: 0), green.withValues(alpha: 0.13)],
-        ).createShader(sweepRect)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 16),
-    );
-    final edge = Offset(
-      center.dx + math.cos(sweepAngle) * maxRadius,
-      center.dy + math.sin(sweepAngle) * maxRadius,
-    );
-    canvas.drawLine(
+    canvas.drawCircle(
       center,
-      edge,
+      maxRadius,
       Paint()
-        ..color = green.withValues(alpha: 0.22)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 6
+        ..color = green.withValues(alpha: 0.08 + 0.06 * breathe)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 9),
+    );
+    canvas.drawArc(
+      rect,
+      math.pi * 1.05,
+      0.55,
+      false,
+      Paint()
+        ..style = PaintingStyle.stroke
         ..strokeWidth = 2
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+        ..strokeCap = StrokeCap.round
+        ..color = const Color(0xFFBFD2D6).withValues(alpha: 0.5)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1),
     );
 
     // ---- 4. North cue: a tiny soft bud on the rim (no hard "N" letter).
