@@ -18,7 +18,7 @@ import 'package:share_plus/share_plus.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
-import 'dart:ui' as ui show ImageFilter, BlurStyle, MaskFilter, Shader, FontFeature, FontVariation, TextDirection, Image;
+import 'dart:ui' as ui show TextDirection;
 import 'dart:ui';
 import 'package:intl/intl.dart';
 import 'firebase_options.dart';
@@ -416,8 +416,8 @@ Route<T> cinematicRoute<T>(Widget page) {
   return PageRouteBuilder<T>(
     transitionDuration: const Duration(milliseconds: 280),
     reverseTransitionDuration: const Duration(milliseconds: 220),
-    pageBuilder: (_, __, ___) => page,
-    transitionsBuilder: (_, animation, __, child) {
+    pageBuilder: (_, _, _) => page,
+    transitionsBuilder: (_, animation, _, child) {
       final curve = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
       return FadeTransition(
         opacity: curve,
@@ -572,7 +572,7 @@ class AnimatedXP extends StatelessWidget {
       tween: Tween<double>(begin: 0, end: value.toDouble()),
       duration: const Duration(milliseconds: 900),
       curve: Curves.easeOutCubic,
-      builder: (_, v, __) => Text('${v.round()}$suffix', style: style),
+      builder: (_, v, _) => Text('${v.round()}$suffix', style: style),
     );
   }
 }
@@ -615,7 +615,7 @@ class SkeletonList extends StatelessWidget {
       padding: padding,
       physics: const BouncingScrollPhysics(),
       itemCount: count,
-      itemBuilder: (_, __) => Padding(
+      itemBuilder: (_, _) => Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: SkeletonCard(height: itemHeight),
       ),
@@ -676,8 +676,8 @@ class FadeInNetImage extends StatelessWidget {
       fit: fit,
       fadeInDuration: const Duration(milliseconds: 240),
       fadeOutDuration: const Duration(milliseconds: 120),
-      placeholder: (_, __) => placeholder,
-      errorWidget: (_, __, ___) => errorWidget,
+      placeholder: (_, _) => placeholder,
+      errorWidget: (_, _, _) => errorWidget,
     );
     if (avatarSize != null) {
       return ClipOval(child: SizedBox(width: avatarSize, height: avatarSize, child: image));
@@ -4861,7 +4861,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         tween: Tween<double>(begin: 0, end: xpCurrent / xpMax),
                         duration: const Duration(milliseconds: 1100),
                         curve: Curves.easeOutCubic,
-                        builder: (_, v, __) => Ps3XpProgressBar(
+                        builder: (_, v, _) => Ps3XpProgressBar(
                           progress: v,
                           height: 10,
                           borderRadius: BorderRadius.circular(6),
@@ -5142,7 +5142,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF00FF41).withOpacity(0.1),
+                      backgroundColor: Color(0xFF00FF41).withValues(alpha: 0.1),
                       side: const BorderSide(
                         color: Color(0xFF00FF41),
                         width: 1,
@@ -5383,7 +5383,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00FF41).withOpacity(0.1),
+                      backgroundColor: const Color(0xFF00FF41).withValues(alpha: 0.1),
                       side: const BorderSide(
                         color: Color(0xFF00FF41),
                         width: 1,
@@ -5871,7 +5871,9 @@ class TekSocialProof {
     final now = DateTime.now();
     if (_lastUserCode == userCode &&
         _lastFetch != null &&
-        now.difference(_lastFetch!) < const Duration(minutes: 5)) return;
+        now.difference(_lastFetch!) < const Duration(minutes: 5)) {
+      return;
+    }
     try {
       final selfSnap = await FirebaseFirestore.instance
           .collection('applications')
@@ -6220,11 +6222,11 @@ class _BadgeTile extends StatelessWidget {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: earned
-            ? badge.color.withOpacity(0.1)
-            : Colors.white.withOpacity(0.03),
+            ? badge.color.withValues(alpha: 0.1)
+            : Colors.white.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: earned ? badge.color.withOpacity(0.4) : Colors.white10,
+          color: earned ? badge.color.withValues(alpha: 0.4) : Colors.white10,
         ),
       ),
       child: Column(
@@ -7186,7 +7188,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(
                           0xFF00FF41,
-                        ).withOpacity(0.15),
+                        ).withValues(alpha: 0.15),
                       ),
                       child: const Text(
                         'RETRY',
@@ -7238,12 +7240,12 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF00FF41).withOpacity(hasCode ? 0.15 : 0.05),
-            const Color(0xFF00FF41).withOpacity(hasCode ? 0.04 : 0.01),
+            const Color(0xFF00FF41).withValues(alpha: hasCode ? 0.15 : 0.05),
+            const Color(0xFF00FF41).withValues(alpha: hasCode ? 0.04 : 0.01),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF00FF41).withOpacity(hasCode ? 0.3 : 0.15)),
+        border: Border.all(color: const Color(0xFF00FF41).withValues(alpha: hasCode ? 0.3 : 0.15)),
       ),
       child: Column(
         children: [
@@ -7302,7 +7304,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
               ElevatedButton(
                 onPressed: _copyInviteCode,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white.withOpacity(0.08),
+                  backgroundColor: Colors.white.withValues(alpha: 0.08),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                     side: const BorderSide(color: Colors.white24),
@@ -7321,7 +7323,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.03),
+              color: Colors.white.withValues(alpha: 0.03),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.white10),
             ),
@@ -7349,7 +7351,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                           hintText: 'friend@email.com',
                           hintStyle: const TextStyle(color: Colors.white24),
                           filled: true,
-                          fillColor: Colors.white.withOpacity(0.05),
+                          fillColor: Colors.white.withValues(alpha: 0.05),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -7371,7 +7373,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                       onPressed: _sendingEmail ? null : _sendEmailInvite,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF00FF41),
-                        disabledBackgroundColor: const Color(0xFF00FF41).withOpacity(0.3),
+                        disabledBackgroundColor: const Color(0xFF00FF41).withValues(alpha: 0.3),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -7439,7 +7441,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.03),
+            color: Colors.white.withValues(alpha: 0.03),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.white10),
           ),
@@ -7478,12 +7480,12 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: earned
-            ? const Color(0xFF00FF41).withOpacity(0.08)
-            : Colors.white.withOpacity(0.03),
+            ? const Color(0xFF00FF41).withValues(alpha: 0.08)
+            : Colors.white.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: earned
-              ? const Color(0xFF00FF41).withOpacity(0.5)
+              ? const Color(0xFF00FF41).withValues(alpha: 0.5)
               : Colors.white10,
           width: earned ? 1.5 : 1,
         ),
@@ -7495,8 +7497,8 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
             height: 48,
             decoration: BoxDecoration(
               color: earned
-                  ? const Color(0xFF00FF41).withOpacity(0.2)
-                  : Colors.white.withOpacity(0.05),
+                  ? const Color(0xFF00FF41).withValues(alpha: 0.2)
+                  : Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -7547,7 +7549,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                           valueColor: AlwaysStoppedAnimation(
                             earned
                                 ? const Color(0xFF00FF41)
-                                : const Color(0xFF00FF41).withOpacity(0.6),
+                                : const Color(0xFF00FF41).withValues(alpha: 0.6),
                           ),
                           minHeight: 6,
                         ),
@@ -7590,7 +7592,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.03),
+              color: Colors.white.withValues(alpha: 0.03),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: Colors.white10),
             ),
@@ -7646,7 +7648,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
+        color: Colors.white.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white10),
       ),
@@ -7664,7 +7666,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                   ? Image.network(
                       profileImageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorBuilder: (_, _, _) => Container(
                         color: Colors.grey[800],
                         child: const Icon(
                           Icons.person,
@@ -7740,19 +7742,19 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
               gradient: LinearGradient(
                 colors: redeemed
                     ? [
-                        Colors.white.withOpacity(0.03),
-                        Colors.white.withOpacity(0.01),
+                        Colors.white.withValues(alpha: 0.03),
+                        Colors.white.withValues(alpha: 0.01),
                       ]
                     : [
-                        const Color(0xFF00FF41).withOpacity(0.15),
-                        const Color(0xFF00FF41).withOpacity(0.04),
+                        const Color(0xFF00FF41).withValues(alpha: 0.15),
+                        const Color(0xFF00FF41).withValues(alpha: 0.04),
                       ],
               ),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: redeemed
                     ? Colors.white24
-                    : const Color(0xFF00FF41).withOpacity(0.5),
+                    : const Color(0xFF00FF41).withValues(alpha: 0.5),
               ),
             ),
             child: Row(
@@ -7794,7 +7796,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF00FF41).withOpacity(0.15),
+                      color: const Color(0xFF00FF41).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(
@@ -7912,7 +7914,7 @@ class _MainAppState extends State<MainApp> {
       final localCode = localResult.claims?['referralCode'] as String?;
       if (localCode != serverCode) {
         await user.getIdToken(true);
-        debugPrint('referralCode claim refreshed: $serverCode');
+        debugPrint('referralCode claim refreshed');
       }
     } catch (e) {
       // Non-fatal — rules just won't authorize until next try.
@@ -9749,7 +9751,7 @@ class _MemberAvatarRow extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: docs.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            separatorBuilder: (_, _) => const SizedBox(width: 10),
             itemBuilder: (context, i) {
               final data = docs[i].data() as Map<String, dynamic>;
               final name = data['name'] as String? ?? '?';
@@ -11009,7 +11011,7 @@ class _StoryViewerScreenState extends State<_StoryViewerScreen> with SingleTicke
                       padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: AnimatedBuilder(
                         animation: _progress,
-                        builder: (_, __) {
+                        builder: (_, _) {
                           final v = i < _index
                               ? 1.0
                               : (i == _index ? _progress.value : 0.0);
@@ -11706,11 +11708,7 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
   }
 
   Future<void> _createEvent() async {
-    debugPrint('DEBUG: _createEvent called');
     if (_titleCtrl.text.isEmpty || _startDate == null) {
-      debugPrint(
-        'DEBUG: Validation failed - title: ${_titleCtrl.text}, date: $_startDate',
-      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -11725,7 +11723,6 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
       setState(() {
         _isSubmitting = true;
       });
-      debugPrint('DEBUG: Starting event creation');
       final parsedPrice = _tryParsePrice(_priceCtrl.text);
       if (parsedPrice == null) {
         if (mounted) {
@@ -11745,20 +11742,16 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
       }
       final price = parsedPrice;
       final capacity = int.tryParse(_capacityCtrl.text) ?? 0;
-      debugPrint('DEBUG: price=$price, capacity=$capacity');
 
       String imageUrl = '';
       if (_eventImage != null) {
-        debugPrint('DEBUG: Uploading image...');
         final ref = FirebaseStorage.instance.ref(
           'event_images/${DateTime.now().millisecondsSinceEpoch}',
         );
         await ref.putFile(_eventImage!);
         imageUrl = await ref.getDownloadURL();
-        debugPrint('DEBUG: Image uploaded: $imageUrl');
       }
 
-      debugPrint('DEBUG: Adding to Firestore...');
       await FirebaseFirestore.instance.collection('events').add({
         'title': _titleCtrl.text.trim(),
         'location': _locationCtrl.text.trim(),
@@ -11771,12 +11764,10 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
         'createdAt': Timestamp.now(),
         'hidden': _hidden,
       });
-      debugPrint('DEBUG: Event created successfully');
       if (mounted) {
         Navigator.of(context).pop(true);
       }
     } catch (e) {
-      debugPrint('DEBUG: Error creating event: $e');
       if (mounted) {
         setState(() {
           _isSubmitting = false;
@@ -11921,7 +11912,7 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
                     Switch(
                       value: _hidden,
                       onChanged: (v) => setState(() => _hidden = v),
-                      activeColor: const Color(0xFFFF8800),
+                      activeThumbColor: const Color(0xFFFF8800),
                       activeTrackColor:
                           const Color(0xFFFF8800).withValues(alpha: 0.4),
                       inactiveThumbColor: Colors.white38,
@@ -12975,13 +12966,13 @@ class _EventMissionsSection extends StatelessWidget {
                       horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
                     color: done
-                        ? Colors.white.withOpacity(0.03)
-                        : const Color(0xFF00FF41).withOpacity(0.06),
+                        ? Colors.white.withValues(alpha: 0.03)
+                        : const Color(0xFF00FF41).withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: done
                           ? Colors.white10
-                          : const Color(0xFF00FF41).withOpacity(0.3),
+                          : const Color(0xFF00FF41).withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
@@ -13009,7 +13000,7 @@ class _EventMissionsSection extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF00FF41).withOpacity(0.1),
+                          color: const Color(0xFF00FF41).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -13276,7 +13267,7 @@ class _CheckInSectionState extends State<_CheckInSection> {
             style: OutlinedButton.styleFrom(
               side: BorderSide(
                 color: _checkedIn
-                    ? const Color(0xFF00FF41).withOpacity(0.5)
+                    ? const Color(0xFF00FF41).withValues(alpha: 0.5)
                     : Colors.white24,
               ),
               shape: RoundedRectangleBorder(
@@ -16311,10 +16302,6 @@ class _UserProfileViewState extends State<UserProfileView> {
     });
 
     try {
-      debugPrint(
-        'DEBUG: Sending friend request from $_currentUserCode to ${widget.userData['referralCode']}',
-      );
-
       // Get the target user document
       final targetUserSnapshot = await FirebaseFirestore.instance
           .collection('applications')
@@ -16328,20 +16315,14 @@ class _UserProfileViewState extends State<UserProfileView> {
 
       final targetUserDoc = targetUserSnapshot.docs.first;
       final targetUserData = targetUserDoc.data();
-      debugPrint('DEBUG: Target user data: $targetUserData');
 
       List<String> requests =
           (targetUserData['friendRequests'] as List?)?.cast<String>() ?? [];
-      debugPrint('DEBUG: Current requests: $requests');
 
       // Add current user to target user's friend requests
       if (_currentUserCode != null && !requests.contains(_currentUserCode)) {
         requests.add(_currentUserCode!);
-        debugPrint(
-          'DEBUG: Adding $_currentUserCode to requests. New list: $requests',
-        );
         await targetUserDoc.reference.update({'friendRequests': requests});
-        debugPrint('DEBUG: Updated Firestore with new requests');
       }
 
       setState(() {
@@ -16479,7 +16460,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                   ? Image.network(
                       imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorBuilder: (_, _, _) => Container(
                         color: Colors.grey[800],
                         child: const Icon(Icons.person,
                             size: 60, color: Colors.white30),
@@ -17535,10 +17516,11 @@ class _ManageBlockedUsersPageState extends State<ManageBlockedUsersPage> {
         ),
       );
     } finally {
-      if (!mounted) return;
-      setState(() {
-        _pendingUnblockCode = null;
-      });
+      if (mounted) {
+        setState(() {
+          _pendingUnblockCode = null;
+        });
+      }
     }
   }
 
@@ -17584,7 +17566,7 @@ class _ManageBlockedUsersPageState extends State<ManageBlockedUsersPage> {
 
           return ListView.separated(
             itemCount: blockedUsers.length,
-            separatorBuilder: (_, __) => const Divider(color: Colors.white10),
+            separatorBuilder: (_, _) => const Divider(color: Colors.white10),
             itemBuilder: (context, index) {
               final user = blockedUsers[index];
               final referralCode = user['referralCode'] as String? ?? '';
@@ -17817,10 +17799,11 @@ class _MyTicketsPageState extends State<MyTicketsPage>
         ),
       );
     } finally {
-      if (!mounted) return;
-      setState(() {
-        _backfilling = false;
-      });
+      if (mounted) {
+        setState(() {
+          _backfilling = false;
+        });
+      }
     }
   }
 
@@ -17888,7 +17871,7 @@ class _MyTicketsPageState extends State<MyTicketsPage>
         return ListView.separated(
           padding: const EdgeInsets.all(16),
           itemCount: tickets.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          separatorBuilder: (_, _) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             final ticket = tickets[index];
 
@@ -18221,7 +18204,7 @@ class _TicketCard extends StatelessWidget {
                     ? Image.network(
                         imageUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(
+                        errorBuilder: (_, _, _) => const Icon(
                           Icons.confirmation_num,
                           color: Color(0xFF00FF41),
                         ),
@@ -18523,7 +18506,7 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Color(0xFF00FF41).withOpacity(0.3),
+                              color: Color(0xFF00FF41).withValues(alpha: 0.3),
                               blurRadius: 20,
                               spreadRadius: 2,
                             ),
@@ -19089,7 +19072,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
               decoration: BoxDecoration(
                 color: Colors.white10,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Color(0xFF00FF41).withOpacity(0.3)),
+                border: Border.all(color: Color(0xFF00FF41).withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
@@ -19411,7 +19394,7 @@ class AboutPage extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -20156,7 +20139,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
             Container(
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Color(0xFFFF0000).withOpacity(0.2),
+                color: Color(0xFFFF0000).withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: Color(0xFFFF0000), size: 24),
@@ -20253,7 +20236,7 @@ class _QuestFeatureFlagsPanel extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFFFF0000).withOpacity(dimmed ? 0.05 : 0.2),
+              color: const Color(0xFFFF0000).withValues(alpha: dimmed ? 0.05 : 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon,
@@ -20289,7 +20272,7 @@ class _QuestFeatureFlagsPanel extends StatelessWidget {
             value: value,
             onChanged: onChanged,
             activeThumbColor: const Color(0xFF00FF41),
-            activeTrackColor: const Color(0xFF00FF41).withOpacity(0.4),
+            activeTrackColor: const Color(0xFF00FF41).withValues(alpha: 0.4),
             inactiveThumbColor: Colors.white38,
             inactiveTrackColor: Colors.white12,
           ),
@@ -20523,7 +20506,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
                             )
                           : null,
                       filled: true,
-                      fillColor: Color(0xFF1A1A1A).withOpacity(0.9),
+                      fillColor: Color(0xFF1A1A1A).withValues(alpha: 0.9),
                       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -20594,7 +20577,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
                 height: 50,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFFFF0000).withOpacity(0.2),
+                  color: Color(0xFFFF0000).withValues(alpha: 0.2),
                   border: Border.all(color: Color(0xFFFF0000), width: 2),
                 ),
                 child: Icon(Icons.person, color: Color(0xFFFF0000), size: 24),
@@ -20625,7 +20608,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
                             decoration: BoxDecoration(
                               color: _getStatusColor(
                                 normalizedStatus,
-                              ).withOpacity(0.2),
+                              ).withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: _getStatusColor(normalizedStatus),
@@ -20656,7 +20639,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Color(0xFF00FF41).withOpacity(0.1),
+                  color: Color(0xFF00FF41).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Color(0xFF00FF41)),
                 ),
@@ -20736,7 +20719,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFFFF0000).withOpacity(0.1),
+              backgroundColor: Color(0xFFFF0000).withValues(alpha: 0.1),
               foregroundColor: Color(0xFFFF0000),
               side: BorderSide(color: Color(0xFFFF0000), width: 1),
               shape: RoundedRectangleBorder(
@@ -20828,7 +20811,7 @@ class SendXPToUsersScreen extends StatefulWidget {
   const SendXPToUsersScreen({super.key});
 
   @override
-  _SendXPToUsersScreenState createState() => _SendXPToUsersScreenState();
+  State<SendXPToUsersScreen> createState() => _SendXPToUsersScreenState();
 }
 
 class _SendXPToUsersScreenState extends State<SendXPToUsersScreen> {
@@ -20912,9 +20895,6 @@ class _SendXPToUsersScreenState extends State<SendXPToUsersScreen> {
         await docRef.update({'xpPoints': newXP});
 
         // Log the transaction
-        debugPrint(
-          'DEBUG: Sent $xpAmount XP to $userName. Old: $currentXP, New: $newXP',
-        );
         await FirebaseFirestore.instance.collection('xp_transactions').add({
           'adminName': 'Admin',
           'userId': userId,
@@ -20993,7 +20973,7 @@ class _SendXPToUsersScreenState extends State<SendXPToUsersScreen> {
                             CircleAvatar(
                               backgroundColor: Color(
                                 0xFFFF0000,
-                              ).withOpacity(0.1),
+                              ).withValues(alpha: 0.1),
                               child: Icon(
                                 Icons.person,
                                 color: Color(0xFFFF0000),
@@ -21139,7 +21119,7 @@ class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
 
   @override
-  _StatisticsScreenState createState() => _StatisticsScreenState();
+  State<StatisticsScreen> createState() => _StatisticsScreenState();
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
@@ -21244,7 +21224,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           gradient: LinearGradient(
-            colors: [color.withOpacity(0.8), color],
+            colors: [color.withValues(alpha: 0.8), color],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -21273,7 +21253,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 title,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -21553,7 +21533,7 @@ class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
 
   @override
-  _ReportsScreenState createState() => _ReportsScreenState();
+  State<ReportsScreen> createState() => _ReportsScreenState();
 }
 
 class _ReportsScreenState extends State<ReportsScreen>
@@ -21606,7 +21586,7 @@ class XPTransactionsTab extends StatefulWidget {
   const XPTransactionsTab({super.key});
 
   @override
-  _XPTransactionsTabState createState() => _XPTransactionsTabState();
+  State<XPTransactionsTab> createState() => _XPTransactionsTabState();
 }
 
 class _XPTransactionsTabState extends State<XPTransactionsTab> {
@@ -21709,7 +21689,7 @@ class _XPTransactionsTabState extends State<XPTransactionsTab> {
                         child: ListTile(
                           contentPadding: EdgeInsets.all(16),
                           leading: CircleAvatar(
-                            backgroundColor: Colors.green.withOpacity(0.1),
+                            backgroundColor: Colors.green.withValues(alpha: 0.1),
                             child: Icon(Icons.add, color: Colors.green),
                           ),
                           title: Text(
@@ -21778,7 +21758,7 @@ class UserActivityTab extends StatefulWidget {
   const UserActivityTab({super.key});
 
   @override
-  _UserActivityTabState createState() => _UserActivityTabState();
+  State<UserActivityTab> createState() => _UserActivityTabState();
 }
 
 class _UserActivityTabState extends State<UserActivityTab> {
@@ -21851,7 +21831,7 @@ class _UserActivityTabState extends State<UserActivityTab> {
                   child: ListTile(
                     contentPadding: EdgeInsets.all(16),
                     leading: CircleAvatar(
-                      backgroundColor: Color(0xFFFF0000).withOpacity(0.1),
+                      backgroundColor: Color(0xFFFF0000).withValues(alpha: 0.1),
                       child: Icon(Icons.person_add, color: Color(0xFFFF0000)),
                     ),
                     title: Text(
@@ -21910,7 +21890,7 @@ class UserRegistryTab extends StatefulWidget {
   const UserRegistryTab({super.key});
 
   @override
-  _UserRegistryTabState createState() => _UserRegistryTabState();
+  State<UserRegistryTab> createState() => _UserRegistryTabState();
 }
 
 class _UserRegistryTabState extends State<UserRegistryTab> {
@@ -22064,7 +22044,7 @@ class _UserRegistryTabState extends State<UserRegistryTab> {
                         ),
                         child: ExpansionTile(
                           leading: CircleAvatar(
-                            backgroundColor: Color(0xFFFF0000).withOpacity(0.1),
+                            backgroundColor: Color(0xFFFF0000).withValues(alpha: 0.1),
                             child: Icon(Icons.person, color: Color(0xFFFF0000)),
                           ),
                           title: Text(
@@ -22617,9 +22597,6 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
         // TODO: Integrate with SMS service like Twilio
         // For now, just log
         debugPrint('SMS sending requested for ${widget.users.length} users');
-        for (var user in widget.users) {
-          debugPrint('Would send SMS to: ${user['phone']} - Message: $message');
-        }
       }
 
       // Send Email (this would use your existing email function or service)
@@ -25426,7 +25403,7 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
                 child: ListView.separated(
                   shrinkWrap: true,
                   itemCount: quests.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  separatorBuilder: (_, _) => const SizedBox(height: 10),
                   itemBuilder: (_, i) {
                     final q = quests[i];
                     final t = (q['title'] as String? ?? '').toUpperCase();
@@ -26023,14 +26000,14 @@ class _RanksTab extends StatelessWidget {
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
                 color: isMe
-                    ? const Color(0xFF00FF41).withOpacity(0.08)
-                    : Colors.white.withOpacity(0.04),
+                    ? const Color(0xFF00FF41).withValues(alpha: 0.08)
+                    : Colors.white.withValues(alpha: 0.04),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isMe
-                      ? const Color(0xFF00FF41).withOpacity(0.4)
+                      ? const Color(0xFF00FF41).withValues(alpha: 0.4)
                       : (rank <= 3
-                          ? rankColor.withOpacity(0.3)
+                          ? rankColor.withValues(alpha: 0.3)
                           : Colors.white10),
                 ),
               ),
@@ -26091,10 +26068,10 @@ class _RanksTab extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: rankColor.withOpacity(0.15),
+                      color: rankColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                          color: rankColor.withOpacity(0.4)),
+                          color: rankColor.withValues(alpha: 0.4)),
                     ),
                     child: Text(
                       '$xp XP',
