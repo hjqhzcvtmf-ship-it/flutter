@@ -20425,11 +20425,13 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
         ),
       );
 
-      // Delete from Firestore
-      await FirebaseFirestore.instance
-          .collection('applications')
-          .doc(docId)
-          .delete();
+      // Delete via Cloud Function (Admin SDK). A direct client-side delete is
+      // rejected by the Firestore rules unless this session's anonymous UID
+      // happens to be on the config/admins allowlist, which it usually isn't.
+      final callable = FirebaseFunctions.instanceFor(
+        region: 'us-central1',
+      ).httpsCallable('deleteApplication');
+      await callable.call({'appId': docId});
 
       // Close loading dialog
       if (mounted) Navigator.pop(context);

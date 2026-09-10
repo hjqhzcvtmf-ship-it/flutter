@@ -645,6 +645,42 @@ async function isAdminUid(uid) {
   return Array.isArray(uids) && uids.includes(uid);
 }
 
+// Resolve admin status for a callable request the same way getAdminStatus does.
+// TEK admins sign in anonymously, so request.auth.uid is an ephemeral UID that
+// is usually NOT on the allowlist (it changes per device/reinstall). Fall back
+// to the caller's application doc — via the referralCode custom claim, or an
+// explicit referralCode arg — and treat its ownerUid/webUid as the admin key.
+async function isAdminRequest(request) {
+  const uid = request.auth && request.auth.uid ? request.auth.uid : "";
+  if (!uid) return false;
+  if (await isAdminUid(uid)) return true;
+
+  const fromClaim =
+    request.auth.token && request.auth.token.referralCode
+      ? String(request.auth.token.referralCode)
+      : "";
+  const fromData =
+    request.data && typeof request.data.referralCode === "string"
+      ? request.data.referralCode.trim()
+      : "";
+  const referralCode = fromClaim || fromData;
+  if (!referralCode) return false;
+
+  const appSnap = await db
+    .collection("applications")
+    .where("referralCode", "==", referralCode)
+    .limit(1)
+    .get();
+  if (appSnap.empty) return false;
+
+  const appData = appSnap.docs[0].data() || {};
+  const candidateUids = [appData.ownerUid, appData.webUid].filter(Boolean);
+  for (const u of candidateUids) {
+    if (await isAdminUid(u)) return true;
+  }
+  return false;
+}
+
 // Callable: return whether the current authenticated uid is an admin.
 // Client: no args. Response: { isAdmin: boolean }
 //
@@ -6041,5 +6077,53 @@ Write the subtitle. Return ONLY the JSON.`;
       subtitle: typeof parsed.subtitle === "string" ? parsed.subtitle.trim() : "",
     };
   }
+);
+
+// Callable: admin-only deletion of an application (a user record).
+//
+// The client used to delete /applications/{id} directly, which the Firestore
+// rules reject unless request.auth.uid is literally on the config/admins
+// allowlist. TEK admins sign in anonymously, so that UID changes per device or
+// reinstall and the in-app "Delete User" button failed with permission-denied.
+// Deleting here via the Admin SDK bypasses rules, and access is gated on the
+// same admin resolution the app's own admin UI uses (isAdminRequest).
+//
+// Client data: { appId: string, referralCode?: string }
+// Response: { success: true, appId, email } | { success: true, alreadyDeleted }
+exports.deleteApplication = onCall(
+  {
+    region: "us-central1",
+    enforceAppCheck: false,
+  },
+  async (request) => {
+    const uid = request.auth && request.auth.uid ? request.auth.uid : "";
+    if (!uid) {
+      throw new HttpsError("unauthenticated", "Unauthenticated");
+    }
+    if (!(await isAdminRequest(request))) {
+      throw new HttpsError("permission-denied", "Admin only");
+    }
+
+    const appId =
+      request.data && typeof request.data.appId === "string"
+        ? request.data.appId.trim()
+        : "";
+    if (!appId) {
+      throw new HttpsError("invalid-argument", "Missing appId");
+    }
+
+    const ref = db.collection("applications").doc(appId);
+    const snap = await ref.get();
+    if (!snap.exists) {
+      return {success: true, alreadyDeleted: true};
+    }
+
+    const data = snap.data() || {};
+    // recursiveDelete also clears subcollections (e.g. questProgress).
+    await db.recursiveDelete(ref);
+    console.log("deleteApplication removed", appId, data.email || "");
+
+    return {success: true, appId, email: data.email || ""};
+  },
 );
 
