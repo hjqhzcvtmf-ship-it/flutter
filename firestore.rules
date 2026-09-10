@@ -67,11 +67,19 @@ service cloud.firestore {
           (isSignedIn() && resource.data.userCode == request.auth.token.referralCode);
       }
 
-      // Live event chat messages — signed-in users can read and post.
+      // Live event chat room.
+      //
+      // Anyone signed in can READ the room (so you can see the vibe before you
+      // arrive), but only people physically CHECKED IN at the venue can POST.
+      // Check-in docs are keyed by userCode, so presence == an existing
+      // /events/{eventId}/checkins/{referralCode} doc. Admins can always post
+      // so they can run/moderate the room without checking in.
       match /messages/{messageId} {
         allow read: if isSignedIn();
         allow create: if isSignedIn() &&
-          request.resource.data.senderUid == request.auth.uid;
+          request.resource.data.senderUid == request.auth.uid &&
+          (isAdmin() ||
+           exists(/databases/$(database)/documents/events/$(eventId)/checkins/$(request.auth.token.referralCode)));
         allow delete: if isAdmin() ||
           (isSignedIn() && resource.data.senderUid == request.auth.uid);
         allow update: if false;

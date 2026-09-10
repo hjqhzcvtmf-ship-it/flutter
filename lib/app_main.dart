@@ -8373,7 +8373,7 @@ class _SocialScreenState extends State<SocialScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _initializeModerationState();
     _searchController.addListener(() {
       setState(() {
@@ -8519,7 +8519,7 @@ class _SocialScreenState extends State<SocialScreen>
 
     // Default tab view when not searching
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -8583,7 +8583,9 @@ class _SocialScreenState extends State<SocialScreen>
                   Tab(text: 'FRIENDLIST'),
                   Tab(text: 'REQUESTS'),
                   Tab(text: 'CREWS'),
+                  Tab(text: 'ROOM'),
                 ],
+                isScrollable: false,
                 labelColor: Color(0xFF00FF41),
                 unselectedLabelColor: Colors.white70,
                 labelStyle: TextStyle(
@@ -8601,6 +8603,7 @@ class _SocialScreenState extends State<SocialScreen>
                   _buildFriendList(),
                   _buildRequests(),
                   _buildCrews(),
+                  _LocationRoomTab(userCode: _currentUserCode),
                 ],
               ),
             ),
@@ -9419,6 +9422,542 @@ class _SocialScreenState extends State<SocialScreen>
     _tabController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+}
+
+// ==================== LOCATION ROOM ====================
+
+/// Location-gated chat room for the TEK event that is live right now.
+///
+/// Reading is open to any member (see the vibe before you arrive), but posting
+/// requires being physically checked in at the venue. That gate is enforced in
+/// firestore.rules too — this UI only mirrors it so the restriction is legible
+/// instead of failing silently.
+///
+/// Surfaced as the ROOM tab inside SOCIAL, and from an event's own page.
+class _LocationRoomTab extends StatefulWidget {
+  const _LocationRoomTab({required this.userCode});
+
+  final String? userCode;
+
+  @override
+  State<_LocationRoomTab> createState() => _LocationRoomTabState();
+}
+
+class _LocationRoomTabState extends State<_LocationRoomTab> {
+  final TextEditingController _composer = TextEditingController();
+
+  bool _resolving = true;
+  bool _sending = false;
+  String? _eventId;
+  String? _eventTitle;
+  String? _userName;
+  bool _checkedIn = false;
+  String? _resolveError;
+  String? _sendError;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolveLiveRoom();
+  }
+
+  @override
+  void dispose() {
+    _composer.dispose();
+    super.dispose();
+  }
+
+  /// Find the event happening around now, then check whether this member is
+  /// checked in to it. An event counts as "live" from 8h before its start to
+  /// 6h after, which covers doors-open through the tail of the night.
+  Future<void> _resolveLiveRoom() async {
+    setState(() {
+      _resolving = true;
+      _resolveError = null;
+    });
+
+    try {
+      final now = DateTime.now();
+      final snap = await FirebaseFirestore.instance
+          .collection('events')
+          .where(
+            'startAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(
+              now.subtract(const Duration(hours: 6)),
+            ),
+          )
+          .where(
+            'startAt',
+            isLessThanOrEqualTo: Timestamp.fromDate(
+              now.add(const Duration(hours: 8)),
+            ),
+          )
+          .orderBy('startAt')
+          .get();
+
+      String? liveId;
+      String? liveTitle;
+      for (final d in snap.docs) {
+        final data = d.data();
+        if (data['hidden'] == true) continue;
+        liveId = d.id;
+        liveTitle = (data['title'] as String?) ?? 'TEK';
+        break;
+      }
+
+      if (liveId == null) {
+        if (!mounted) return;
+        setState(() {
+          _eventId = null;
+          _eventTitle = null;
+          _resolving = false;
+        });
+        return;
+      }
+
+      var checkedIn = false;
+      final code = widget.userCode;
+      if (code != null && code.isNotEmpty) {
+        final ci = await FirebaseFirestore.instance
+            .collection('events')
+            .doc(liveId)
+            .collection('checkins')
+            .doc(code)
+            .get();
+        checkedIn = ci.exists;
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _eventId = liveId;
+        _eventTitle = liveTitle;
+        _checkedIn = checkedIn;
+        _resolving = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _resolveError = e.toString();
+        _resolving = false;
+      });
+    }
+  }
+
+  /// Display name for this member, resolved from their application doc.
+  Future<String?> _fetchUserName() async {
+    final code = widget.userCode;
+    if (code == null || code.isEmpty) return null;
+    try {
+      final snap = await FirebaseFirestore.instance
+          .collection('applications')
+          .where('referralCode', isEqualTo: code)
+          .limit(1)
+          .get();
+      if (snap.docs.isEmpty) return null;
+      return snap.docs.first.data()['name'] as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _send() async {
+    final text = _composer.text.trim();
+    final eventId = _eventId;
+    if (text.isEmpty || eventId == null || _sending) return;
+
+    setState(() {
+      _sending = true;
+      _sendError = null;
+    });
+
+    try {
+      _userName ??= await _fetchUserName();
+      await FirebaseFirestore.instance
+          .collection('events')
+          .doc(eventId)
+          .collection('messages')
+          .add({
+            'senderCode': widget.userCode,
+            'senderName': _userName ?? widget.userCode,
+            'senderUid': FirebaseAuth.instance.currentUser?.uid ?? '',
+            'text': text,
+            'sentAt': FieldValue.serverTimestamp(),
+          });
+      _composer.clear();
+    } on FirebaseException catch (e) {
+      // permission-denied here almost always means the check-in claim hasn't
+      // synced yet, not that the user is doing something wrong.
+      if (!mounted) return;
+      setState(() {
+        _sendError = e.code == 'permission-denied'
+            ? 'Your check-in is still syncing. Reconnecting — try again in a moment.'
+            : 'Could not send: ${e.message ?? e.code}';
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _sendError = 'Could not send. Check your connection.');
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_resolving) {
+      return const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation(Color(0xFF00FF41)),
+        ),
+      );
+    }
+
+    if (_resolveError != null) {
+      return _RoomNotice(
+        icon: Icons.wifi_off,
+        title: 'CAN\'T REACH THE ROOM',
+        body: 'Reconnecting…',
+        actionLabel: 'RETRY',
+        onAction: _resolveLiveRoom,
+      );
+    }
+
+    if (_eventId == null) {
+      return const _RoomNotice(
+        icon: Icons.nightlife,
+        title: 'NO ROOM TONIGHT',
+        body:
+            'The room opens when a TEK event is live. Check the EVENTS tab for what\'s next.',
+      );
+    }
+
+    return Column(
+      children: [
+        _RoomHeader(title: _eventTitle ?? 'TEK', checkedIn: _checkedIn),
+        Expanded(child: _buildMessages()),
+        if (_sendError != null)
+          Container(
+            width: double.infinity,
+            color: Colors.orange.withValues(alpha: 0.15),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              _sendError!,
+              style: const TextStyle(color: Colors.orange, fontSize: 12),
+            ),
+          ),
+        _buildComposer(),
+      ],
+    );
+  }
+
+  Widget _buildMessages() {
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('events')
+          .doc(_eventId)
+          .collection('messages')
+          .orderBy('sentAt', descending: true)
+          .limit(100)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const _RoomNotice(
+            icon: Icons.wifi_off,
+            title: 'CONNECTION LOST',
+            body: 'Reconnecting to the room…',
+          );
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(Color(0xFF00FF41)),
+            ),
+          );
+        }
+
+        final docs = snapshot.data?.docs ?? [];
+        if (docs.isEmpty) {
+          return const _RoomNotice(
+            icon: Icons.forum_outlined,
+            title: 'ROOM IS QUIET',
+            body: 'Be the first to say something.',
+          );
+        }
+
+        return ListView.builder(
+          reverse: true,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          itemCount: docs.length,
+          itemBuilder: (context, i) {
+            final data = docs[i].data();
+            final mine = data['senderCode'] == widget.userCode;
+            return Align(
+              alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.75,
+                ),
+                decoration: BoxDecoration(
+                  color: mine
+                      ? const Color(0xFF00FF41).withValues(alpha: 0.12)
+                      : Colors.white10,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: mine
+                        ? const Color(0xFF00FF41).withValues(alpha: 0.4)
+                        : Colors.white24,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (!mine)
+                      Text(
+                        (data['senderName'] ?? data['senderCode'] ?? 'MEMBER')
+                            .toString(),
+                        style: const TextStyle(
+                          color: Color(0xFF00FF41),
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    if (!mine) const SizedBox(height: 3),
+                    Text(
+                      (data['text'] ?? '').toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildComposer() {
+    if (!_checkedIn) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: Colors.white10)),
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.lock_outline, color: Colors.white38, size: 20),
+            const SizedBox(height: 8),
+            Text(
+              'Check in at ${_eventTitle ?? 'the venue'} to join the conversation.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white54, fontSize: 12),
+            ),
+            const SizedBox(height: 10),
+            TextButton(
+              onPressed: _resolveLiveRoom,
+              child: const Text(
+                'I\'VE CHECKED IN — REFRESH',
+                style: TextStyle(
+                  color: Color(0xFF00FF41),
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: Colors.white10)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _composer,
+              style: const TextStyle(color: Colors.white),
+              textCapitalization: TextCapitalization.sentences,
+              minLines: 1,
+              maxLines: 4,
+              decoration: InputDecoration(
+                hintText: 'Say something to the room…',
+                hintStyle: const TextStyle(color: Colors.white38),
+                filled: true,
+                fillColor: Colors.white10,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(22),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              onSubmitted: (_) => _send(),
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: _sending ? null : _send,
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF00FF41).withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFF00FF41)),
+              ),
+              child: _sending
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation(Color(0xFF00FF41)),
+                      ),
+                    )
+                  : const Icon(
+                      Icons.send,
+                      color: Color(0xFF00FF41),
+                      size: 18,
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Header strip showing which room you're in and whether you can talk.
+class _RoomHeader extends StatelessWidget {
+  const _RoomHeader({required this.title, required this.checkedIn});
+
+  final String title;
+  final bool checkedIn;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Colors.white10)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: checkedIn ? const Color(0xFF00FF41) : Colors.white38,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              title.toUpperCase(),
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ),
+          Text(
+            checkedIn ? 'LIVE · YOU\'RE HERE' : 'READ ONLY',
+            style: TextStyle(
+              color: checkedIn ? const Color(0xFF00FF41) : Colors.white38,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Centred empty/error state used by the room.
+class _RoomNotice extends StatelessWidget {
+  const _RoomNotice({
+    required this.icon,
+    required this.title,
+    required this.body,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: Colors.white24, size: 40),
+            const SizedBox(height: 14),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              body,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white38, fontSize: 12),
+            ),
+            if (actionLabel != null && onAction != null) ...[
+              const SizedBox(height: 14),
+              TextButton(
+                onPressed: onAction,
+                child: Text(
+                  actionLabel!,
+                  style: const TextStyle(
+                    color: Color(0xFF00FF41),
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -12025,18 +12564,44 @@ class _EventChatScreenState extends State<EventChatScreen> with SingleTickerProv
   Future<void> _send() async {
     final text = _msgController.text.trim();
     if (text.isEmpty || _userCode == null) return;
-    _msgController.clear();
-    await FirebaseFirestore.instance
-        .collection('events')
-        .doc(widget.eventId)
-        .collection('messages')
-        .add({
-      'senderCode': _userCode,
-      'senderName': _userName ?? _userCode,
-      'senderUid': _userUid ?? '',
-      'text': text,
-      'sentAt': FieldValue.serverTimestamp(),
-    });
+
+    // Keep the text until the write lands — posting can be refused (only
+    // members checked in at the venue may post), and silently eating the
+    // message would be worse than showing why it failed.
+    try {
+      await FirebaseFirestore.instance
+          .collection('events')
+          .doc(widget.eventId)
+          .collection('messages')
+          .add({
+            'senderCode': _userCode,
+            'senderName': _userName ?? _userCode,
+            'senderUid': _userUid ?? '',
+            'text': text,
+            'sentAt': FieldValue.serverTimestamp(),
+          });
+      _msgController.clear();
+    } on FirebaseException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.code == 'permission-denied'
+                ? 'Only people checked in at the venue can post here. Check in to join the room.'
+                : 'Could not send: ${e.message ?? e.code}',
+          ),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not send. Reconnecting…'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
   }
 
   @override
