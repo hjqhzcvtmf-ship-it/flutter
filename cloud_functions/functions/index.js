@@ -32,34 +32,56 @@ function createMailTransporter() {
 
   const zohoHosts = ["smtp.zoho.eu", "smtp.zoho.com"];
 
-  return {
-    async sendMail(mailOptions) {
-      let lastError = null;
+  // Zoho shared SMTP throttles under bursts ("550 5.4.6 Unusual sending
+  // activity detected") and silently drops referral-code emails. Kept only as
+  // a fallback behind Brevo below.
+  const sendViaZoho = async (mailOptions) => {
+    let lastError = null;
 
-      for (const host of zohoHosts) {
-        try {
-          const transporter = nodemailer.createTransport({
-            host,
-            port: 465,
-            secure: true,
-            auth,
-          });
-          return await transporter.sendMail(mailOptions);
-        } catch (error) {
-          lastError = error;
-          const errorMessage = String(error?.message || "");
-          const shouldTryNextHost =
-            error?.code === "EAUTH" ||
-            error?.responseCode === 535 ||
-            errorMessage.includes("535 Authentication Failed");
+    for (const host of zohoHosts) {
+      try {
+        const transporter = nodemailer.createTransport({
+          host,
+          port: 465,
+          secure: true,
+          auth,
+        });
+        return await transporter.sendMail(mailOptions);
+      } catch (error) {
+        lastError = error;
+        const errorMessage = String(error?.message || "");
+        const shouldTryNextHost =
+          error?.code === "EAUTH" ||
+          error?.responseCode === 535 ||
+          errorMessage.includes("535 Authentication Failed");
 
-          if (!shouldTryNextHost || host === zohoHosts[zohoHosts.length - 1]) {
-            throw error;
-          }
+        if (!shouldTryNextHost || host === zohoHosts[zohoHosts.length - 1]) {
+          throw error;
         }
       }
+    }
 
-      throw lastError;
+    throw lastError;
+  };
+
+  // Prefer Brevo (dedicated transactional relay) for all mail; fall back to
+  // Zoho only if Brevo is unavailable or a send fails, so delivery is strictly
+  // more reliable than before. Requires BREVO_SMTP_LOGIN/KEY on the function.
+  const brevo = createBroadcastTransporter();
+
+  return {
+    async sendMail(mailOptions) {
+      if (brevo) {
+        try {
+          return await brevo.sendMail(mailOptions);
+        } catch (error) {
+          console.warn(
+            "[Mail] Brevo send failed, falling back to Zoho:",
+            String(error?.message || error),
+          );
+        }
+      }
+      return sendViaZoho(mailOptions);
     },
   };
 }
@@ -995,7 +1017,7 @@ exports.sendInviteEmail = onCall(
   {
     region: "us-central1",
     enforceAppCheck: false,
-    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD],
+    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD, BREVO_SMTP_LOGIN, BREVO_SMTP_KEY],
   },
   async (request) => {
     if (!request.auth || !request.auth.uid) {
@@ -1667,7 +1689,7 @@ async function processApplicationReview({appId, action}) {
 exports.notifyAdminNewApplication = onCall(
   {
     region: "us-central1",
-    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD],
+    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD, BREVO_SMTP_LOGIN, BREVO_SMTP_KEY],
   },
   async (request) => {
     console.log("notifyAdminNewApplication called");
@@ -1759,7 +1781,7 @@ exports.notifyAdminNewApplication = onCall(
 exports.approveApplication = onCall(
   {
     region: "us-central1",
-    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD],
+    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD, BREVO_SMTP_LOGIN, BREVO_SMTP_KEY],
   },
   async (request) => {
     console.log("approveApplication called");
@@ -1789,7 +1811,7 @@ exports.handleApplicationAction = onRequest(
   {
     region: "us-central1",
     cors: true,
-    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD],
+    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD, BREVO_SMTP_LOGIN, BREVO_SMTP_KEY],
   },
   async (req, res) => {
     console.log("handleApplicationAction called");
@@ -1868,7 +1890,7 @@ exports.handleApplicationAction = onRequest(
 exports.sendMembershipEmail = onCall(
   {
     region: "us-central1",
-    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD],
+    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD, BREVO_SMTP_LOGIN, BREVO_SMTP_KEY],
   },
   async (request) => {
   console.log("sendMembershipEmail called (legacy)");
@@ -1948,7 +1970,7 @@ exports.adminSendTestReferralCodeEmail = onCall(
   {
     region: "us-central1",
     enforceAppCheck: false,
-    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD],
+    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD, BREVO_SMTP_LOGIN, BREVO_SMTP_KEY],
   },
   async (request) => {
     try {
@@ -2016,7 +2038,7 @@ exports.adminReviewApplication = onCall(
   {
     region: "us-central1",
     enforceAppCheck: false,
-    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD],
+    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD, BREVO_SMTP_LOGIN, BREVO_SMTP_KEY],
   },
   async (request) => {
     const callerUid = request.auth && request.auth.uid ? request.auth.uid : "";
@@ -2035,7 +2057,7 @@ exports.adminGetDashboardData = onCall(
   {
     region: "us-central1",
     enforceAppCheck: false,
-    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD, STRIPE_SECRET_KEY],
+    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD, STRIPE_SECRET_KEY, BREVO_SMTP_LOGIN, BREVO_SMTP_KEY],
   },
   async (request) => {
     const callerUid = request.auth && request.auth.uid ? request.auth.uid : "";
@@ -4143,7 +4165,7 @@ exports.sendBroadcastEmail = onCall(
     region: "us-central1",
     // TEMP: App Check enforcement disabled until iOS App Check is registered.
     enforceAppCheck: false,
-    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD],
+    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD, BREVO_SMTP_LOGIN, BREVO_SMTP_KEY],
   },
   async (request) => {
     try {
@@ -4612,7 +4634,7 @@ exports.sendWebsiteReferral = onRequest(
   {
     region: "us-central1",
     cors: true,
-    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD],
+    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD, BREVO_SMTP_LOGIN, BREVO_SMTP_KEY],
   },
   async (req, res) => {
     if (req.method === "OPTIONS") {
@@ -4724,7 +4746,7 @@ exports.sendPerformerApplication = onRequest(
   {
     region: "us-central1",
     cors: true,
-    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD],
+    secrets: [MAIL_SENDER_EMAIL, MAIL_SENDER_PASSWORD, BREVO_SMTP_LOGIN, BREVO_SMTP_KEY],
   },
   async (req, res) => {
     if (req.method === "OPTIONS") {
