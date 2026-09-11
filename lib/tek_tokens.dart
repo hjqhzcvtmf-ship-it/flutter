@@ -30,6 +30,10 @@ class TekColors {
   /// Sheets, dialogs, nav — the app's established deep chrome surface.
   static const Color surfaceDeep = Color(0xFF0A0A0A);
 
+  /// Lifted fill — image placeholders, avatar backgrounds, inert blocks.
+  /// The cold replacement for Material's warm `Colors.grey[800]`.
+  static const Color surfaceLift = Color(0xFF2A2C33);
+
   // ── Signal green (~8–12%) — ENERGY, not decoration ──────────────
   /// PRIMARY: active state, focus, brand, primary CTA.
   static const Color signal = Color(0xFF00FF41);
@@ -47,6 +51,18 @@ class TekColors {
   /// Dark machined metal — the low end of the cold-metal ramp.
   /// Replaces bronze in tier/medal hierarchies.
   static const Color gunmetal = Color(0xFF6E7480);
+
+  /// Brightest cold metal. Replaces gold as the top non-energy tier.
+  static const Color platinum = Color(0xFFE8ECF4);
+
+  /// The cold-metal status ladder, lowest to highest.
+  ///
+  /// gunmetal → silver → platinum → signal
+  ///
+  /// Signal green stays the apex: the top of the ladder is *energy*, not
+  /// metal. Everything below it is machined and cold. No gold, ever —
+  /// gold reads as participation trophy; cold metal reads as earned access.
+  static const List<Color> tierLadder = [gunmetal, silver, platinum, signal];
 
   // ── State ───────────────────────────────────────────────────────
   /// Errors, destructive actions, expired states.

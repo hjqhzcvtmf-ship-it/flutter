@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'cosmos_bg.dart';
 import 'observability.dart';
 import 'tek_sounds.dart';
+import 'tek_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -254,7 +255,7 @@ class ReferralSessionManager {
       ScaffoldMessenger.of(ctx).showSnackBar(
         SnackBar(
           content: Text(reason),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
           duration: const Duration(seconds: 4),
         ),
       );
@@ -435,7 +436,7 @@ class GlowPulse extends StatefulWidget {
   final Widget child;
   final Color color;
   final double maxBlur;
-  const GlowPulse({super.key, required this.child, this.color = const Color(0xFF00FF41), this.maxBlur = 22});
+  const GlowPulse({super.key, required this.child, this.color = TekColors.signal, this.maxBlur = 22});
 
   @override
   State<GlowPulse> createState() => _GlowPulseState();
@@ -461,7 +462,7 @@ class _GlowPulseState extends State<GlowPulse> with SingleTickerProviderStateMix
       animation: _a,
       builder: (_, child) => Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: TekShape.br,
           boxShadow: [BoxShadow(color: widget.color.withValues(alpha: 0.45), blurRadius: _a.value, spreadRadius: 1)],
         ),
         child: child,
@@ -527,9 +528,9 @@ class _XPToastWidgetState extends State<_XPToastWidget> with SingleTickerProvide
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
               decoration: BoxDecoration(
-                color: const Color(0xFF00FF41),
-                borderRadius: BorderRadius.circular(40),
-                boxShadow: [BoxShadow(color: const Color(0xFF00FF41).withValues(alpha: 0.6), blurRadius: 24, spreadRadius: 2)],
+                color: TekColors.signal,
+                borderRadius: TekShape.br,
+                boxShadow: [BoxShadow(color: TekColors.signal.withValues(alpha: 0.6), blurRadius: 24, spreadRadius: 2)],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -588,14 +589,14 @@ class SkeletonCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Colors.white.withValues(alpha: 0.06),
-      highlightColor: const Color(0xFF00FF41).withValues(alpha: 0.18),
+      baseColor: TekInk.high.withValues(alpha: 0.06),
+      highlightColor: TekColors.signal.withValues(alpha: 0.18),
       period: const Duration(milliseconds: 1400),
       child: Container(
         width: width ?? double.infinity,
         height: height,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.06),
+          color: TekInk.high.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(radius),
         ),
       ),
@@ -630,12 +631,12 @@ class SkeletonAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Colors.white.withValues(alpha: 0.06),
-      highlightColor: const Color(0xFF00FF41).withValues(alpha: 0.18),
+      baseColor: TekInk.high.withValues(alpha: 0.06),
+      highlightColor: TekColors.signal.withValues(alpha: 0.18),
       child: Container(
         width: size,
         height: size,
-        decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white12),
+        decoration: const BoxDecoration(shape: BoxShape.circle, color: TekInk.hairline),
       ),
     );
   }
@@ -666,8 +667,8 @@ class FadeInNetImage extends StatelessWidget {
     final errorWidget = Container(
       width: width,
       height: height,
-      color: Colors.grey[900],
-      child: const Icon(Icons.image, color: Colors.white24, size: 40),
+      color: TekColors.surface,
+      child: const Icon(Icons.image, color: TekInk.line, size: 40),
     );
     final image = CachedNetworkImage(
       imageUrl: url,
@@ -700,7 +701,7 @@ class _FullscreenImageView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: TekInk.high),
       ),
       body: Center(
         child: InteractiveViewer(
@@ -785,7 +786,7 @@ class FrostedGlass extends StatelessWidget {
             color: Colors.black.withValues(alpha: opacity),
             borderRadius: borderRadius,
             border: chromeEdge
-                ? Border.all(color: const Color(0xFF7A7A7A).withValues(alpha: 0.35), width: 0.6)
+                ? Border.all(color: TekColors.chrome.withValues(alpha: 0.35), width: 0.6)
                 : null,
           ),
           child: child,
@@ -971,7 +972,7 @@ class _RedeemDrinkButton extends StatelessWidget {
         final canRedeem = xp >= kRedemptionXpCost;
         return PressScale(
           child: GlowPulse(
-          color: canRedeem ? const Color(0xFF00FF41) : Colors.white24,
+          color: canRedeem ? TekColors.signal : TekInk.line,
           maxBlur: canRedeem ? 18 : 4,
           child: SizedBox(
             width: double.infinity,
@@ -991,7 +992,7 @@ class _RedeemDrinkButton extends StatelessWidget {
                   : null,
               icon: Icon(
                 canRedeem ? Icons.local_bar : Icons.lock_outline,
-                color: canRedeem ? Colors.black : Colors.white38,
+                color: canRedeem ? Colors.black : TekInk.faint,
                 size: 18,
               ),
               label: Text(
@@ -999,7 +1000,7 @@ class _RedeemDrinkButton extends StatelessWidget {
                     ? 'REDEEM FREE DRINK'
                     : '${kRedemptionXpCost - xp} XP TO FREE DRINK',
                 style: TextStyle(
-                  color: canRedeem ? Colors.black : Colors.white54,
+                  color: canRedeem ? Colors.black : TekInk.muted,
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.5,
@@ -1007,13 +1008,13 @@ class _RedeemDrinkButton extends StatelessWidget {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: canRedeem
-                    ? const Color(0xFF00FF41)
-                    : Colors.white.withValues(alpha: 0.05),
-                disabledBackgroundColor: Colors.white.withValues(alpha: 0.05),
+                    ? TekColors.signal
+                    : TekInk.high.withValues(alpha: 0.05),
+                disabledBackgroundColor: TekInk.high.withValues(alpha: 0.05),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: TekShape.br,
                   side: BorderSide(
-                    color: canRedeem ? const Color(0xFF00FF41) : Colors.white24,
+                    color: canRedeem ? TekColors.signal : TekInk.line,
                     width: 1,
                   ),
                 ),
@@ -1061,15 +1062,15 @@ class _FriendQrScreenState extends State<_FriendQrScreen> with SingleTickerProvi
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF00FF41)),
+        iconTheme: const IconThemeData(color: TekColors.signal),
         title: const Text('CONNECT',
-            style: TextStyle(color: Color(0xFF00FF41), fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 3)),
+            style: TextStyle(color: TekColors.signal, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 3)),
         centerTitle: true,
         bottom: TabBar(
           controller: _tab,
-          labelColor: const Color(0xFF00FF41),
-          unselectedLabelColor: Colors.white54,
-          indicatorColor: const Color(0xFF00FF41),
+          labelColor: TekColors.signal,
+          unselectedLabelColor: TekInk.muted,
+          indicatorColor: TekColors.signal,
           labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5),
           tabs: const [
             Tab(text: 'MY CODE'),
@@ -1095,25 +1096,25 @@ class _FriendQrScreenState extends State<_FriendQrScreen> with SingleTickerProvi
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text('SHOW THIS TO ANOTHER OPERATOR',
-                style: TextStyle(color: Color(0xFF7A7A7A), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                style: TextStyle(color: TekColors.chrome, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
             const SizedBox(height: 24),
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                color: TekInk.high,
+                borderRadius: TekShape.br,
                 boxShadow: [
-                  BoxShadow(color: const Color(0xFF00FF41).withValues(alpha: 0.4), blurRadius: 32, spreadRadius: 2),
+                  BoxShadow(color: TekColors.signal.withValues(alpha: 0.4), blurRadius: 32, spreadRadius: 2),
                 ],
               ),
               child: qr_flutter.QrImageView(data: 'TEK:${widget.myReferralCode}', size: 220),
             ),
             const SizedBox(height: 24),
             Text(widget.myName.toUpperCase(),
-                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                style: const TextStyle(color: TekInk.high, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 2)),
             const SizedBox(height: 4),
             Text(widget.myReferralCode,
-                style: const TextStyle(color: Color(0xFF00FF41), fontSize: 13, letterSpacing: 3, fontWeight: FontWeight.bold)),
+                style: const TextStyle(color: TekColors.signal, fontSize: 13, letterSpacing: 3, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -1130,7 +1131,7 @@ class _FriendQrScannerTabState extends State<_FriendQrScannerTab> {
   late final MobileScannerController _ctrl;
   bool _processing = false;
   String? _resultMsg;
-  Color _resultColor = Colors.white54;
+  Color _resultColor = TekInk.muted;
 
   @override
   void initState() {
@@ -1169,12 +1170,12 @@ class _FriendQrScannerTabState extends State<_FriendQrScannerTab> {
         'friendRequests': FieldValue.arrayUnion([myCode]),
       });
 
-      _flash('REQUEST SENT — AWAITING ACCEPT', const Color(0xFF00FF41));
+      _flash('REQUEST SENT — AWAITING ACCEPT', TekColors.signal);
       Future.delayed(const Duration(milliseconds: 1500), () {
         if (mounted) Navigator.pop(context);
       });
     } catch (e) {
-      _flash(e.toString().replaceFirst('Exception: ', '').toUpperCase(), Colors.red);
+      _flash(e.toString().replaceFirst('Exception: ', '').toUpperCase(), TekColors.danger);
     }
   }
 
@@ -1206,7 +1207,7 @@ class _FriendQrScannerTabState extends State<_FriendQrScannerTab> {
           child: SizedBox(
             width: 240, height: 240,
             child: CustomPaint(
-              painter: _QRCornerPainter(color: _resultColor == Colors.white54 ? const Color(0xFF00FF41) : _resultColor),
+              painter: _QRCornerPainter(color: _resultColor == TekInk.muted ? TekColors.signal : _resultColor),
             ),
           ),
         ),
@@ -1353,13 +1354,13 @@ class _RelayPowerDialogState extends State<_RelayPowerDialog> {
       child: FrostedGlass(
         sigma: 22,
         opacity: 0.78,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: TekShape.br,
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF00FF41).withValues(alpha: 0.7), width: 1.2),
+            borderRadius: TekShape.br,
+            border: Border.all(color: TekColors.signal.withValues(alpha: 0.7), width: 1.2),
             boxShadow: [
-              BoxShadow(color: const Color(0xFF00FF41).withValues(alpha: 0.25), blurRadius: 24),
+              BoxShadow(color: TekColors.signal.withValues(alpha: 0.25), blurRadius: 24),
             ],
           ),
           padding: const EdgeInsets.all(20),
@@ -1368,17 +1369,17 @@ class _RelayPowerDialogState extends State<_RelayPowerDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(children: [
-                const Icon(Icons.bolt, color: Color(0xFF00FF41), size: 16),
+                const Icon(Icons.bolt, color: TekColors.signal, size: 16),
                 const SizedBox(width: 6),
                 const Text('RELAY POWER',
-                    style: TextStyle(color: Color(0xFF00FF41), fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 3)),
+                    style: TextStyle(color: TekColors.signal, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 3)),
               ]),
               const SizedBox(height: 8),
               Text('TRANSFERRING XP TO ${widget.recipientName.toUpperCase()}',
-                  style: const TextStyle(color: Colors.white70, fontSize: 11, letterSpacing: 1)),
+                  style: const TextStyle(color: TekInk.body, fontSize: 11, letterSpacing: 1)),
               const SizedBox(height: 16),
               Text('YOUR BALANCE: $_myXp XP',
-                  style: const TextStyle(color: Colors.white54, fontSize: 11, letterSpacing: 1)),
+                  style: const TextStyle(color: TekInk.muted, fontSize: 11, letterSpacing: 1)),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
@@ -1395,13 +1396,13 @@ class _RelayPowerDialogState extends State<_RelayPowerDialog> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFF00FF41) : Colors.transparent,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFF00FF41), width: 1.2),
+                          color: isSelected ? TekColors.signal : Colors.transparent,
+                          borderRadius: TekShape.br,
+                          border: Border.all(color: TekColors.signal, width: 1.2),
                         ),
                         child: Text('+$amount XP',
                             style: TextStyle(
-                              color: isSelected ? Colors.black : const Color(0xFF00FF41),
+                              color: isSelected ? Colors.black : TekColors.signal,
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1,
@@ -1413,7 +1414,7 @@ class _RelayPowerDialogState extends State<_RelayPowerDialog> {
               ),
               if (_error != null) ...[
                 const SizedBox(height: 12),
-                Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 11)),
+                Text(_error!, style: const TextStyle(color: TekColors.danger, fontSize: 11)),
               ],
               const SizedBox(height: 18),
               Row(
@@ -1421,24 +1422,24 @@ class _RelayPowerDialogState extends State<_RelayPowerDialog> {
                 children: [
                   TextButton(
                     onPressed: _sending ? null : () => Navigator.pop(context),
-                    child: const Text('CANCEL', style: TextStyle(color: Colors.white38)),
+                    child: const Text('CANCEL', style: TextStyle(color: TekInk.faint)),
                   ),
                   const SizedBox(width: 8),
                   PressScale(
                     child: ElevatedButton(
                       onPressed: (_sending || !canAfford) ? null : _send,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00FF41),
-                        disabledBackgroundColor: Colors.white12,
+                        backgroundColor: TekColors.signal,
+                        disabledBackgroundColor: TekInk.hairline,
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(borderRadius: TekShape.br),
                       ),
                       child: _sending
                           ? const SizedBox(width: 16, height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
                           : Text(canAfford ? 'RELAY ENGAGE' : 'NOT ENOUGH XP',
                               style: TextStyle(
-                                color: canAfford ? Colors.black : Colors.white38,
+                                color: canAfford ? Colors.black : TekInk.faint,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
                                 letterSpacing: 1.5,
@@ -1537,27 +1538,27 @@ class _RedeemQrDialogState extends State<_RedeemQrDialog> {
       child: FrostedGlass(
         sigma: 24,
         opacity: 0.78,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: TekShape.br,
         child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF00FF41), width: 1.5),
+          borderRadius: TekShape.br,
+          border: Border.all(color: TekColors.signal, width: 1.5),
           boxShadow: [
-            BoxShadow(color: const Color(0xFF00FF41).withValues(alpha: 0.35), blurRadius: 32, spreadRadius: 1),
+            BoxShadow(color: TekColors.signal.withValues(alpha: 0.35), blurRadius: 32, spreadRadius: 1),
           ],
         ),
         child: _docId == null
           ? Padding(
               padding: const EdgeInsets.all(40),
               child: _creating
-                  ? const Center(child: CircularProgressIndicator(color: Color(0xFF00FF41)))
+                  ? const Center(child: CircularProgressIndicator(color: TekColors.signal))
                   : Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(_error ?? 'Failed to create redemption', style: const TextStyle(color: Colors.red)),
+                        Text(_error ?? 'Failed to create redemption', style: const TextStyle(color: TekColors.danger)),
                         const SizedBox(height: 12),
                         TextButton(onPressed: () => Navigator.pop(context),
-                            child: const Text('CLOSE', style: TextStyle(color: Color(0xFF00FF41)))),
+                            child: const Text('CLOSE', style: TextStyle(color: TekColors.signal))),
                       ],
                     ),
             )
@@ -1575,7 +1576,7 @@ class _RedeemQrDialogState extends State<_RedeemQrDialog> {
                       Text(
                         redeemed ? 'REDEEMED ✓' : (expired ? 'EXPIRED' : 'SHOW TO BARTENDER'),
                         style: TextStyle(
-                          color: redeemed ? const Color(0xFF00FF41) : (expired ? Colors.red : Colors.white),
+                          color: redeemed ? TekColors.signal : (expired ? TekColors.danger : TekInk.high),
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 2,
@@ -1583,7 +1584,7 @@ class _RedeemQrDialogState extends State<_RedeemQrDialog> {
                       ),
                       const SizedBox(height: 16),
                       Container(
-                        color: Colors.white,
+                        color: TekInk.high,
                         padding: const EdgeInsets.all(16),
                         child: Stack(
                           alignment: Alignment.center,
@@ -1593,9 +1594,9 @@ class _RedeemQrDialogState extends State<_RedeemQrDialog> {
                               child: qr_flutter.QrImageView(data: _code!, size: 200),
                             ),
                             if (redeemed)
-                              const Icon(Icons.check_circle, color: Color(0xFF00FF41), size: 80),
+                              const Icon(Icons.check_circle, color: TekColors.signal, size: 80),
                             if (expired && !redeemed)
-                              const Icon(Icons.timer_off, color: Colors.red, size: 80),
+                              const Icon(Icons.timer_off, color: TekColors.danger, size: 80),
                           ],
                         ),
                       ),
@@ -1606,19 +1607,19 @@ class _RedeemQrDialogState extends State<_RedeemQrDialog> {
                             : (expired ? 'Generate a new one to retry.' : 'Expires in ${_fmt(_secondsLeft)}'),
                         style: TextStyle(
                           color: redeemed
-                              ? const Color(0xFF00FF41)
-                              : (expired ? Colors.red : Colors.white54),
+                              ? TekColors.signal
+                              : (expired ? TekColors.danger : TekInk.muted),
                           fontSize: 12,
                           letterSpacing: 1,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text('CODE: $_code',
-                          style: const TextStyle(color: Colors.white38, fontSize: 11, letterSpacing: 2)),
+                          style: const TextStyle(color: TekInk.faint, fontSize: 11, letterSpacing: 2)),
                       const SizedBox(height: 12),
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('CLOSE', style: TextStyle(color: Color(0xFF00FF41))),
+                        child: const Text('CLOSE', style: TextStyle(color: TekColors.signal)),
                       ),
                     ],
                   ),
@@ -1648,12 +1649,12 @@ class _RedemptionScannerButton extends StatelessWidget {
               cinematicRoute(const _RedemptionScannerPage()),
             );
           },
-          icon: const Icon(Icons.qr_code_scanner, color: Color(0xFF00FF41), size: 18),
+          icon: const Icon(Icons.qr_code_scanner, color: TekColors.signal, size: 18),
           label: const Text('SCAN REDEMPTION QR',
-              style: TextStyle(color: Color(0xFF00FF41), fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+              style: TextStyle(color: TekColors.signal, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
           style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: Color(0xFF00FF41)),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            side: const BorderSide(color: TekColors.signal),
+            shape: RoundedRectangleBorder(borderRadius: TekShape.br),
             padding: const EdgeInsets.symmetric(vertical: 12),
           ),
         ),
@@ -1673,7 +1674,7 @@ class _RedemptionScannerPageState extends State<_RedemptionScannerPage> {
   late final MobileScannerController _controller;
   bool _processing = false;
   String? _resultMsg;
-  Color _resultColor = Colors.white;
+  Color _resultColor = TekInk.high;
 
   @override
   void initState() {
@@ -1700,18 +1701,18 @@ class _RedemptionScannerPageState extends State<_RedemptionScannerPage> {
           .limit(1)
           .get();
       if (snap.docs.isEmpty) {
-        _flash('Not a valid redemption code', Colors.red);
+        _flash('Not a valid redemption code', TekColors.danger);
         return;
       }
       final doc = snap.docs.first;
       final data = doc.data();
       if (data['redeemed'] == true) {
-        _flash('Already redeemed', Colors.orange);
+        _flash('Already redeemed', TekColors.danger);
         return;
       }
       final expiresAt = (data['expiresAt'] as Timestamp?)?.toDate();
       if (expiresAt != null && expiresAt.isBefore(DateTime.now())) {
-        _flash('Code expired', Colors.red);
+        _flash('Code expired', TekColors.danger);
         return;
       }
       // Find user app doc to deduct XP
@@ -1727,7 +1728,7 @@ class _RedemptionScannerPageState extends State<_RedemptionScannerPage> {
           final appDoc = appSnap.docs.first;
           final currentXP = (appDoc.data()['xpPoints'] as num?)?.toInt() ?? 0;
           if (currentXP < xpCost) {
-            _flash('User no longer has enough XP', Colors.red);
+            _flash('User no longer has enough XP', TekColors.danger);
             return;
           }
           final batch = FirebaseFirestore.instance.batch();
@@ -1756,12 +1757,12 @@ class _RedemptionScannerPageState extends State<_RedemptionScannerPage> {
       }
       HapticFeedback.heavyImpact();
       TekSounds.instance.redeem();
-      _flash('✓ REDEEMED FOR ${(data['userName'] ?? userCode).toString().toUpperCase()}', const Color(0xFF00FF41));
+      _flash('✓ REDEEMED FOR ${(data['userName'] ?? userCode).toString().toUpperCase()}', TekColors.signal);
       Future.delayed(const Duration(milliseconds: 1600), () {
         if (mounted) Navigator.pop(context);
       });
     } catch (e) {
-      _flash('Error: $e', Colors.red);
+      _flash('Error: $e', TekColors.danger);
     }
   }
 
@@ -1782,9 +1783,9 @@ class _RedemptionScannerPageState extends State<_RedemptionScannerPage> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF00FF41)),
+        iconTheme: const IconThemeData(color: TekColors.signal),
         title: const Text('REDEMPTION SCANNER',
-            style: TextStyle(color: Color(0xFF00FF41), fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 2)),
+            style: TextStyle(color: TekColors.signal, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 2)),
         centerTitle: true,
       ),
       body: Stack(
@@ -1804,7 +1805,7 @@ class _RedemptionScannerPageState extends State<_RedemptionScannerPage> {
               width: 240,
               height: 240,
               child: CustomPaint(
-                painter: _QRCornerPainter(color: _resultColor == Colors.white ? const Color(0xFF00FF41) : _resultColor),
+                painter: _QRCornerPainter(color: _resultColor == TekInk.high ? TekColors.signal : _resultColor),
               ),
             ),
           ),
@@ -1816,7 +1817,7 @@ class _RedemptionScannerPageState extends State<_RedemptionScannerPage> {
               _resultMsg ?? 'POINT AT USER\'S REDEMPTION QR',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: _resultColor == Colors.white ? Colors.white54 : _resultColor,
+                color: _resultColor == TekInk.high ? TekInk.muted : _resultColor,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.5,
@@ -1883,26 +1884,26 @@ class _PushDiagnosticsPanelState extends State<_PushDiagnosticsPanel> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: ok ? const Color(0xFF00FF41).withValues(alpha: 0.4) : Colors.red.withValues(alpha: 0.5)),
+        borderRadius: TekShape.br,
+        border: Border.all(color: ok ? TekColors.signal.withValues(alpha: 0.4) : TekColors.danger.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: [
             Icon(ok ? Icons.notifications_active : Icons.notifications_off,
-                color: ok ? const Color(0xFF00FF41) : Colors.red, size: 14),
+                color: ok ? TekColors.signal : TekColors.danger, size: 14),
             const SizedBox(width: 6),
             Text('PUSH DIAGNOSTICS',
                 style: TextStyle(
-                    color: ok ? const Color(0xFF00FF41) : Colors.red,
+                    color: ok ? TekColors.signal : TekColors.danger,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 2)),
             const Spacer(),
             GestureDetector(
               onTap: _retry,
-              child: const Icon(Icons.refresh, color: Colors.white54, size: 16),
+              child: const Icon(Icons.refresh, color: TekInk.muted, size: 16),
             ),
           ]),
           const SizedBox(height: 8),
@@ -1911,14 +1912,14 @@ class _PushDiagnosticsPanelState extends State<_PushDiagnosticsPanel> {
                 ? 'TOKEN: ${_token!.substring(0, 16)}...${_token!.substring(_token!.length - 8)}'
                 : 'TOKEN: NOT CAPTURED',
             style: TextStyle(
-                color: ok ? Colors.white : Colors.red.shade300,
+                color: ok ? TekInk.high : TekColors.danger,
                 fontSize: 11,
                 fontFamily: 'monospace'),
           ),
           if (_error != null && _error!.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text('ERROR: $_error',
-                style: const TextStyle(color: Colors.red, fontSize: 10)),
+                style: const TextStyle(color: TekColors.danger, fontSize: 10)),
           ],
           const SizedBox(height: 8),
           if (ok)
@@ -1929,17 +1930,17 @@ class _PushDiagnosticsPanelState extends State<_PushDiagnosticsPanel> {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     content: Text('Token copied'),
                     duration: Duration(seconds: 1),
-                    backgroundColor: Color(0xFF00FF41)));
+                    backgroundColor: TekColors.signal));
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00FF41).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0xFF00FF41), width: 1),
+                  color: TekColors.signal.withValues(alpha: 0.15),
+                  borderRadius: TekShape.br,
+                  border: Border.all(color: TekColors.signal, width: 1),
                 ),
                 child: const Text('COPY TOKEN',
-                    style: TextStyle(color: Color(0xFF00FF41), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                    style: TextStyle(color: TekColors.signal, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
               ),
             ),
         ],
@@ -1961,7 +1962,7 @@ class AppUtils {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message ?? 'Copied to clipboard!'),
-          backgroundColor: Color(0xFF00FF41),
+          backgroundColor: TekColors.signal,
           duration: Duration(seconds: 2),
         ),
       );
@@ -2039,7 +2040,7 @@ class AppUtils {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
           duration: Duration(seconds: 3),
         ),
       );
@@ -2052,7 +2053,7 @@ class AppUtils {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
-          backgroundColor: Color(0xFF00FF41),
+          backgroundColor: TekColors.signal,
           duration: Duration(seconds: 2),
         ),
       );
@@ -2078,12 +2079,12 @@ class AppUtils {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 80, color: Colors.white30),
+            Icon(icon, size: 80, color: TekInk.dim),
             SizedBox(height: 16),
             Text(
               title,
               style: TextStyle(
-                color: Colors.white70,
+                color: TekInk.body,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -2093,7 +2094,7 @@ class AppUtils {
               SizedBox(height: 8),
               Text(
                 subtitle,
-                style: TextStyle(color: Colors.white38, fontSize: 14),
+                style: TextStyle(color: TekInk.faint, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -2102,7 +2103,7 @@ class AppUtils {
               ElevatedButton(
                 onPressed: onAction,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF00FF41),
+                  backgroundColor: TekColors.signal,
                   foregroundColor: Colors.black,
                   padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                 ),
@@ -2122,11 +2123,11 @@ class AppUtils {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(Color(0xFF00FF41)),
+            valueColor: AlwaysStoppedAnimation(TekColors.signal),
           ),
           if (message != null) ...[
             SizedBox(height: 16),
-            Text(message, style: TextStyle(color: Colors.white70)),
+            Text(message, style: TextStyle(color: TekInk.body)),
           ],
         ],
       ),
@@ -2145,19 +2146,19 @@ class AppUtils {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Color(0xFF1A1A1A).withValues(alpha: 0.85),
-        title: Text(title, style: TextStyle(color: Color(0xFFB8B8C0))),
-        content: Text(message, style: TextStyle(color: Colors.white70)),
+        backgroundColor: TekColors.surface.withValues(alpha: 0.85),
+        title: Text(title, style: TextStyle(color: TekColors.steel)),
+        content: Text(message, style: TextStyle(color: TekInk.body)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(cancelText, style: TextStyle(color: Colors.white54)),
+            child: Text(cancelText, style: TextStyle(color: TekInk.muted)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: isDangerous ? Colors.red : Color(0xFF00FF41),
-              foregroundColor: isDangerous ? Colors.white : Colors.black,
+              backgroundColor: isDangerous ? TekColors.danger : TekColors.signal,
+              foregroundColor: isDangerous ? TekInk.high : Colors.black,
             ),
             child: Text(confirmText),
           ),
@@ -2194,7 +2195,7 @@ class AppUtils {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close, color: Color(0xFFB8B8C0)),
+                        icon: const Icon(Icons.close, color: TekColors.steel),
                         tooltip: 'Close',
                       ),
                       const Spacer(),
@@ -2204,7 +2205,7 @@ class AppUtils {
                           ticketCode,
                           message: 'Ticket code copied',
                         ),
-                        icon: const Icon(Icons.copy, color: Color(0xFF00FF41)),
+                        icon: const Icon(Icons.copy, color: TekColors.signal),
                         tooltip: 'Copy code',
                       ),
                     ],
@@ -2220,7 +2221,7 @@ class AppUtils {
                           const Text(
                             'SHOW THIS BY THE DOOR',
                             style: TextStyle(
-                              color: Colors.white70,
+                              color: TekInk.body,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 2,
@@ -2231,7 +2232,7 @@ class AppUtils {
                           Text(
                             eventTitle.toUpperCase(),
                             style: const TextStyle(
-                              color: Color(0xFFB8B8C0),
+                              color: TekColors.steel,
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1,
@@ -2243,7 +2244,7 @@ class AppUtils {
                             Text(
                               DateFormat('EEE, MMM d · HH:mm').format(startAt),
                               style: const TextStyle(
-                                color: Colors.white70,
+                                color: TekInk.body,
                                 fontSize: 14,
                               ),
                               textAlign: TextAlign.center,
@@ -2255,7 +2256,7 @@ class AppUtils {
                             Text(
                               location,
                               style: const TextStyle(
-                                color: Colors.white70,
+                                color: TekInk.body,
                                 fontSize: 14,
                               ),
                               textAlign: TextAlign.center,
@@ -2269,19 +2270,19 @@ class AppUtils {
                               vertical: 22,
                             ),
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: TekShape.br,
                               border: Border.all(
-                                color: const Color(0xFF00FF41),
+                                color: TekColors.signal,
                                 width: 2,
                               ),
-                              color: Colors.white.withValues(alpha: 0.05),
+                              color: TekInk.high.withValues(alpha: 0.05),
                             ),
                             child: Column(
                               children: [
                                 const Text(
                                   'TICKET CODE',
                                   style: TextStyle(
-                                    color: Colors.white54,
+                                    color: TekInk.muted,
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 2,
@@ -2291,7 +2292,7 @@ class AppUtils {
                                 SelectableText(
                                   ticketCode,
                                   style: const TextStyle(
-                                    color: Color(0xFFB8B8C0),
+                                    color: TekColors.steel,
                                     fontSize: 26,
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 1,
@@ -2311,11 +2312,11 @@ class AppUtils {
                                 message: 'Ticket code copied',
                               ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF00FF41),
+                                backgroundColor: TekColors.signal,
                                 foregroundColor: Colors.black,
                                 minimumSize: const Size(double.infinity, 52),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
+                                  borderRadius: TekShape.br,
                                 ),
                               ),
                               child: const Text(
@@ -2431,8 +2432,8 @@ class _CosmosPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
-const Color _chromeTextColor = Color(0xFFE7E8ED);
-const Color _chromeTextMuted = Color(0xFFBDC2CB);
+const Color _chromeTextColor = TekInk.high;
+const Color _chromeTextMuted = TekColors.steel;
 const List<Shadow> _chromeGlowShadows = [
   Shadow(color: Color(0x22000000), offset: Offset(0, 1), blurRadius: 2),
   Shadow(color: Color(0x3000FF41), offset: Offset(0, 0), blurRadius: 10),
@@ -2564,7 +2565,7 @@ class ChromeDivider extends StatelessWidget implements PreferredSizeWidget {
         width: double.infinity,
         height: 1.5,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: TekShape.brPill,
           gradient: const LinearGradient(
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
@@ -2601,7 +2602,7 @@ class Ps3XpProgressBar extends StatefulWidget {
     super.key,
     required this.progress,
     this.height = 12,
-    this.borderRadius = const BorderRadius.all(Radius.circular(10)),
+    this.borderRadius = TekShape.br,
   });
 
   @override
@@ -2783,9 +2784,9 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         scaffoldBackgroundColor: Colors.transparent,
         colorScheme: ColorScheme.dark(
-          primary: Color(0xFF00FF41),
-          secondary: Color(0xFF00FF41),
-          surface: Color(0xFF0D0D0D),
+          primary: TekColors.signal,
+          secondary: TekColors.signal,
+          surface: TekColors.void_,
         ),
         useMaterial3: true,
         appBarTheme: const AppBarTheme(
@@ -2800,9 +2801,9 @@ class MyApp extends StatelessWidget {
           },
         ),
         bottomSheetTheme: const BottomSheetThemeData(
-          backgroundColor: Color(0xFF0A0A0A),
+          backgroundColor: TekColors.surfaceDeep,
         ),
-        dialogTheme: const DialogThemeData(backgroundColor: Color(0xFF0A0A0A)),
+        dialogTheme: const DialogThemeData(backgroundColor: TekColors.surfaceDeep),
         // TEK typography: Inter for body/UI (clean geometric workhorse) +
         // Space Grotesk for display headlines (tighter, more industrial —
         // pairs with the all-caps machined TEK headers).
@@ -2949,13 +2950,13 @@ class _BootstrapGateState extends State<BootstrapGate> {
                   const Text(
                     'Initializing Firebase and services',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white70),
+                    style: TextStyle(color: TekInk.body),
                   ),
                 ] else ...[
                   const Text(
                     'Startup failed',
                     style: TextStyle(
-                      color: Colors.redAccent,
+                      color: TekColors.danger,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -2963,7 +2964,7 @@ class _BootstrapGateState extends State<BootstrapGate> {
                   Text(
                     _friendlyBootstrapError(_error!),
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white70),
+                    style: const TextStyle(color: TekInk.body),
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -3104,7 +3105,7 @@ class _OnboardingFilmState extends State<OnboardingFilm>
                     child: const Text(
                       'SKIP',
                       style: TextStyle(
-                        color: Colors.white38,
+                        color: TekInk.faint,
                         fontSize: 11,
                         letterSpacing: 3,
                         fontWeight: FontWeight.bold,
@@ -3139,13 +3140,13 @@ class _OnboardingFilmState extends State<OnboardingFilm>
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   decoration: BoxDecoration(
                     color: active
-                        ? const Color(0xFF00FF41)
-                        : Colors.white24,
-                    borderRadius: BorderRadius.circular(2),
+                        ? TekColors.signal
+                        : TekInk.line,
+                    borderRadius: TekShape.brTight,
                     boxShadow: active
                         ? [
                             BoxShadow(
-                              color: const Color(0xFF00FF41)
+                              color: TekColors.signal
                                   .withValues(alpha: 0.6),
                               blurRadius: 8,
                             ),
@@ -3165,9 +3166,9 @@ class _OnboardingFilmState extends State<OnboardingFilm>
                 child: ElevatedButton(
                   onPressed: _next,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF00FF41),
+                    backgroundColor: TekColors.signal,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: TekShape.br,
                     ),
                     elevation: 0,
                   ),
@@ -3227,12 +3228,12 @@ class _OnboardingPanel extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: const Color(0xFF00FF41),
+                    color: TekColors.signal,
                     width: 1.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF00FF41)
+                      color: TekColors.signal
                           .withValues(alpha: 0.25 + 0.35 * t),
                       blurRadius: 24 + 18 * t,
                       spreadRadius: 1 + 2 * t,
@@ -3241,7 +3242,7 @@ class _OnboardingPanel extends StatelessWidget {
                 ),
                 child: Icon(
                   data.icon,
-                  color: const Color(0xFF00FF41),
+                  color: TekColors.signal,
                   size: 52,
                 ),
               );
@@ -3253,7 +3254,7 @@ class _OnboardingPanel extends StatelessWidget {
             data.eyebrow,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: Color(0xFF00FF41),
+              color: TekColors.signal,
               fontSize: 11,
               fontWeight: FontWeight.bold,
               letterSpacing: 4,
@@ -3265,7 +3266,7 @@ class _OnboardingPanel extends StatelessWidget {
             data.title,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: Colors.white,
+              color: TekInk.high,
               fontSize: 32,
               fontWeight: FontWeight.bold,
               letterSpacing: 3,
@@ -3278,7 +3279,7 @@ class _OnboardingPanel extends StatelessWidget {
             data.body,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: Colors.white70,
+              color: TekInk.body,
               fontSize: 14,
               height: 1.6,
               letterSpacing: 0.5,
@@ -3365,7 +3366,7 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Login failed (session): $msg'),
-              backgroundColor: Colors.red,
+              backgroundColor: TekColors.danger,
               duration: const Duration(seconds: 6),
             ),
           );
@@ -3376,7 +3377,7 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Login failed (session): ${e.toString()}'),
-              backgroundColor: Colors.red,
+              backgroundColor: TekColors.danger,
               duration: const Duration(seconds: 6),
             ),
           );
@@ -3427,7 +3428,7 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please enter a referral code'),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
         ),
       );
       return;
@@ -3449,7 +3450,7 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(msg),
-              backgroundColor: Colors.red,
+              backgroundColor: TekColors.danger,
               duration: Duration(seconds: 6),
             ),
           );
@@ -3479,7 +3480,7 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen>
               content: Text(
                 'Invalid referral code. Please check your email or try again in a moment.',
               ),
-              backgroundColor: Colors.red,
+              backgroundColor: TekColors.danger,
               duration: Duration(seconds: 4),
             ),
           );
@@ -3516,7 +3517,7 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Login failed (session): $msg'),
-              backgroundColor: Colors.red,
+              backgroundColor: TekColors.danger,
               duration: const Duration(seconds: 6),
             ),
           );
@@ -3528,7 +3529,7 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Login failed (session): ${e.toString()}'),
-              backgroundColor: Colors.red,
+              backgroundColor: TekColors.danger,
             ),
           );
         }
@@ -3564,7 +3565,7 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error validating code. Please try again.'),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
           ),
         );
       }
@@ -3604,7 +3605,7 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen>
                   'ENTER REFERRAL CODE',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.white70,
+                    color: TekInk.body,
                     letterSpacing: 1.5,
                   ),
                   textAlign: TextAlign.center,
@@ -3615,22 +3616,22 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen>
                 padding: EdgeInsets.symmetric(horizontal: 24),
                 child: TextField(
                   controller: _codeController,
-                  style: TextStyle(color: Color(0xFFB8B8C0)),
+                  style: TextStyle(color: TekColors.steel),
                   decoration: InputDecoration(
                     hintText: 'Enter code',
-                    hintStyle: TextStyle(color: Colors.white30),
+                    hintStyle: TextStyle(color: TekInk.dim),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.white30),
+                      borderRadius: TekShape.br,
+                      borderSide: BorderSide(color: TekInk.dim),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.white30),
+                      borderRadius: TekShape.br,
+                      borderSide: BorderSide(color: TekInk.dim),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: TekShape.br,
                       borderSide: BorderSide(
-                        color: Color(0xFF00FF41),
+                        color: TekColors.signal,
                         width: 2,
                       ),
                     ),
@@ -3645,7 +3646,7 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen>
               GlowButton(
                 onPressed: _isLoading ? null : _validateAndLogin,
                 label: 'CONTINUE',
-                color: Color(0xFFB8B8C0),
+                color: TekColors.steel,
                 isLoading: _isLoading,
                 width: 220,
                 height: 54,
@@ -3663,7 +3664,7 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen>
                 child: Text(
                   'APPLY FOR MEMBERSHIP',
                   style: TextStyle(
-                    color: Color(0xFF00FF41),
+                    color: TekColors.signal,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1,
@@ -3788,7 +3789,7 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Color(0xFF5A5A5A).withValues(alpha: 0.4),
+                        color: TekColors.chrome.withValues(alpha: 0.4),
                         width: 1,
                       ),
                     ),
@@ -3878,7 +3879,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Enter admin email and password'),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
         ),
       );
       return;
@@ -3906,7 +3907,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
               backgroundColor: const Color(0xFF0B0B0B),
               title: const Text(
                 'Not allowlisted',
-                style: TextStyle(color: Color(0xFFB8B8C0)),
+                style: TextStyle(color: TekColors.steel),
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -3914,15 +3915,15 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                 children: [
                   const Text(
                     'This account signed in successfully, but it is not in config/admins.uids.',
-                    style: TextStyle(color: Colors.white70, height: 1.4),
+                    style: TextStyle(color: TekInk.body, height: 1.4),
                   ),
                   const SizedBox(height: 12),
-                  const Text('UID:', style: TextStyle(color: Colors.white54)),
+                  const Text('UID:', style: TextStyle(color: TekInk.muted)),
                   const SizedBox(height: 6),
                   SelectableText(
                     uid.isEmpty ? '(missing uid)' : uid,
                     style: const TextStyle(
-                      color: Color(0xFFB8B8C0),
+                      color: TekColors.steel,
                       fontFamily: 'monospace',
                       fontSize: 13,
                     ),
@@ -3930,7 +3931,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                   const SizedBox(height: 10),
                   const Text(
                     'Copy this UID and make it the ONLY entry in config/admins.uids.',
-                    style: TextStyle(color: Colors.white54, height: 1.3),
+                    style: TextStyle(color: TekInk.muted, height: 1.3),
                   ),
                 ],
               ),
@@ -3946,7 +3947,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.of(dialogCtx).pop(),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  style: ElevatedButton.styleFrom(backgroundColor: TekColors.danger),
                   child: const Text('OK'),
                 ),
               ],
@@ -3995,7 +3996,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(msg),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
             duration: const Duration(seconds: 6),
           ),
         );
@@ -4005,7 +4006,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Admin login failed: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
             duration: const Duration(seconds: 6),
           ),
         );
@@ -4023,14 +4024,14 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
+          icon: const Icon(Icons.arrow_back, color: TekColors.steel),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: const Text(
           'ADMIN LOGIN',
           style: TextStyle(
-            color: Color(0xFFFF0000),
+            color: TekColors.danger,
             fontWeight: FontWeight.bold,
             letterSpacing: 2,
           ),
@@ -4043,7 +4044,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
           children: [
             const Text(
               'This is for TEK admins only.\nLong-press the TEK title on the login screen to open this page.',
-              style: TextStyle(color: Colors.white54, height: 1.4),
+              style: TextStyle(color: TekInk.muted, height: 1.4),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -4051,10 +4052,10 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
               controller: _emailController,
               enabled: !_loading,
               keyboardType: TextInputType.emailAddress,
-              style: const TextStyle(color: Color(0xFFB8B8C0)),
+              style: const TextStyle(color: TekColors.steel),
               decoration: const InputDecoration(
                 labelText: 'Admin email',
-                labelStyle: TextStyle(color: Colors.white70),
+                labelStyle: TextStyle(color: TekInk.body),
               ),
             ),
             const SizedBox(height: 12),
@@ -4062,17 +4063,17 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
               controller: _passwordController,
               enabled: !_loading,
               obscureText: _obscure,
-              style: const TextStyle(color: Color(0xFFB8B8C0)),
+              style: const TextStyle(color: TekColors.steel),
               decoration: InputDecoration(
                 labelText: 'Password',
-                labelStyle: const TextStyle(color: Colors.white70),
+                labelStyle: const TextStyle(color: TekInk.body),
                 suffixIcon: IconButton(
                   onPressed: _loading
                       ? null
                       : () => setState(() => _obscure = !_obscure),
                   icon: Icon(
                     _obscure ? Icons.visibility : Icons.visibility_off,
-                    color: Colors.white54,
+                    color: TekInk.muted,
                   ),
                 ),
               ),
@@ -4081,7 +4082,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
             ElevatedButton(
               onPressed: _loading ? null : _signInAdmin,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF0000),
+                backgroundColor: TekColors.danger,
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
               child: Text(_loading ? 'Signing in…' : 'Sign in'),
@@ -4120,13 +4121,13 @@ class _MembershipApplicationScreenState
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
+          icon: Icon(Icons.arrow_back, color: TekColors.steel),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'APPLY FOR MEMBERSHIP',
           style: TextStyle(
-            color: Color(0xFFB8B8C0),
+            color: TekColors.steel,
             fontSize: 16,
             fontWeight: FontWeight.bold,
             letterSpacing: 1,
@@ -4158,11 +4159,11 @@ class _MembershipApplicationScreenState
                   height: 150,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Color(0xFF00FF41), width: 2),
-                    color: Colors.grey[900],
+                    border: Border.all(color: TekColors.signal, width: 2),
+                    color: TekColors.surface,
                   ),
                   child: _profileImage == null
-                      ? Icon(Icons.camera_alt, color: Colors.white70, size: 40)
+                      ? Icon(Icons.camera_alt, color: TekInk.body, size: 40)
                       : ClipOval(
                           child: Image.file(
                             File(_profileImage!),
@@ -4175,7 +4176,7 @@ class _MembershipApplicationScreenState
               Text(
                 'TAP TO UPLOAD PROFILE PICTURE',
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: TekInk.body,
                   fontSize: 11,
                   letterSpacing: 1,
                 ),
@@ -4221,8 +4222,8 @@ class _MembershipApplicationScreenState
               Container(
                 padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white10),
-                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: TekInk.wash),
+                  borderRadius: TekShape.br,
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -4234,7 +4235,7 @@ class _MembershipApplicationScreenState
                           _eulaAccepted = value ?? false;
                         });
                       },
-                      activeColor: Color(0xFF00FF41),
+                      activeColor: TekColors.signal,
                       checkColor: Colors.black,
                     ),
                     Expanded(
@@ -4250,7 +4251,7 @@ class _MembershipApplicationScreenState
                             Text(
                               'Terms of Service & Privacy',
                               style: TextStyle(
-                                color: Color(0xFFB8B8C0),
+                                color: TekColors.steel,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -4259,7 +4260,7 @@ class _MembershipApplicationScreenState
                             Text(
                               'I agree to the Terms of Service and acknowledge the Privacy Policy. I understand there is zero tolerance for objectionable content or abusive users.',
                               style: TextStyle(
-                                color: Colors.white70,
+                                color: TekInk.body,
                                 fontSize: 11,
                               ),
                             ),
@@ -4282,14 +4283,14 @@ class _MembershipApplicationScreenState
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _eulaAccepted
-                        ? Color(0xFF00FF41).withValues(alpha: 0.2)
-                        : Colors.grey[700],
+                        ? TekColors.signal.withValues(alpha: 0.2)
+                        : TekColors.chrome,
                     side: BorderSide(
-                      color: _eulaAccepted ? Color(0xFF00FF41) : Colors.grey,
+                      color: _eulaAccepted ? TekColors.signal : TekColors.chrome,
                       width: 2,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: TekShape.br,
                     ),
                     padding: EdgeInsets.symmetric(vertical: 14),
                   ),
@@ -4298,7 +4299,7 @@ class _MembershipApplicationScreenState
                         ? 'SUBMIT APPLICATION'
                         : 'ACCEPT TERMS TO CONTINUE',
                     style: TextStyle(
-                      color: _eulaAccepted ? Color(0xFF00FF41) : Colors.grey,
+                      color: _eulaAccepted ? TekColors.signal : TekColors.chrome,
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1,
@@ -4326,7 +4327,7 @@ class _MembershipApplicationScreenState
         Text(
           label,
           style: TextStyle(
-            color: Colors.white70,
+            color: TekInk.body,
             fontSize: 11,
             fontWeight: FontWeight.bold,
             letterSpacing: 1,
@@ -4336,21 +4337,21 @@ class _MembershipApplicationScreenState
         TextField(
           controller: controller,
           maxLines: maxLines,
-          style: TextStyle(color: Color(0xFFB8B8C0)),
+          style: TextStyle(color: TekColors.steel),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: Colors.white30),
+            hintStyle: TextStyle(color: TekInk.dim),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.white10),
+              borderRadius: TekShape.br,
+              borderSide: BorderSide(color: TekInk.wash),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.white10),
+              borderRadius: TekShape.br,
+              borderSide: BorderSide(color: TekInk.wash),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Color(0xFF00FF41), width: 2),
+              borderRadius: TekShape.br,
+              borderSide: BorderSide(color: TekColors.signal, width: 2),
             ),
             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           ),
@@ -4368,7 +4369,7 @@ class _MembershipApplicationScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please fill in all fields'),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
         ),
       );
       return;
@@ -4378,7 +4379,7 @@ class _MembershipApplicationScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please add a profile photo before submitting'),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
         ),
       );
       return;
@@ -4403,7 +4404,7 @@ class _MembershipApplicationScreenState
             content: Text(
               'This email is already registered. Please use your existing referral code to log in.',
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
             duration: Duration(seconds: 4),
           ),
         );
@@ -4423,7 +4424,7 @@ class _MembershipApplicationScreenState
             content: Text(
               'This phone number is already registered. Please use your existing referral code to log in.',
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
             duration: Duration(seconds: 4),
           ),
         );
@@ -4436,7 +4437,7 @@ class _MembershipApplicationScreenState
             content: Text(
               'Please remove abusive or explicit language from your bio before submitting.',
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
           ),
         );
         return;
@@ -4510,7 +4511,7 @@ class _MembershipApplicationScreenState
           content: Text(
             'Application submitted! You will receive an email once approved.',
           ),
-          backgroundColor: Color(0xFF00FF41),
+          backgroundColor: TekColors.signal,
           duration: Duration(seconds: 3),
         ),
       );
@@ -4536,7 +4537,7 @@ class _MembershipApplicationScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error submitting application: ${e.toString()}'),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
           duration: Duration(seconds: 5),
         ),
       );
@@ -4661,13 +4662,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   shape: BoxShape.circle,
                   color: Colors.black.withValues(alpha: 0.35),
                   border: Border.all(
-                    color: const Color(0xFF00FF41).withValues(alpha: 0.55),
+                    color: TekColors.signal.withValues(alpha: 0.55),
                     width: 0.8,
                   ),
                 ),
                 child: const Icon(
                   Icons.admin_panel_settings,
-                  color: Color(0xFF00FF41),
+                  color: TekColors.signal,
                   size: 20,
                 ),
               ),
@@ -4725,7 +4726,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                           builder: (context) => const Center(
                             child: CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation(
-                                Color(0xFF00FF41),
+                                TekColors.signal,
                               ),
                             ),
                           ),
@@ -4788,7 +4789,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 Text(
                   (profileData['name'] as String? ?? 'N/A').toUpperCase(),
                   style: const TextStyle(
-                    color: Color(0xFFB8B8C0),
+                    color: TekColors.steel,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1,
@@ -4819,13 +4820,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
                           const Icon(
                             Icons.visibility,
                             size: 14,
-                            color: Colors.white70,
+                            color: TekInk.body,
                           ),
                           const SizedBox(width: 6),
                           Text(
                             'LEVEL $level',
                             style: const TextStyle(
-                              color: Colors.white70,
+                              color: TekInk.body,
                               fontSize: 12,
                               letterSpacing: 1,
                             ),
@@ -4864,7 +4865,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         builder: (_, v, _) => Ps3XpProgressBar(
                           progress: v,
                           height: 10,
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: TekShape.br,
                         ),
                       ),
                     );
@@ -4898,7 +4899,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                           AnimatedXP(
                             value: xpCurrent,
                             style: const TextStyle(
-                              color: Colors.white70,
+                              color: TekInk.body,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
@@ -4906,7 +4907,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                           const Text(
                             '$xpMax XP',
                             style: TextStyle(
-                              color: Colors.white70,
+                              color: TekInk.body,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
@@ -4942,7 +4943,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       child: Text(
                         '$xpToNext XP TO FREE DRINK',
                         style: const TextStyle(
-                          color: Colors.white54,
+                          color: TekInk.muted,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,
@@ -4958,7 +4959,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     child: Text(
                       '@${profileData['instagram']}',
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: TekInk.body,
                         fontSize: 12,
                       ),
                     ),
@@ -4971,7 +4972,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       profileData['bio'] as String,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: TekInk.body,
                         fontSize: 12,
                         height: 1.5,
                       ),
@@ -5130,25 +5131,25 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     icon: const Icon(
                       Icons.edit,
                       size: 16,
-                      color: Color(0xFFB8B8C0),
+                      color: TekColors.steel,
                     ),
                     label: const Text(
                       'EDIT INFORMATION',
                       style: TextStyle(
-                        color: Color(0xFFB8B8C0),
+                        color: TekColors.steel,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF00FF41).withValues(alpha: 0.1),
+                      backgroundColor: TekColors.signal.withValues(alpha: 0.1),
                       side: const BorderSide(
-                        color: Color(0xFF00FF41),
+                        color: TekColors.signal,
                         width: 1,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: TekShape.br,
                       ),
                       padding: const EdgeInsets.symmetric(
                         vertical: 12,
@@ -5181,12 +5182,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
                             myName: (profileData['name'] ?? '') as String,
                           )));
                         },
-                        icon: const Icon(Icons.qr_code_2, color: Color(0xFF00FF41), size: 16),
+                        icon: const Icon(Icons.qr_code_2, color: TekColors.signal, size: 16),
                         label: const Text('CONNECT VIA QR',
-                            style: TextStyle(color: Color(0xFF00FF41), fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                            style: TextStyle(color: TekColors.signal, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0xFF00FF41)),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          side: const BorderSide(color: TekColors.signal),
+                          shape: RoundedRectangleBorder(borderRadius: TekShape.br),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                       ),
@@ -5232,11 +5233,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           side: const BorderSide(
-                            color: Colors.white30,
+                            color: TekInk.dim,
                             width: 1,
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: TekShape.br,
                           ),
                           padding: const EdgeInsets.symmetric(
                             vertical: 10,
@@ -5249,7 +5250,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                             Text(
                               'REWARDS',
                               style: TextStyle(
-                                color: Color(0xFFB8B8C0),
+                                color: TekColors.steel,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -5257,7 +5258,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                             SizedBox(width: 8),
                             Icon(
                               Icons.arrow_forward,
-                              color: Color(0xFFB8B8C0),
+                              color: TekColors.steel,
                               size: 14,
                             ),
                           ],
@@ -5274,7 +5275,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     child: const Text(
                       'EDIT PICTURES',
                       style: TextStyle(
-                        color: Colors.white70,
+                        color: TekInk.body,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1,
@@ -5287,8 +5288,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white10),
+                      borderRadius: TekShape.br,
+                      border: Border.all(color: TekInk.wash),
                     ),
                     child: Row(
                       children: [
@@ -5296,12 +5297,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
                           width: 60,
                           height: 60,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: Colors.grey[800],
+                            borderRadius: TekShape.br,
+                            color: TekColors.surfaceLift,
                           ),
                           child: const Icon(
                             Icons.image,
-                            color: Colors.white30,
+                            color: TekInk.dim,
                             size: 30,
                           ),
                         ),
@@ -5310,7 +5311,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                           child: Text(
                             (profileData['name'] as String).toUpperCase(),
                             style: const TextStyle(
-                              color: Color(0xFFB8B8C0),
+                              color: TekColors.steel,
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
@@ -5318,7 +5319,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         ),
                         const Icon(
                           Icons.arrow_forward,
-                          color: Colors.white30,
+                          color: TekInk.dim,
                           size: 20,
                         ),
                       ],
@@ -5330,18 +5331,18 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white10),
+                      borderRadius: TekShape.br,
+                      border: Border.all(color: TekInk.wash),
                     ),
                     child: const Row(
                       children: [
-                        Icon(Icons.person, color: Colors.white70, size: 24),
+                        Icon(Icons.person, color: TekInk.body, size: 24),
                         SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             'EDIT INFO',
                             style: TextStyle(
-                              color: Color(0xFFB8B8C0),
+                              color: TekColors.steel,
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
@@ -5349,7 +5350,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         ),
                         Icon(
                           Icons.arrow_forward,
-                          color: Colors.white30,
+                          color: TekInk.dim,
                           size: 20,
                         ),
                       ],
@@ -5371,25 +5372,25 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     icon: const Icon(
                       Icons.person_add,
                       size: 18,
-                      color: Color(0xFF00FF41),
+                      color: TekColors.signal,
                     ),
                     label: const Text(
                       'INVITE FRIENDS',
                       style: TextStyle(
-                        color: Color(0xFF00FF41),
+                        color: TekColors.signal,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00FF41).withValues(alpha: 0.1),
+                      backgroundColor: TekColors.signal.withValues(alpha: 0.1),
                       side: const BorderSide(
-                        color: Color(0xFF00FF41),
+                        color: TekColors.signal,
                         width: 1,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: TekShape.br,
                       ),
                       padding: const EdgeInsets.symmetric(
                         vertical: 12,
@@ -5443,7 +5444,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Color(0xFF00FF41).withValues(alpha: 0.15),
+                  color: TekColors.signal.withValues(alpha: 0.15),
                   blurRadius: 40,
                   spreadRadius: 5,
                 ),
@@ -5457,7 +5458,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: Color(0xFF7A7A7A).withValues(alpha: 0.5),
+                color: TekColors.chrome.withValues(alpha: 0.5),
                 width: 1.5,
               ),
             ),
@@ -5469,7 +5470,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: Color(0xFF00FF41).withValues(alpha: 0.2),
+                color: TekColors.signal.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -5481,7 +5482,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: Color(0xFF8A8A8A).withValues(alpha: 0.35),
+                color: TekColors.chrome.withValues(alpha: 0.35),
                 width: 1.5,
               ),
             ),
@@ -5493,12 +5494,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: Color(0xFF00FF41).withValues(alpha: 0.35),
+                color: TekColors.signal.withValues(alpha: 0.35),
                 width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Color(0xFF00FF41).withValues(alpha: 0.12),
+                  color: TekColors.signal.withValues(alpha: 0.12),
                   blurRadius: 12,
                   spreadRadius: 1,
                 ),
@@ -5519,22 +5520,22 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
-                          color: Colors.grey[800],
+                          color: TekColors.surfaceLift,
                           child: Icon(
                             Icons.person,
                             size: size * 0.5,
-                            color: Colors.white30,
+                            color: TekInk.dim,
                           ),
                         );
                       },
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;
                         return Container(
-                          color: Colors.grey[800],
+                          color: TekColors.surfaceLift,
                           child: Center(
                             child: CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation(
-                                Color(0xFF00FF41),
+                                TekColors.signal,
                               ),
                             ),
                           ),
@@ -5542,11 +5543,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       },
                     )
                   : Container(
-                      color: Colors.grey[800],
+                      color: TekColors.surfaceLift,
                       child: Icon(
                         Icons.person,
                         size: size * 0.5,
-                        color: Colors.white30,
+                        color: TekInk.dim,
                       ),
                     ),
             ),
@@ -5599,7 +5600,7 @@ final List<_BadgeDef> _tekBadges = [
     name: 'FIRST CONTACT',
     subtitle: 'Complete 1 mission',
     icon: Icons.bolt,
-    color: const Color(0xFFCD7F32),
+    color: TekColors.gunmetal,
     sigil: _BadgeSigil.bolt,
     earned: (d) => ((d['completedSidequests'] as List?)?.length ?? 0) >= 1,
   ),
@@ -5607,7 +5608,7 @@ final List<_BadgeDef> _tekBadges = [
     name: 'OPERATOR',
     subtitle: 'Complete 5 missions',
     icon: Icons.military_tech,
-    color: const Color(0xFFC0C0C0),
+    color: TekColors.silver,
     sigil: _BadgeSigil.chevrons,
     earned: (d) => ((d['completedSidequests'] as List?)?.length ?? 0) >= 5,
   ),
@@ -5615,7 +5616,7 @@ final List<_BadgeDef> _tekBadges = [
     name: 'DEEP COVER',
     subtitle: 'Complete 10 missions',
     icon: Icons.shield,
-    color: const Color(0xFFFFD700),
+    color: TekColors.platinum,
     sigil: _BadgeSigil.shield,
     earned: (d) => ((d['completedSidequests'] as List?)?.length ?? 0) >= 10,
   ),
@@ -5623,7 +5624,7 @@ final List<_BadgeDef> _tekBadges = [
     name: 'PHANTOM',
     subtitle: 'Complete 18 missions',
     icon: Icons.nights_stay,
-    color: const Color(0xFF00FF41),
+    color: TekColors.signal,
     sigil: _BadgeSigil.crescent,
     earned: (d) => ((d['completedSidequests'] as List?)?.length ?? 0) >= 18,
   ),
@@ -5631,7 +5632,7 @@ final List<_BadgeDef> _tekBadges = [
     name: 'RECRUIT',
     subtitle: 'Make 1 friend',
     icon: Icons.person_add,
-    color: const Color(0xFFCD7F32),
+    color: TekColors.gunmetal,
     sigil: _BadgeSigil.node,
     earned: (d) => ((d['friends'] as List?)?.length ?? 0) >= 1,
   ),
@@ -5639,7 +5640,7 @@ final List<_BadgeDef> _tekBadges = [
     name: 'CONNECTED',
     subtitle: 'Have 5 friends',
     icon: Icons.group,
-    color: const Color(0xFFC0C0C0),
+    color: TekColors.silver,
     sigil: _BadgeSigil.triad,
     earned: (d) => ((d['friends'] as List?)?.length ?? 0) >= 5,
   ),
@@ -5647,7 +5648,7 @@ final List<_BadgeDef> _tekBadges = [
     name: 'NETWORKED',
     subtitle: 'Have 10 friends',
     icon: Icons.hub,
-    color: const Color(0xFFFFD700),
+    color: TekColors.platinum,
     sigil: _BadgeSigil.mesh,
     earned: (d) => ((d['friends'] as List?)?.length ?? 0) >= 10,
   ),
@@ -5655,7 +5656,7 @@ final List<_BadgeDef> _tekBadges = [
     name: 'INITIATE',
     subtitle: 'Reach 100 XP',
     icon: Icons.star_border,
-    color: const Color(0xFFCD7F32),
+    color: TekColors.gunmetal,
     sigil: _BadgeSigil.spark,
     earned: (d) => ((d['xpPoints'] as num?)?.toInt() ?? 0) >= 100,
   ),
@@ -5663,7 +5664,7 @@ final List<_BadgeDef> _tekBadges = [
     name: 'ASSET',
     subtitle: 'Reach 500 XP',
     icon: Icons.star_half,
-    color: const Color(0xFFC0C0C0),
+    color: TekColors.silver,
     sigil: _BadgeSigil.halfStar,
     earned: (d) => ((d['xpPoints'] as num?)?.toInt() ?? 0) >= 500,
   ),
@@ -5671,7 +5672,7 @@ final List<_BadgeDef> _tekBadges = [
     name: 'OPERATIVE',
     subtitle: 'Reach 1000 XP',
     icon: Icons.star,
-    color: const Color(0xFFFFD700),
+    color: TekColors.platinum,
     sigil: _BadgeSigil.star,
     earned: (d) => ((d['xpPoints'] as num?)?.toInt() ?? 0) >= 1000,
   ),
@@ -5679,7 +5680,7 @@ final List<_BadgeDef> _tekBadges = [
     name: 'LEGEND',
     subtitle: 'Reach 2500 XP',
     icon: Icons.auto_awesome,
-    color: const Color(0xFF00FF41),
+    color: TekColors.signal,
     sigil: _BadgeSigil.vortex,
     earned: (d) => ((d['xpPoints'] as num?)?.toInt() ?? 0) >= 2500,
   ),
@@ -5687,7 +5688,7 @@ final List<_BadgeDef> _tekBadges = [
     name: 'CHALLENGER',
     subtitle: 'Win a challenge',
     icon: Icons.emoji_events,
-    color: const Color(0xFFFFD700),
+    color: TekColors.platinum,
     sigil: _BadgeSigil.laurelCrown,
     earned: (d) => ((d['challengesWon'] as num?)?.toInt() ?? 0) >= 1,
   ),
@@ -5727,7 +5728,7 @@ const List<_TekReward> _tekRewards = [
     xpRequired: 0,
     level: 1,
     icon: Icons.local_cafe,
-    color: Color(0xFFCD7F32),
+    color: TekColors.gunmetal,
   ),
   _TekReward(
     id: 'free_drink',
@@ -5736,7 +5737,7 @@ const List<_TekReward> _tekRewards = [
     xpRequired: 500,
     level: 5,
     icon: Icons.local_bar,
-    color: Color(0xFFC0C0C0),
+    color: TekColors.silver,
   ),
   _TekReward(
     id: 'plus_one_guest',
@@ -5745,7 +5746,7 @@ const List<_TekReward> _tekRewards = [
     xpRequired: 800,
     level: 8,
     icon: Icons.person_add_alt_1,
-    color: Color(0xFF87CEEB),
+    color: TekColors.chrome,
   ),
   _TekReward(
     id: 'free_ticket',
@@ -5754,7 +5755,7 @@ const List<_TekReward> _tekRewards = [
     xpRequired: 1200,
     level: 12,
     icon: Icons.confirmation_num,
-    color: Color(0xFFFFD700),
+    color: TekColors.platinum,
   ),
   _TekReward(
     id: 'vip_entry',
@@ -5763,7 +5764,7 @@ const List<_TekReward> _tekRewards = [
     xpRequired: 1800,
     level: 18,
     icon: Icons.star,
-    color: Color(0xFFFFD700),
+    color: TekColors.platinum,
   ),
   _TekReward(
     id: 'reserved_booth',
@@ -5772,7 +5773,7 @@ const List<_TekReward> _tekRewards = [
     xpRequired: 2500,
     level: 25,
     icon: Icons.weekend,
-    color: Color(0xFF00FF41),
+    color: TekColors.signal,
   ),
   _TekReward(
     id: 'inner_circle',
@@ -5781,7 +5782,7 @@ const List<_TekReward> _tekRewards = [
     xpRequired: 4000,
     level: 40,
     icon: Icons.diamond,
-    color: Color(0xFF9F59FF),
+    color: TekColors.silver,
   ),
   _TekReward(
     id: 'black_card',
@@ -5790,7 +5791,7 @@ const List<_TekReward> _tekRewards = [
     xpRequired: 6000,
     level: 60,
     icon: Icons.workspace_premium,
-    color: Color(0xFFE63946),
+    color: TekColors.signal,
   ),
 ];
 
@@ -5826,9 +5827,9 @@ class TekTier {
   const TekTier(this.kind, this.label, this.icon, this.color);
 }
 
-const _tierFounder = TekTier(TekIdentityTier.founder, 'FOUNDER', Icons.shield, Color(0xFFC0C0C0));
-const _tierBlackCard = TekTier(TekIdentityTier.blackCard, 'BLACK CARD', Icons.workspace_premium, Color(0xFFE63946));
-const _tierInnerCircle = TekTier(TekIdentityTier.innerCircle, 'INNER CIRCLE', Icons.diamond, Color(0xFF9F59FF));
+const _tierFounder = TekTier(TekIdentityTier.founder, 'FOUNDER', Icons.shield, TekColors.silver);
+const _tierBlackCard = TekTier(TekIdentityTier.blackCard, 'BLACK CARD', Icons.workspace_premium, TekColors.signal);
+const _tierInnerCircle = TekTier(TekIdentityTier.innerCircle, 'INNER CIRCLE', Icons.diamond, TekColors.silver);
 
 /// Resolve the highest-priority tier badge for a user given their data + flags.
 /// Priority: Black Card > Inner Circle > Founder > none
@@ -6036,7 +6037,7 @@ class TieredAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ringColor = tier?.color ?? const Color(0xFF00FF41).withValues(alpha: 0.5);
+    final ringColor = tier?.color ?? TekColors.signal.withValues(alpha: 0.5);
     final ringWidth = tier == null ? 1.5 : 2.5;
     return SizedBox(
       width: size + 6,
@@ -6063,12 +6064,12 @@ class TieredAvatar extends StatelessWidget {
               child: (imageUrl != null && imageUrl!.isNotEmpty)
                   ? FadeInNetImage(url: imageUrl!, avatarSize: size)
                   : Container(
-                      color: const Color(0xFF00FF41).withValues(alpha: 0.15),
+                      color: TekColors.signal.withValues(alpha: 0.15),
                       alignment: Alignment.center,
                       child: Text(
                         fallbackText.trim().isEmpty ? '?' : fallbackText.trim()[0].toUpperCase(),
                         style: TextStyle(
-                          color: const Color(0xFF00FF41),
+                          color: TekColors.signal,
                           fontSize: size * 0.4,
                           fontWeight: FontWeight.bold,
                         ),
@@ -6114,7 +6115,7 @@ class _TrophyWallSection extends StatelessWidget {
           child: Text(
             'STATS',
             style: TextStyle(
-              color: Colors.white70,
+              color: TekInk.body,
               fontSize: 12,
               fontWeight: FontWeight.bold,
               letterSpacing: 1,
@@ -6138,7 +6139,7 @@ class _TrophyWallSection extends StatelessWidget {
           child: Text(
             'BADGES',
             style: TextStyle(
-              color: Colors.white70,
+              color: TekInk.body,
               fontSize: 12,
               fontWeight: FontWeight.bold,
               letterSpacing: 1,
@@ -6175,7 +6176,7 @@ class _StatCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const valueStyle = TextStyle(
-      color: Color(0xFF00FF41),
+      color: TekColors.signal,
       fontSize: 22,
       fontWeight: FontWeight.bold,
     );
@@ -6184,9 +6185,9 @@ class _StatCell extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.white10),
+          color: TekInk.high.withValues(alpha: 0.05),
+          borderRadius: TekShape.br,
+          border: Border.all(color: TekInk.wash),
         ),
         child: Column(
           children: [
@@ -6197,7 +6198,7 @@ class _StatCell extends StatelessWidget {
             Text(
               label,
               style: const TextStyle(
-                color: Colors.white54,
+                color: TekInk.muted,
                 fontSize: 9,
                 letterSpacing: 0.5,
                 fontWeight: FontWeight.bold,
@@ -6223,10 +6224,10 @@ class _BadgeTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: earned
             ? badge.color.withValues(alpha: 0.1)
-            : Colors.white.withValues(alpha: 0.03),
-        borderRadius: BorderRadius.circular(10),
+            : TekInk.high.withValues(alpha: 0.03),
+        borderRadius: TekShape.br,
         border: Border.all(
-          color: earned ? badge.color.withValues(alpha: 0.4) : Colors.white10,
+          color: earned ? badge.color.withValues(alpha: 0.4) : TekInk.wash,
         ),
       ),
       child: Column(
@@ -6248,7 +6249,7 @@ class _BadgeTile extends StatelessWidget {
             badge.name,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: earned ? Colors.white : Colors.white30,
+              color: earned ? TekInk.high : TekInk.dim,
               fontSize: 8,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.3,
@@ -6259,7 +6260,7 @@ class _BadgeTile extends StatelessWidget {
             badge.subtitle,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: earned ? Colors.white54 : Colors.white24,
+              color: earned ? TekInk.muted : TekInk.line,
               fontSize: 7,
               letterSpacing: 0.2,
             ),
@@ -6339,7 +6340,7 @@ class _BadgeMedallionPainter extends CustomPainter {
       r * 0.81,
       Paint()
         ..shader = const RadialGradient(
-          colors: [Color(0xFF131313), Color(0xFF000000)],
+          colors: [TekColors.surface2, Color(0xFF000000)],
         ).createShader(Rect.fromCircle(center: center, radius: r * 0.81)),
     );
 
@@ -6610,7 +6611,7 @@ class _EngravedDiscPainter extends CustomPainter {
       r * 0.80,
       Paint()
         ..shader = const RadialGradient(
-          colors: [Color(0xFF131313), Color(0xFF000000)],
+          colors: [TekColors.surface2, Color(0xFF000000)],
         ).createShader(Rect.fromCircle(center: center, radius: r * 0.80)),
     );
 
@@ -6766,13 +6767,13 @@ class RewardsProgressPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
+          icon: const Icon(Icons.arrow_back, color: TekColors.steel),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'REWARDS',
           style: TextStyle(
-            color: Color(0xFF00FF41),
+            color: TekColors.signal,
             fontSize: 18,
             fontWeight: FontWeight.bold,
             letterSpacing: 2,
@@ -6792,20 +6793,20 @@ class RewardsProgressPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      const Color(0xFF00FF41).withValues(alpha: 0.2),
-                      const Color(0xFF00FF41).withValues(alpha: 0.05),
+                      TekColors.signal.withValues(alpha: 0.2),
+                      TekColors.signal.withValues(alpha: 0.05),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: TekShape.br,
                   border: Border.all(
-                      color: const Color(0xFF00FF41).withValues(alpha: 0.3)),
+                      color: TekColors.signal.withValues(alpha: 0.3)),
                 ),
                 child: Column(
                   children: [
                     Text(
                       'LEVEL $currentLevel',
                       style: const TextStyle(
-                        color: Color(0xFF00FF41),
+                        color: TekColors.signal,
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 2,
@@ -6818,7 +6819,7 @@ class RewardsProgressPage extends StatelessWidget {
                         Text(
                           '$xp XP',
                           style: const TextStyle(
-                            color: Colors.white70,
+                            color: TekInk.body,
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                           ),
@@ -6826,7 +6827,7 @@ class RewardsProgressPage extends StatelessWidget {
                         Text(
                           '$nextThreshold XP',
                           style: const TextStyle(
-                            color: Colors.white70,
+                            color: TekInk.body,
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                           ),
@@ -6837,7 +6838,7 @@ class RewardsProgressPage extends StatelessWidget {
                     Ps3XpProgressBar(
                       progress: progress,
                       height: 14,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: TekShape.br,
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -6846,8 +6847,8 @@ class RewardsProgressPage extends StatelessWidget {
                           : '$xpToNext XP TO ${next.name}',
                       style: TextStyle(
                         color: next == null
-                            ? const Color(0xFFFFD700)
-                            : Colors.white54,
+                            ? TekColors.platinum
+                            : TekInk.muted,
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1,
@@ -6862,7 +6863,7 @@ class RewardsProgressPage extends StatelessWidget {
                 const Text(
                   'NEXT REWARD',
                   style: TextStyle(
-                    color: Color(0xFF00FF41),
+                    color: TekColors.signal,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.5,
@@ -6877,7 +6878,7 @@ class RewardsProgressPage extends StatelessWidget {
                 const Text(
                   'UNLOCKED',
                   style: TextStyle(
-                    color: Color(0xFF00FF41),
+                    color: TekColors.signal,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.5,
@@ -6895,7 +6896,7 @@ class RewardsProgressPage extends StatelessWidget {
                 const Text(
                   'HIGHER TIERS',
                   style: TextStyle(
-                    color: Colors.white38,
+                    color: TekInk.faint,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.5,
@@ -6920,13 +6921,13 @@ class RewardsProgressPage extends StatelessWidget {
     required bool locked,
     required bool isNext,
   }) {
-    final accent = locked ? Colors.white24 : reward.color;
-    final highlight = isNext ? const Color(0xFF00FF41) : accent;
+    final accent = locked ? TekInk.line : reward.color;
+    final highlight = isNext ? TekColors.signal : accent;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: locked ? 0.03 : 0.06),
-        borderRadius: BorderRadius.circular(16),
+        color: TekInk.high.withValues(alpha: locked ? 0.03 : 0.06),
+        borderRadius: TekShape.br,
         border: Border.all(
           color: highlight.withValues(alpha: locked && !isNext ? 0.25 : 0.7),
           width: isNext ? 2 : 1.2,
@@ -6951,7 +6952,7 @@ class RewardsProgressPage extends StatelessWidget {
                     Text(
                       'LEVEL ${reward.level}  •  ${reward.xpRequired} XP',
                       style: TextStyle(
-                        color: locked ? Colors.white38 : Colors.white70,
+                        color: locked ? TekInk.faint : TekInk.body,
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1,
@@ -6960,7 +6961,7 @@ class RewardsProgressPage extends StatelessWidget {
                     if (!locked) ...[
                       const SizedBox(width: 8),
                       const Icon(Icons.check_circle,
-                          color: Color(0xFF00FF41), size: 14),
+                          color: TekColors.signal, size: 14),
                     ],
                   ],
                 ),
@@ -6968,7 +6969,7 @@ class RewardsProgressPage extends StatelessWidget {
                 Text(
                   reward.name,
                   style: TextStyle(
-                    color: locked ? Colors.white54 : Colors.white,
+                    color: locked ? TekInk.muted : TekInk.high,
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1,
@@ -6978,7 +6979,7 @@ class RewardsProgressPage extends StatelessWidget {
                 Text(
                   reward.description,
                   style: TextStyle(
-                    color: locked ? Colors.white38 : Colors.white70,
+                    color: locked ? TekInk.faint : TekInk.body,
                     fontSize: 13,
                     height: 1.35,
                   ),
@@ -7147,13 +7148,13 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
+          icon: const Icon(Icons.arrow_back, color: TekColors.steel),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'INVITE FRIENDS',
           style: TextStyle(
-            color: Color(0xFF00FF41),
+            color: TekColors.signal,
             fontSize: 18,
             fontWeight: FontWeight.bold,
             letterSpacing: 2,
@@ -7164,7 +7165,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
       body: _loading
           ? const Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(Color(0xFF00FF41)),
+                valueColor: AlwaysStoppedAnimation(TekColors.signal),
               ),
             )
           : _errorMessage != null
@@ -7177,7 +7178,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                     Text(
                       _errorMessage!,
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: TekInk.body,
                         fontSize: 14,
                       ),
                       textAlign: TextAlign.center,
@@ -7192,7 +7193,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                       ),
                       child: const Text(
                         'RETRY',
-                        style: TextStyle(color: Color(0xFF00FF41)),
+                        style: TextStyle(color: TekColors.signal),
                       ),
                     ),
                   ],
@@ -7201,7 +7202,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
             )
           : RefreshIndicator(
               onRefresh: _loadInviteStats,
-              color: const Color(0xFF00FF41),
+              color: TekColors.signal,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(16),
@@ -7240,19 +7241,19 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF00FF41).withValues(alpha: hasCode ? 0.15 : 0.05),
-            const Color(0xFF00FF41).withValues(alpha: hasCode ? 0.04 : 0.01),
+            TekColors.signal.withValues(alpha: hasCode ? 0.15 : 0.05),
+            TekColors.signal.withValues(alpha: hasCode ? 0.04 : 0.01),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF00FF41).withValues(alpha: hasCode ? 0.3 : 0.15)),
+        borderRadius: TekShape.br,
+        border: Border.all(color: TekColors.signal.withValues(alpha: hasCode ? 0.3 : 0.15)),
       ),
       child: Column(
         children: [
           const Text(
             'YOUR INVITE CODE',
             style: TextStyle(
-              color: Colors.white54,
+              color: TekInk.muted,
               fontSize: 11,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.5,
@@ -7262,7 +7263,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
           Text(
             hasCode ? _inviteCode! : 'Pending',
             style: TextStyle(
-              color: const Color(0xFF00FF41),
+              color: TekColors.signal,
               fontSize: hasCode ? 28 : 24,
               fontWeight: FontWeight.bold,
               letterSpacing: hasCode ? 3 : 2,
@@ -7272,7 +7273,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
           const SizedBox(height: 16),
           const Text(
             'Invite 5 friends to earn a free drink.\nIf all 5 buy tickets, you get a free ticket!',
-            style: TextStyle(color: Colors.white54, fontSize: 12, height: 1.5),
+            style: TextStyle(color: TekInk.muted, fontSize: 12, height: 1.5),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
@@ -7292,9 +7293,9 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF00FF41),
+                    backgroundColor: TekColors.signal,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: TekShape.br,
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
@@ -7304,17 +7305,17 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
               ElevatedButton(
                 onPressed: _copyInviteCode,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white.withValues(alpha: 0.08),
+                  backgroundColor: TekInk.high.withValues(alpha: 0.08),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: const BorderSide(color: Colors.white24),
+                    borderRadius: TekShape.br,
+                    side: const BorderSide(color: TekInk.line),
                   ),
                   padding: const EdgeInsets.symmetric(
                     vertical: 14,
                     horizontal: 16,
                   ),
                 ),
-                child: const Icon(Icons.copy, size: 18, color: Colors.white70),
+                child: const Icon(Icons.copy, size: 18, color: TekInk.body),
               ),
             ],
           ),
@@ -7323,9 +7324,9 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.03),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white10),
+              color: TekInk.high.withValues(alpha: 0.03),
+              borderRadius: TekShape.br,
+              border: Border.all(color: TekInk.wash),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -7333,7 +7334,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                 const Text(
                   'SEND EMAIL INVITE',
                   style: TextStyle(
-                    color: Colors.white54,
+                    color: TekInk.muted,
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.5,
@@ -7346,24 +7347,24 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                       child: TextField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        style: const TextStyle(color: Colors.white, fontSize: 14),
+                        style: const TextStyle(color: TekInk.high, fontSize: 14),
                         decoration: InputDecoration(
                           hintText: 'friend@email.com',
-                          hintStyle: const TextStyle(color: Colors.white24),
+                          hintStyle: const TextStyle(color: TekInk.line),
                           filled: true,
-                          fillColor: Colors.white.withValues(alpha: 0.05),
+                          fillColor: TekInk.high.withValues(alpha: 0.05),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: Colors.white10),
+                            borderRadius: TekShape.br,
+                            borderSide: const BorderSide(color: TekInk.wash),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: Colors.white10),
+                            borderRadius: TekShape.br,
+                            borderSide: const BorderSide(color: TekInk.wash),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: Color(0xFF00FF41)),
+                            borderRadius: TekShape.br,
+                            borderSide: const BorderSide(color: TekColors.signal),
                           ),
                         ),
                       ),
@@ -7372,10 +7373,10 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                     ElevatedButton(
                       onPressed: _sendingEmail ? null : _sendEmailInvite,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00FF41),
-                        disabledBackgroundColor: const Color(0xFF00FF41).withValues(alpha: 0.3),
+                        backgroundColor: TekColors.signal,
+                        disabledBackgroundColor: TekColors.signal.withValues(alpha: 0.3),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: TekShape.br,
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                       ),
@@ -7407,7 +7408,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
         const Text(
           'INVITE PROGRESS',
           style: TextStyle(
-            color: Color(0xFF00FF41),
+            color: TekColors.signal,
             fontSize: 14,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.5,
@@ -7441,19 +7442,19 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.03),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white10),
+            color: TekInk.high.withValues(alpha: 0.03),
+            borderRadius: TekShape.br,
+            border: Border.all(color: TekInk.wash),
           ),
           child: Row(
             children: [
-              const Icon(Icons.star, color: Color(0xFF00FF41), size: 22),
+              const Icon(Icons.star, color: TekColors.signal, size: 22),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   '+50 XP per approved invite (${_approvedCount * 50} XP earned)',
                   style: const TextStyle(
-                    color: Colors.white70,
+                    color: TekInk.body,
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -7480,13 +7481,13 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: earned
-            ? const Color(0xFF00FF41).withValues(alpha: 0.08)
-            : Colors.white.withValues(alpha: 0.03),
-        borderRadius: BorderRadius.circular(14),
+            ? TekColors.signal.withValues(alpha: 0.08)
+            : TekInk.high.withValues(alpha: 0.03),
+        borderRadius: TekShape.br,
         border: Border.all(
           color: earned
-              ? const Color(0xFF00FF41).withValues(alpha: 0.5)
-              : Colors.white10,
+              ? TekColors.signal.withValues(alpha: 0.5)
+              : TekInk.wash,
           width: earned ? 1.5 : 1,
         ),
       ),
@@ -7497,13 +7498,13 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
             height: 48,
             decoration: BoxDecoration(
               color: earned
-                  ? const Color(0xFF00FF41).withValues(alpha: 0.2)
-                  : Colors.white.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(12),
+                  ? TekColors.signal.withValues(alpha: 0.2)
+                  : TekInk.high.withValues(alpha: 0.05),
+              borderRadius: TekShape.br,
             ),
             child: Icon(
               icon,
-              color: earned ? const Color(0xFF00FF41) : Colors.white38,
+              color: earned ? TekColors.signal : TekInk.faint,
               size: 26,
             ),
           ),
@@ -7517,7 +7518,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                     Text(
                       title,
                       style: TextStyle(
-                        color: earned ? const Color(0xFF00FF41) : Colors.white,
+                        color: earned ? TekColors.signal : TekInk.high,
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                       ),
@@ -7526,7 +7527,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                       const SizedBox(width: 8),
                       const Icon(
                         Icons.check_circle,
-                        color: Color(0xFF00FF41),
+                        color: TekColors.signal,
                         size: 18,
                       ),
                     ],
@@ -7535,21 +7536,21 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: const TextStyle(color: Colors.white54, fontSize: 12),
+                  style: const TextStyle(color: TekInk.muted, fontSize: 12),
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
                     Expanded(
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: TekShape.br,
                         child: LinearProgressIndicator(
                           value: progress,
-                          backgroundColor: Colors.white10,
+                          backgroundColor: TekInk.wash,
                           valueColor: AlwaysStoppedAnimation(
                             earned
-                                ? const Color(0xFF00FF41)
-                                : const Color(0xFF00FF41).withValues(alpha: 0.6),
+                                ? TekColors.signal
+                                : TekColors.signal.withValues(alpha: 0.6),
                           ),
                           minHeight: 6,
                         ),
@@ -7559,7 +7560,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                     Text(
                       '$current / $target',
                       style: const TextStyle(
-                        color: Colors.white54,
+                        color: TekInk.muted,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
@@ -7581,7 +7582,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
         Text(
           'INVITED FRIENDS (${_invitedFriends.length})',
           style: const TextStyle(
-            color: Color(0xFF00FF41),
+            color: TekColors.signal,
             fontSize: 14,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.5,
@@ -7592,18 +7593,18 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.03),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.white10),
+              color: TekInk.high.withValues(alpha: 0.03),
+              borderRadius: TekShape.br,
+              border: Border.all(color: TekInk.wash),
             ),
             child: const Center(
               child: Column(
                 children: [
-                  Icon(Icons.person_add, color: Colors.white24, size: 40),
+                  Icon(Icons.person_add, color: TekInk.line, size: 40),
                   SizedBox(height: 12),
                   Text(
                     'No friends invited yet.\nShare your invite link to get started!',
-                    style: TextStyle(color: Colors.white38, fontSize: 13),
+                    style: TextStyle(color: TekInk.faint, fontSize: 13),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -7627,7 +7628,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
     IconData statusIcon;
 
     if (boughtTicket) {
-      statusColor = const Color(0xFF00FF41);
+      statusColor = TekColors.signal;
       statusLabel = 'TICKET BOUGHT';
       statusIcon = Icons.confirmation_num;
     } else if (status == 'approved') {
@@ -7635,11 +7636,11 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
       statusLabel = 'APPROVED';
       statusIcon = Icons.check_circle;
     } else if (status == 'rejected') {
-      statusColor = const Color(0xFFFF4141);
+      statusColor = TekColors.danger;
       statusLabel = 'REJECTED';
       statusIcon = Icons.cancel;
     } else {
-      statusColor = const Color(0xFFFFB74D);
+      statusColor = TekColors.silver;
       statusLabel = 'PENDING';
       statusIcon = Icons.hourglass_empty;
     }
@@ -7648,9 +7649,9 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.03),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white10),
+        color: TekInk.high.withValues(alpha: 0.03),
+        borderRadius: TekShape.br,
+        border: Border.all(color: TekInk.wash),
       ),
       child: Row(
         children: [
@@ -7659,7 +7660,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
             height: 42,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white24),
+              border: Border.all(color: TekInk.line),
             ),
             child: ClipOval(
               child: profileImageUrl != null && profileImageUrl.isNotEmpty
@@ -7667,19 +7668,19 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                       profileImageUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (_, _, _) => Container(
-                        color: Colors.grey[800],
+                        color: TekColors.surfaceLift,
                         child: const Icon(
                           Icons.person,
-                          color: Colors.white30,
+                          color: TekInk.dim,
                           size: 20,
                         ),
                       ),
                     )
                   : Container(
-                      color: Colors.grey[800],
+                      color: TekColors.surfaceLift,
                       child: const Icon(
                         Icons.person,
-                        color: Colors.white30,
+                        color: TekInk.dim,
                         size: 20,
                       ),
                     ),
@@ -7690,7 +7691,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
             child: Text(
               name.toUpperCase(),
               style: const TextStyle(
-                color: Color(0xFFB8B8C0),
+                color: TekColors.steel,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.5,
@@ -7720,7 +7721,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
         const Text(
           'YOUR REWARDS',
           style: TextStyle(
-            color: Color(0xFF00FF41),
+            color: TekColors.signal,
             fontSize: 14,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.5,
@@ -7742,26 +7743,26 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
               gradient: LinearGradient(
                 colors: redeemed
                     ? [
-                        Colors.white.withValues(alpha: 0.03),
-                        Colors.white.withValues(alpha: 0.01),
+                        TekInk.high.withValues(alpha: 0.03),
+                        TekInk.high.withValues(alpha: 0.01),
                       ]
                     : [
-                        const Color(0xFF00FF41).withValues(alpha: 0.15),
-                        const Color(0xFF00FF41).withValues(alpha: 0.04),
+                        TekColors.signal.withValues(alpha: 0.15),
+                        TekColors.signal.withValues(alpha: 0.04),
                       ],
               ),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: TekShape.br,
               border: Border.all(
                 color: redeemed
-                    ? Colors.white24
-                    : const Color(0xFF00FF41).withValues(alpha: 0.5),
+                    ? TekInk.line
+                    : TekColors.signal.withValues(alpha: 0.5),
               ),
             ),
             child: Row(
               children: [
                 Icon(
                   icon,
-                  color: redeemed ? Colors.white38 : const Color(0xFF00FF41),
+                  color: redeemed ? TekInk.faint : TekColors.signal,
                   size: 28,
                 ),
                 const SizedBox(width: 14),
@@ -7773,8 +7774,8 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                         label,
                         style: TextStyle(
                           color: redeemed
-                              ? Colors.white54
-                              : const Color(0xFF00FF41),
+                              ? TekInk.muted
+                              : TekColors.signal,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -7782,7 +7783,7 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                       Text(
                         redeemed ? 'Redeemed' : 'Show this at the bar',
                         style: TextStyle(
-                          color: redeemed ? Colors.white38 : Colors.white54,
+                          color: redeemed ? TekInk.faint : TekInk.muted,
                           fontSize: 12,
                         ),
                       ),
@@ -7796,20 +7797,20 @@ class _InviteFriendsPageState extends State<InviteFriendsPage> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF00FF41).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
+                      color: TekColors.signal.withValues(alpha: 0.15),
+                      borderRadius: TekShape.br,
                     ),
                     child: const Text(
                       'ACTIVE',
                       style: TextStyle(
-                        color: Color(0xFF00FF41),
+                        color: TekColors.signal,
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 if (redeemed)
-                  const Icon(Icons.check, color: Colors.white38, size: 20),
+                  const Icon(Icons.check, color: TekInk.faint, size: 20),
               ],
             ),
           );
@@ -8053,7 +8054,7 @@ class _MainAppState extends State<MainApp> {
               Text(n.body!, style: const TextStyle(color: Colors.black87, fontSize: 13)),
           ],
         ),
-        backgroundColor: const Color(0xFF00FF41),
+        backgroundColor: TekColors.signal,
         duration: const Duration(seconds: 4),
         behavior: SnackBarBehavior.floating,
       ));
@@ -8205,7 +8206,7 @@ class _MainAppState extends State<MainApp> {
       ),
       child: Icon(
         icon,
-        color: selected ? const Color(0xFF00FF41) : const Color(0xFF8F959E),
+        color: selected ? TekColors.signal : const Color(0xFF8F959E),
       ),
     );
   }
@@ -8242,7 +8243,7 @@ class _MainAppState extends State<MainApp> {
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: 0.5),
               border: const Border(
-                top: BorderSide(color: Colors.white10, width: 0.5),
+                top: BorderSide(color: TekInk.wash, width: 0.5),
               ),
             ),
             child: LayoutBuilder(
@@ -8261,11 +8262,11 @@ class _MainAppState extends State<MainApp> {
                         width: pillWidth,
                         height: 3,
                         decoration: BoxDecoration(
-                          color: _showControl ? const Color(0xFFFF0000) : const Color(0xFF00FF41),
-                          borderRadius: BorderRadius.circular(2),
+                          color: _showControl ? TekColors.danger : TekColors.signal,
+                          borderRadius: TekShape.brTight,
                           boxShadow: [
                             BoxShadow(
-                              color: (_showControl ? const Color(0xFFFF0000) : const Color(0xFF00FF41)).withValues(alpha: 0.6),
+                              color: (_showControl ? TekColors.danger : TekColors.signal).withValues(alpha: 0.6),
                               blurRadius: 8,
                               spreadRadius: 0,
                             ),
@@ -8328,8 +8329,8 @@ class _MainAppState extends State<MainApp> {
                   ),
               ],
               selectedItemColor: _showControl
-                  ? Color(0xFFFF0000)
-                  : Color(0xFF00FF41),
+                  ? TekColors.danger
+                  : TekColors.signal,
               unselectedItemColor: const Color(0xFF8F959E),
               selectedLabelStyle: const TextStyle(
                 fontSize: 11,
@@ -8478,14 +8479,14 @@ class _SocialScreenState extends State<SocialScreen>
               padding: EdgeInsets.all(12),
               child: TextField(
                 controller: _searchController,
-                style: TextStyle(color: Color(0xFFB8B8C0)),
+                style: TextStyle(color: TekColors.steel),
                 decoration: InputDecoration(
                   hintText: 'Search username or name...',
-                  hintStyle: TextStyle(color: Colors.white30),
-                  prefixIcon: Icon(Icons.search, color: Colors.white70),
+                  hintStyle: TextStyle(color: TekInk.dim),
+                  prefixIcon: Icon(Icons.search, color: TekInk.body),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
-                          icon: Icon(Icons.clear, color: Colors.white70),
+                          icon: Icon(Icons.clear, color: TekInk.body),
                           onPressed: () {
                             _searchController.clear();
                             setState(() => _searchQuery = '');
@@ -8493,16 +8494,16 @@ class _SocialScreenState extends State<SocialScreen>
                         )
                       : null,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white10),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekInk.wash),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white10),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekInk.wash),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Color(0xFF00FF41), width: 2),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekColors.signal, width: 2),
                   ),
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 12,
@@ -8535,14 +8536,14 @@ class _SocialScreenState extends State<SocialScreen>
               padding: EdgeInsets.all(12),
               child: TextField(
                 controller: _searchController,
-                style: TextStyle(color: Color(0xFFB8B8C0)),
+                style: TextStyle(color: TekColors.steel),
                 decoration: InputDecoration(
                   hintText: 'Search username or name...',
-                  hintStyle: TextStyle(color: Colors.white30),
-                  prefixIcon: Icon(Icons.search, color: Colors.white70),
+                  hintStyle: TextStyle(color: TekInk.dim),
+                  prefixIcon: Icon(Icons.search, color: TekInk.body),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
-                          icon: Icon(Icons.clear, color: Colors.white70),
+                          icon: Icon(Icons.clear, color: TekInk.body),
                           onPressed: () {
                             _searchController.clear();
                             setState(() => _searchQuery = '');
@@ -8550,16 +8551,16 @@ class _SocialScreenState extends State<SocialScreen>
                         )
                       : null,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white10),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekInk.wash),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white10),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekInk.wash),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Color(0xFF00FF41), width: 2),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekColors.signal, width: 2),
                   ),
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 12,
@@ -8574,7 +8575,7 @@ class _SocialScreenState extends State<SocialScreen>
             Container(
               decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Colors.white10, width: 1),
+                  bottom: BorderSide(color: TekInk.wash, width: 1),
                 ),
               ),
               child: TabBar(
@@ -8586,14 +8587,14 @@ class _SocialScreenState extends State<SocialScreen>
                   Tab(text: 'ROOM'),
                 ],
                 isScrollable: false,
-                labelColor: Color(0xFF00FF41),
-                unselectedLabelColor: Colors.white70,
+                labelColor: TekColors.signal,
+                unselectedLabelColor: TekInk.body,
                 labelStyle: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1,
                 ),
-                indicatorColor: Color(0xFF00FF41),
+                indicatorColor: TekColors.signal,
               ),
             ),
             Expanded(
@@ -8619,7 +8620,7 @@ class _SocialScreenState extends State<SocialScreen>
         child: Text(
           'No users found',
           style: TextStyle(
-            color: Colors.white70,
+            color: TekInk.body,
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
@@ -8644,7 +8645,7 @@ class _SocialScreenState extends State<SocialScreen>
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: Colors.white10, width: 0.5),
+                bottom: BorderSide(color: TekInk.wash, width: 0.5),
               ),
             ),
             child: Row(
@@ -8655,7 +8656,7 @@ class _SocialScreenState extends State<SocialScreen>
                   height: 60,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Color(0xFFB8B8C0), width: 2),
+                    border: Border.all(color: TekColors.steel, width: 2),
                   ),
                   child: ClipOval(
                     child:
@@ -8666,17 +8667,17 @@ class _SocialScreenState extends State<SocialScreen>
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return Container(
-                                color: Colors.grey[800],
+                                color: TekColors.surfaceLift,
                                 child: Icon(
                                   Icons.person,
-                                  color: Colors.white30,
+                                  color: TekInk.dim,
                                 ),
                               );
                             },
                           )
                         : Container(
-                            color: Colors.grey[800],
-                            child: Icon(Icons.person, color: Colors.white30),
+                            color: TekColors.surfaceLift,
+                            child: Icon(Icons.person, color: TekInk.dim),
                           ),
                   ),
                 ),
@@ -8688,7 +8689,7 @@ class _SocialScreenState extends State<SocialScreen>
                       Text(
                         user['name'] as String,
                         style: TextStyle(
-                          color: Color(0xFFB8B8C0),
+                          color: TekColors.steel,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -8696,16 +8697,16 @@ class _SocialScreenState extends State<SocialScreen>
                       Text(
                         // Referral code is private; do not display in public lists
                         '',
-                        style: TextStyle(color: Colors.white70, fontSize: 11),
+                        style: TextStyle(color: TekInk.body, fontSize: 11),
                       ),
                       Text(
                         'LEVEL ${user['level']}',
-                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                        style: TextStyle(color: TekInk.body, fontSize: 12),
                       ),
                     ],
                   ),
                 ),
-                Icon(Icons.arrow_forward, color: Colors.white70),
+                Icon(Icons.arrow_forward, color: TekInk.body),
               ],
             ),
           ),
@@ -8722,7 +8723,7 @@ class _SocialScreenState extends State<SocialScreen>
       builder: (context, userSnapshot) {
         if (!userSnapshot.hasData) {
           return const Center(
-            child: CircularProgressIndicator(color: Color(0xFF00FF41)),
+            child: CircularProgressIndicator(color: TekColors.signal),
           );
         }
 
@@ -8731,7 +8732,7 @@ class _SocialScreenState extends State<SocialScreen>
           return Center(
             child: Text(
               'Please log in to view friends',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: TekInk.body),
             ),
           );
         }
@@ -8751,7 +8752,7 @@ class _SocialScreenState extends State<SocialScreen>
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
-                child: CircularProgressIndicator(color: Color(0xFF00FF41)),
+                child: CircularProgressIndicator(color: TekColors.signal),
               );
             }
 
@@ -8759,7 +8760,7 @@ class _SocialScreenState extends State<SocialScreen>
               return Center(
                 child: Text(
                   'YOU HAVE NO FRIENDS YET',
-                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                  style: TextStyle(color: TekInk.body, fontSize: 16),
                 ),
               );
             }
@@ -8778,7 +8779,7 @@ class _SocialScreenState extends State<SocialScreen>
               return Center(
                 child: Text(
                   'YOU HAVE NO FRIENDS YET',
-                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                  style: TextStyle(color: TekInk.body, fontSize: 16),
                 ),
               );
             }
@@ -8810,12 +8811,12 @@ class _SocialScreenState extends State<SocialScreen>
                         child: Container(
                           height: 80,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.05),
-                            borderRadius: BorderRadius.circular(12),
+                            color: TekInk.high.withValues(alpha: 0.05),
+                            borderRadius: TekShape.br,
                           ),
                           child: const Center(
                             child: CircularProgressIndicator(
-                              color: Color(0xFF00FF41),
+                              color: TekColors.signal,
                               strokeWidth: 2,
                             ),
                           ),
@@ -8849,7 +8850,7 @@ class _SocialScreenState extends State<SocialScreen>
                         decoration: BoxDecoration(
                           border: Border(
                             bottom: BorderSide(
-                              color: Colors.white10,
+                              color: TekInk.wash,
                               width: 0.5,
                             ),
                           ),
@@ -8863,7 +8864,7 @@ class _SocialScreenState extends State<SocialScreen>
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: Color(0xFFB8B8C0),
+                                  color: TekColors.steel,
                                   width: 2,
                                 ),
                               ),
@@ -8879,19 +8880,19 @@ class _SocialScreenState extends State<SocialScreen>
                                         errorBuilder:
                                             (context, error, stackTrace) {
                                               return Container(
-                                                color: Colors.grey[800],
+                                                color: TekColors.surfaceLift,
                                                 child: const Icon(
                                                   Icons.person,
-                                                  color: Colors.white30,
+                                                  color: TekInk.dim,
                                                 ),
                                               );
                                             },
                                       )
                                     : Container(
-                                        color: Colors.grey[800],
+                                        color: TekColors.surfaceLift,
                                         child: const Icon(
                                           Icons.person,
-                                          color: Colors.white30,
+                                          color: TekInk.dim,
                                         ),
                                       ),
                               ),
@@ -8914,7 +8915,7 @@ class _SocialScreenState extends State<SocialScreen>
                                             friendData['name'] ?? 'Unknown',
                                             overflow: TextOverflow.ellipsis,
                                             style: const TextStyle(
-                                              color: Color(0xFFB8B8C0),
+                                              color: TekColors.steel,
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -8929,7 +8930,7 @@ class _SocialScreenState extends State<SocialScreen>
                                     Text(
                                       'LEVEL ${friendXp ~/ 100 + 1}',
                                       style: const TextStyle(
-                                        color: Colors.white70,
+                                        color: TekInk.body,
                                         fontSize: 12,
                                       ),
                                     ),
@@ -8940,7 +8941,7 @@ class _SocialScreenState extends State<SocialScreen>
                             IconButton(
                               icon: const Icon(
                                 Icons.message,
-                                color: Color(0xFF00FF41),
+                                color: TekColors.signal,
                               ),
                               onPressed: () {
                                 Navigator.push(
@@ -8979,7 +8980,7 @@ class _SocialScreenState extends State<SocialScreen>
       builder: (context, userSnapshot) {
         if (!userSnapshot.hasData) {
           return const Center(
-            child: CircularProgressIndicator(color: Color(0xFF00FF41)),
+            child: CircularProgressIndicator(color: TekColors.signal),
           );
         }
 
@@ -8988,7 +8989,7 @@ class _SocialScreenState extends State<SocialScreen>
           return Center(
             child: Text(
               'Please log in to view requests',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: TekInk.body),
             ),
           );
         }
@@ -9008,7 +9009,7 @@ class _SocialScreenState extends State<SocialScreen>
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
-                child: CircularProgressIndicator(color: Color(0xFF00FF41)),
+                child: CircularProgressIndicator(color: TekColors.signal),
               );
             }
 
@@ -9016,7 +9017,7 @@ class _SocialScreenState extends State<SocialScreen>
               return Center(
                 child: Text(
                   'No friend requests',
-                  style: TextStyle(color: Colors.white70),
+                  style: TextStyle(color: TekInk.body),
                 ),
               );
             }
@@ -9029,7 +9030,7 @@ class _SocialScreenState extends State<SocialScreen>
               return Center(
                 child: Text(
                   'No friend requests',
-                  style: TextStyle(color: Colors.white70),
+                  style: TextStyle(color: TekInk.body),
                 ),
               );
             }
@@ -9061,12 +9062,12 @@ class _SocialScreenState extends State<SocialScreen>
                         child: Container(
                           height: 80,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.05),
-                            borderRadius: BorderRadius.circular(12),
+                            color: TekInk.high.withValues(alpha: 0.05),
+                            borderRadius: TekShape.br,
                           ),
                           child: const Center(
                             child: CircularProgressIndicator(
-                              color: Color(0xFF00FF41),
+                              color: TekColors.signal,
                               strokeWidth: 2,
                             ),
                           ),
@@ -9086,10 +9087,10 @@ class _SocialScreenState extends State<SocialScreen>
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(12),
+                        color: TekInk.high.withValues(alpha: 0.05),
+                        borderRadius: TekShape.br,
                         border: Border.all(
-                          color: const Color(0xFF00FF41).withValues(alpha: 0.3),
+                          color: TekColors.signal.withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),
@@ -9104,7 +9105,7 @@ class _SocialScreenState extends State<SocialScreen>
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: Color(0xFFB8B8C0),
+                                  color: TekColors.steel,
                                   width: 2,
                                 ),
                               ),
@@ -9120,19 +9121,19 @@ class _SocialScreenState extends State<SocialScreen>
                                         errorBuilder:
                                             (context, error, stackTrace) {
                                               return Container(
-                                                color: Colors.grey[800],
+                                                color: TekColors.surfaceLift,
                                                 child: const Icon(
                                                   Icons.person,
-                                                  color: Colors.white30,
+                                                  color: TekInk.dim,
                                                 ),
                                               );
                                             },
                                       )
                                     : Container(
-                                        color: Colors.grey[800],
+                                        color: TekColors.surfaceLift,
                                         child: const Icon(
                                           Icons.person,
-                                          color: Colors.white30,
+                                          color: TekInk.dim,
                                         ),
                                       ),
                               ),
@@ -9146,7 +9147,7 @@ class _SocialScreenState extends State<SocialScreen>
                                   Text(
                                     requesterData['name'] ?? 'Unknown',
                                     style: const TextStyle(
-                                      color: Color(0xFFB8B8C0),
+                                      color: TekColors.steel,
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -9155,7 +9156,7 @@ class _SocialScreenState extends State<SocialScreen>
                                     // Referral code is private; do not display in public lists
                                     '',
                                     style: const TextStyle(
-                                      color: Colors.white70,
+                                      color: TekInk.body,
                                       fontSize: 12,
                                     ),
                                   ),
@@ -9174,13 +9175,13 @@ class _SocialScreenState extends State<SocialScreen>
                                     snapshot.data!.id,
                                   ),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF00FF41),
+                                    backgroundColor: TekColors.signal,
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 16,
                                       vertical: 8,
                                     ),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: TekShape.br,
                                     ),
                                   ),
                                   child: const Text(
@@ -9201,7 +9202,7 @@ class _SocialScreenState extends State<SocialScreen>
                                     snapshot.data!.id,
                                   ),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red.withValues(
+                                    backgroundColor: TekColors.danger.withValues(
                                       alpha: 0.7,
                                     ),
                                     padding: const EdgeInsets.symmetric(
@@ -9209,13 +9210,13 @@ class _SocialScreenState extends State<SocialScreen>
                                       vertical: 8,
                                     ),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: TekShape.br,
                                     ),
                                   ),
                                   child: const Text(
                                     'Reject',
                                     style: TextStyle(
-                                      color: Color(0xFFB8B8C0),
+                                      color: TekColors.steel,
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -9292,7 +9293,7 @@ class _SocialScreenState extends State<SocialScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Friend request accepted!'),
-            backgroundColor: Color(0xFF00FF41),
+            backgroundColor: TekColors.signal,
           ),
         );
       }
@@ -9301,7 +9302,7 @@ class _SocialScreenState extends State<SocialScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error accepting request: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
           ),
         );
       }
@@ -9328,7 +9329,7 @@ class _SocialScreenState extends State<SocialScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Friend request rejected'),
-            backgroundColor: Colors.white70,
+            backgroundColor: TekInk.body,
           ),
         );
       }
@@ -9337,7 +9338,7 @@ class _SocialScreenState extends State<SocialScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error rejecting request: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
           ),
         );
       }
@@ -9348,7 +9349,7 @@ class _SocialScreenState extends State<SocialScreen>
     if (_currentUserCode == null) {
       return const Center(
         child: Text('STAND BY — IDENTIFYING OPERATOR',
-            style: TextStyle(color: Color(0xFF00FF41), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
+            style: TextStyle(color: TekColors.signal, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
       );
     }
     return StreamBuilder<QuerySnapshot>(
@@ -9373,7 +9374,7 @@ class _SocialScreenState extends State<SocialScreen>
                     padding: EdgeInsets.symmetric(vertical: 48),
                     child: Center(
                       child: Text('NO CREWS FORMED — RECRUIT A SQUAD',
-                          style: TextStyle(color: Color(0xFF00FF41), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                          style: TextStyle(color: TekColors.signal, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
                     ),
                   )
                 else
@@ -9386,7 +9387,7 @@ class _SocialScreenState extends State<SocialScreen>
               child: FloatingActionButton(
                 heroTag: 'createCrew',
                 onPressed: _showCreateCrewDialog,
-                backgroundColor: const Color(0xFF00FF41),
+                backgroundColor: TekColors.signal,
                 child: const Icon(Icons.add, color: Colors.black),
               ),
             ),
@@ -9607,7 +9608,7 @@ class _LocationRoomTabState extends State<_LocationRoomTab> {
     if (_resolving) {
       return const Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation(Color(0xFF00FF41)),
+          valueColor: AlwaysStoppedAnimation(TekColors.signal),
         ),
       );
     }
@@ -9638,11 +9639,11 @@ class _LocationRoomTabState extends State<_LocationRoomTab> {
         if (_sendError != null)
           Container(
             width: double.infinity,
-            color: Colors.orange.withValues(alpha: 0.15),
+            color: TekColors.danger.withValues(alpha: 0.15),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
               _sendError!,
-              style: const TextStyle(color: Colors.orange, fontSize: 12),
+              style: const TextStyle(color: TekColors.danger, fontSize: 12),
             ),
           ),
         _buildComposer(),
@@ -9670,7 +9671,7 @@ class _LocationRoomTabState extends State<_LocationRoomTab> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(Color(0xFF00FF41)),
+              valueColor: AlwaysStoppedAnimation(TekColors.signal),
             ),
           );
         }
@@ -9704,13 +9705,13 @@ class _LocationRoomTabState extends State<_LocationRoomTab> {
                 ),
                 decoration: BoxDecoration(
                   color: mine
-                      ? const Color(0xFF00FF41).withValues(alpha: 0.12)
-                      : Colors.white10,
-                  borderRadius: BorderRadius.circular(14),
+                      ? TekColors.signal.withValues(alpha: 0.12)
+                      : TekInk.wash,
+                  borderRadius: TekShape.br,
                   border: Border.all(
                     color: mine
-                        ? const Color(0xFF00FF41).withValues(alpha: 0.4)
-                        : Colors.white24,
+                        ? TekColors.signal.withValues(alpha: 0.4)
+                        : TekInk.line,
                   ),
                 ),
                 child: Column(
@@ -9721,7 +9722,7 @@ class _LocationRoomTabState extends State<_LocationRoomTab> {
                         (data['senderName'] ?? data['senderCode'] ?? 'MEMBER')
                             .toString(),
                         style: const TextStyle(
-                          color: Color(0xFF00FF41),
+                          color: TekColors.signal,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1,
@@ -9731,7 +9732,7 @@ class _LocationRoomTabState extends State<_LocationRoomTab> {
                     Text(
                       (data['text'] ?? '').toString(),
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: TekInk.high,
                         fontSize: 14,
                         height: 1.3,
                       ),
@@ -9752,16 +9753,16 @@ class _LocationRoomTabState extends State<_LocationRoomTab> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.white10)),
+          border: Border(top: BorderSide(color: TekInk.wash)),
         ),
         child: Column(
           children: [
-            const Icon(Icons.lock_outline, color: Colors.white38, size: 20),
+            const Icon(Icons.lock_outline, color: TekInk.faint, size: 20),
             const SizedBox(height: 8),
             Text(
               'Check in at ${_eventTitle ?? 'the venue'} to join the conversation.',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white54, fontSize: 12),
+              style: const TextStyle(color: TekInk.muted, fontSize: 12),
             ),
             const SizedBox(height: 10),
             TextButton(
@@ -9769,7 +9770,7 @@ class _LocationRoomTabState extends State<_LocationRoomTab> {
               child: const Text(
                 'I\'VE CHECKED IN — REFRESH',
                 style: TextStyle(
-                  color: Color(0xFF00FF41),
+                  color: TekColors.signal,
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1,
@@ -9784,28 +9785,28 @@ class _LocationRoomTabState extends State<_LocationRoomTab> {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
       decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: Colors.white10)),
+        border: Border(top: BorderSide(color: TekInk.wash)),
       ),
       child: Row(
         children: [
           Expanded(
             child: TextField(
               controller: _composer,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: TekInk.high),
               textCapitalization: TextCapitalization.sentences,
               minLines: 1,
               maxLines: 4,
               decoration: InputDecoration(
                 hintText: 'Say something to the room…',
-                hintStyle: const TextStyle(color: Colors.white38),
+                hintStyle: const TextStyle(color: TekInk.faint),
                 filled: true,
-                fillColor: Colors.white10,
+                fillColor: TekInk.wash,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 14,
                   vertical: 10,
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(22),
+                  borderRadius: TekShape.br,
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -9818,9 +9819,9 @@ class _LocationRoomTabState extends State<_LocationRoomTab> {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF00FF41).withValues(alpha: 0.15),
+                color: TekColors.signal.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFF00FF41)),
+                border: Border.all(color: TekColors.signal),
               ),
               child: _sending
                   ? const SizedBox(
@@ -9828,12 +9829,12 @@ class _LocationRoomTabState extends State<_LocationRoomTab> {
                       height: 18,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation(Color(0xFF00FF41)),
+                        valueColor: AlwaysStoppedAnimation(TekColors.signal),
                       ),
                     )
                   : const Icon(
                       Icons.send,
-                      color: Color(0xFF00FF41),
+                      color: TekColors.signal,
                       size: 18,
                     ),
             ),
@@ -9857,7 +9858,7 @@ class _RoomHeader extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.white10)),
+        border: Border(bottom: BorderSide(color: TekInk.wash)),
       ),
       child: Row(
         children: [
@@ -9866,7 +9867,7 @@ class _RoomHeader extends StatelessWidget {
             height: 8,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: checkedIn ? const Color(0xFF00FF41) : Colors.white38,
+              color: checkedIn ? TekColors.signal : TekInk.faint,
             ),
           ),
           const SizedBox(width: 10),
@@ -9875,7 +9876,7 @@ class _RoomHeader extends StatelessWidget {
               title.toUpperCase(),
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                color: Colors.white,
+                color: TekInk.high,
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.5,
@@ -9885,7 +9886,7 @@ class _RoomHeader extends StatelessWidget {
           Text(
             checkedIn ? 'LIVE · YOU\'RE HERE' : 'READ ONLY',
             style: TextStyle(
-              color: checkedIn ? const Color(0xFF00FF41) : Colors.white38,
+              color: checkedIn ? TekColors.signal : TekInk.faint,
               fontSize: 10,
               fontWeight: FontWeight.bold,
               letterSpacing: 1,
@@ -9921,13 +9922,13 @@ class _RoomNotice extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: Colors.white24, size: 40),
+            Icon(icon, color: TekInk.line, size: 40),
             const SizedBox(height: 14),
             Text(
               title,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Colors.white70,
+                color: TekInk.body,
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.5,
@@ -9937,7 +9938,7 @@ class _RoomNotice extends StatelessWidget {
             Text(
               body,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white38, fontSize: 12),
+              style: const TextStyle(color: TekInk.faint, fontSize: 12),
             ),
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: 14),
@@ -9946,7 +9947,7 @@ class _RoomNotice extends StatelessWidget {
                 child: Text(
                   actionLabel!,
                   style: const TextStyle(
-                    color: Color(0xFF00FF41),
+                    color: TekColors.signal,
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1,
@@ -10042,7 +10043,7 @@ class _CrewChatScreenState extends State<CrewChatScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text('Failed to send: $e'),
-              backgroundColor: Colors.red),
+              backgroundColor: TekColors.danger),
         );
       }
     } finally {
@@ -10058,7 +10059,7 @@ class _CrewChatScreenState extends State<CrewChatScreen> {
         backgroundColor: Colors.black,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
+          icon: const Icon(Icons.arrow_back, color: TekColors.steel),
           onPressed: () => Navigator.pop(context),
         ),
         title: Column(
@@ -10067,7 +10068,7 @@ class _CrewChatScreenState extends State<CrewChatScreen> {
             Text(
               widget.crewName,
               style: const TextStyle(
-                color: Color(0xFF00FF41),
+                color: TekColors.signal,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1,
@@ -10076,19 +10077,19 @@ class _CrewChatScreenState extends State<CrewChatScreen> {
             Text(
               '${widget.memberCodes.length} MEMBERS',
               style: const TextStyle(
-                  color: Colors.white38, fontSize: 10, letterSpacing: 0.5),
+                  color: TekInk.faint, fontSize: 10, letterSpacing: 0.5),
             ),
           ],
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.white10, height: 1),
+          child: Container(color: TekInk.wash, height: 1),
         ),
       ),
       body: Column(
         children: [
           _MemberAvatarRow(memberCodes: widget.memberCodes),
-          const Divider(color: Colors.white10, height: 1),
+          const Divider(color: TekInk.wash, height: 1),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
@@ -10105,7 +10106,7 @@ class _CrewChatScreenState extends State<CrewChatScreen> {
                     child: Text(
                       'CHANNEL OPEN — TRANSMIT',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white38, fontSize: 13),
+                      style: TextStyle(color: TekInk.faint, fontSize: 13),
                     ),
                   );
                 }
@@ -10132,13 +10133,13 @@ class _CrewChatScreenState extends State<CrewChatScreen> {
                           if (!isMe) ...[
                             CircleAvatar(
                               radius: 14,
-                              backgroundColor: Colors.white10,
+                              backgroundColor: TekInk.wash,
                               child: Text(
                                 senderName.isNotEmpty
                                     ? senderName[0].toUpperCase()
                                     : '?',
                                 style: const TextStyle(
-                                  color: Color(0xFF00FF41),
+                                  color: TekColors.signal,
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -10156,7 +10157,7 @@ class _CrewChatScreenState extends State<CrewChatScreen> {
                                   Text(
                                     senderName,
                                     style: const TextStyle(
-                                        color: Colors.white38,
+                                        color: TekInk.faint,
                                         fontSize: 10,
                                         letterSpacing: 0.3),
                                   ),
@@ -10165,9 +10166,9 @@ class _CrewChatScreenState extends State<CrewChatScreen> {
                                       horizontal: 12, vertical: 8),
                                   decoration: BoxDecoration(
                                     color: isMe
-                                        ? const Color(0xFF00FF41)
+                                        ? TekColors.signal
                                             .withValues(alpha: 0.15)
-                                        : Colors.white
+                                        : TekInk.high
                                             .withValues(alpha: 0.08),
                                     borderRadius: BorderRadius.only(
                                       topLeft: const Radius.circular(12),
@@ -10179,17 +10180,17 @@ class _CrewChatScreenState extends State<CrewChatScreen> {
                                     ),
                                     border: Border.all(
                                       color: isMe
-                                          ? const Color(0xFF00FF41)
+                                          ? TekColors.signal
                                               .withValues(alpha: 0.3)
-                                          : Colors.white12,
+                                          : TekInk.hairline,
                                     ),
                                   ),
                                   child: Text(
                                     text,
                                     style: TextStyle(
                                       color: isMe
-                                          ? const Color(0xFF00FF41)
-                                          : Colors.white,
+                                          ? TekColors.signal
+                                          : TekInk.high,
                                       fontSize: 13,
                                     ),
                                   ),
@@ -10198,7 +10199,7 @@ class _CrewChatScreenState extends State<CrewChatScreen> {
                                   Text(
                                     '${ts.hour.toString().padLeft(2, '0')}:${ts.minute.toString().padLeft(2, '0')}',
                                     style: const TextStyle(
-                                        color: Colors.white24, fontSize: 9),
+                                        color: TekInk.line, fontSize: 9),
                                   ),
                               ],
                             ),
@@ -10215,7 +10216,7 @@ class _CrewChatScreenState extends State<CrewChatScreen> {
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
             decoration: const BoxDecoration(
               color: Colors.black,
-              border: Border(top: BorderSide(color: Colors.white10)),
+              border: Border(top: BorderSide(color: TekInk.wash)),
             ),
             child: Row(
               children: [
@@ -10223,27 +10224,27 @@ class _CrewChatScreenState extends State<CrewChatScreen> {
                   child: TextField(
                     controller: _msgController,
                     style:
-                        const TextStyle(color: Colors.white, fontSize: 14),
+                        const TextStyle(color: TekInk.high, fontSize: 14),
                     decoration: InputDecoration(
                       hintText: 'Message crew...',
                       hintStyle: const TextStyle(
-                          color: Colors.white38, fontSize: 13),
+                          color: TekInk.faint, fontSize: 13),
                       filled: true,
-                      fillColor: Colors.white.withValues(alpha: 0.05),
+                      fillColor: TekInk.high.withValues(alpha: 0.05),
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 10),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: const BorderSide(color: Colors.white10),
+                        borderRadius: TekShape.br,
+                        borderSide: const BorderSide(color: TekInk.wash),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: const BorderSide(color: Colors.white10),
+                        borderRadius: TekShape.br,
+                        borderSide: const BorderSide(color: TekInk.wash),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: TekShape.br,
                         borderSide: const BorderSide(
-                            color: Color(0xFF00FF41), width: 1.5),
+                            color: TekColors.signal, width: 1.5),
                       ),
                     ),
                     onSubmitted: (_) => _send(),
@@ -10255,8 +10256,8 @@ class _CrewChatScreenState extends State<CrewChatScreen> {
                   icon: Icon(
                     Icons.send,
                     color: _sending
-                        ? Colors.white24
-                        : const Color(0xFF00FF41),
+                        ? TekInk.line
+                        : TekColors.signal,
                     size: 22,
                   ),
                 ),
@@ -10300,14 +10301,14 @@ class _MemberAvatarRow extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 16,
-                    backgroundColor: Colors.white10,
+                    backgroundColor: TekInk.wash,
                     backgroundImage:
                         imgUrl != null ? NetworkImage(imgUrl) : null,
                     child: imgUrl == null
                         ? Text(
                             name.isNotEmpty ? name[0].toUpperCase() : '?',
                             style: const TextStyle(
-                              color: Color(0xFF00FF41),
+                              color: TekColors.signal,
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
@@ -10318,7 +10319,7 @@ class _MemberAvatarRow extends StatelessWidget {
                   Text(
                     name.split(' ').first,
                     style: const TextStyle(
-                        color: Colors.white38, fontSize: 8),
+                        color: TekInk.faint, fontSize: 8),
                   ),
                 ],
               );
@@ -10376,7 +10377,7 @@ class _CreateCrewDialogState extends State<_CreateCrewDialog> {
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Enter a crew name'),
-          backgroundColor: Colors.red));
+          backgroundColor: TekColors.danger));
       return;
     }
     setState(() => _saving = true);
@@ -10393,7 +10394,7 @@ class _CreateCrewDialogState extends State<_CreateCrewDialog> {
       if (mounted) {
         setState(() => _saving = false);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Failed: $e'), backgroundColor: Colors.red));
+            content: Text('Failed: $e'), backgroundColor: TekColors.danger));
       }
     }
   }
@@ -10401,14 +10402,14 @@ class _CreateCrewDialogState extends State<_CreateCrewDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: const Color(0xFF0D0D1A),
+      backgroundColor: TekColors.void_,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFF00FF41)),
+        borderRadius: TekShape.br,
+        side: const BorderSide(color: TekColors.signal),
       ),
       title: const Text('CREATE CREW',
           style: TextStyle(
-              color: Color(0xFF00FF41),
+              color: TekColors.signal,
               fontWeight: FontWeight.bold,
               fontSize: 16,
               letterSpacing: 2)),
@@ -10418,22 +10419,22 @@ class _CreateCrewDialogState extends State<_CreateCrewDialog> {
           children: [
             TextField(
               controller: _nameController,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
+              style: const TextStyle(color: TekInk.high, fontSize: 14),
               decoration: InputDecoration(
                 labelText: 'CREW NAME',
                 labelStyle: const TextStyle(
-                    color: Color(0xFF00FF41),
+                    color: TekColors.signal,
                     fontSize: 12,
                     letterSpacing: 1),
                 enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.white24)),
+                    borderRadius: TekShape.br,
+                    borderSide: const BorderSide(color: TekInk.line)),
                 focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: TekShape.br,
                     borderSide: const BorderSide(
-                        color: Color(0xFF00FF41), width: 1.5)),
+                        color: TekColors.signal, width: 1.5)),
                 filled: true,
-                fillColor: Colors.white.withValues(alpha: 0.04),
+                fillColor: TekInk.high.withValues(alpha: 0.04),
               ),
             ),
             if (_friends.isNotEmpty) ...[
@@ -10442,7 +10443,7 @@ class _CreateCrewDialogState extends State<_CreateCrewDialog> {
                 alignment: Alignment.centerLeft,
                 child: Text('INVITE FRIENDS',
                     style: TextStyle(
-                        color: Colors.white54,
+                        color: TekInk.muted,
                         fontSize: 11,
                         letterSpacing: 1)),
               ),
@@ -10462,8 +10463,8 @@ class _CreateCrewDialogState extends State<_CreateCrewDialog> {
                   }),
                   title: Text(name,
                       style: const TextStyle(
-                          color: Colors.white, fontSize: 13)),
-                  activeColor: const Color(0xFF00FF41),
+                          color: TekInk.high, fontSize: 13)),
+                  activeColor: TekColors.signal,
                   checkColor: Colors.black,
                   contentPadding: EdgeInsets.zero,
                 );
@@ -10476,15 +10477,15 @@ class _CreateCrewDialogState extends State<_CreateCrewDialog> {
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: const Text('CANCEL',
-              style: TextStyle(color: Colors.white38)),
+              style: TextStyle(color: TekInk.faint)),
         ),
         ElevatedButton(
           onPressed: _saving ? null : _create,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF00FF41),
+            backgroundColor: TekColors.signal,
             foregroundColor: Colors.black,
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8)),
+                borderRadius: TekShape.br),
           ),
           child: _saving
               ? const SizedBox(
@@ -10593,9 +10594,9 @@ class _NightReportCardState extends State<_NightReportCard> {
           child: Container(
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: 0.65),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFFFFD700).withValues(alpha: 0.5), width: 1),
-              boxShadow: [BoxShadow(color: const Color(0xFFFFD700).withValues(alpha: 0.18), blurRadius: 22)],
+              borderRadius: TekShape.br,
+              border: Border.all(color: TekColors.platinum.withValues(alpha: 0.5), width: 1),
+              boxShadow: [BoxShadow(color: TekColors.platinum.withValues(alpha: 0.18), blurRadius: 22)],
             ),
             padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
             child: Row(
@@ -10604,10 +10605,10 @@ class _NightReportCardState extends State<_NightReportCard> {
                   width: 38, height: 38,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFFFFD700).withValues(alpha: 0.14),
-                    border: Border.all(color: const Color(0xFFFFD700), width: 1.2),
+                    color: TekColors.platinum.withValues(alpha: 0.14),
+                    border: Border.all(color: TekColors.platinum, width: 1.2),
                   ),
-                  child: const Icon(Icons.assessment, color: Color(0xFFFFD700), size: 20),
+                  child: const Icon(Icons.assessment, color: TekColors.platinum, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -10615,17 +10616,17 @@ class _NightReportCardState extends State<_NightReportCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text('NIGHT REPORT — TAP FOR DEBRIEF',
-                          style: TextStyle(color: Color(0xFFFFD700), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                          style: TextStyle(color: TekColors.platinum, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2)),
                       const SizedBox(height: 4),
                       Text(title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                          style: const TextStyle(color: TekInk.high, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1)),
                     ],
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white38, size: 18),
+                  icon: const Icon(Icons.close, color: TekInk.faint, size: 18),
                   onPressed: _dismiss,
                 ),
               ],
@@ -10714,16 +10715,16 @@ class _NightReportFullscreenState extends State<_NightReportFullscreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFFFFD700)),
+        iconTheme: const IconThemeData(color: TekColors.platinum),
         title: const Text('NIGHT REPORT',
-            style: TextStyle(color: Color(0xFFFFD700), fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 3)),
+            style: TextStyle(color: TekColors.platinum, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 3)),
         centerTitle: true,
         actions: [
-          IconButton(icon: const Icon(Icons.ios_share, color: Color(0xFFFFD700)), onPressed: _loading ? null : _share),
+          IconButton(icon: const Icon(Icons.ios_share, color: TekColors.platinum), onPressed: _loading ? null : _share),
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFFFFD700)))
+          ? const Center(child: CircularProgressIndicator(color: TekColors.platinum))
           : Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -10731,11 +10732,11 @@ class _NightReportFullscreenState extends State<_NightReportFullscreen> {
                 children: [
                   const SizedBox(height: 20),
                   Text(title, textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                      style: const TextStyle(color: TekInk.high, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2)),
                   const SizedBox(height: 6),
                   const Text('OPERATIONS COMPLETE — DEBRIEF',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Color(0xFFFFD700), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                      style: TextStyle(color: TekColors.platinum, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
                   const SizedBox(height: 30),
                   _ReportRow(label: 'MISSIONS COMPLETED', value: '${_missionsCompleted ?? 0}', icon: Icons.bolt),
                   const SizedBox(height: 12),
@@ -10750,9 +10751,9 @@ class _NightReportFullscreenState extends State<_NightReportFullscreen> {
                       label: const Text('SHARE REPORT',
                           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, letterSpacing: 2)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFD700),
+                        backgroundColor: TekColors.platinum,
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(borderRadius: TekShape.br),
                       ),
                     ),
                   ),
@@ -10776,19 +10777,19 @@ class _ReportRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFFD700).withValues(alpha: 0.4)),
+        borderRadius: TekShape.br,
+        border: Border.all(color: TekColors.platinum.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFFFFD700), size: 22),
+          Icon(icon, color: TekColors.platinum, size: 22),
           const SizedBox(width: 14),
           Expanded(
             child: Text(label,
-                style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                style: const TextStyle(color: TekInk.body, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
           ),
           AnimatedXP(value: int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0, suffix: '',
-              style: const TextStyle(color: Color(0xFFFFD700), fontSize: 22, fontWeight: FontWeight.bold)),
+              style: const TextStyle(color: TekColors.platinum, fontSize: 22, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -10965,13 +10966,13 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
     );
   }
 
-  Widget _shell({required Widget child, Color accent = const Color(0xFF00FF41)}) {
+  Widget _shell({required Widget child, Color accent = TekColors.signal}) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.7),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: TekShape.br,
           border: Border.all(color: accent.withValues(alpha: 0.4), width: 1),
           boxShadow: [
             BoxShadow(color: accent.withValues(alpha: 0.18), blurRadius: 22, spreadRadius: 0),
@@ -10983,7 +10984,7 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
     );
   }
 
-  Widget _heroLabel(String text, {Color color = const Color(0xFF00FF41)}) {
+  Widget _heroLabel(String text, {Color color = TekColors.signal}) {
     return Row(
       children: [
         Container(width: 6, height: 6, decoration: BoxDecoration(shape: BoxShape.circle, color: color)),
@@ -11006,10 +11007,10 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
           Text(title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Color(0xFF00FF41), fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
+              style: const TextStyle(color: TekColors.signal, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
           if (location.isNotEmpty) ...[
             const SizedBox(height: 2),
-            Text(location, style: const TextStyle(color: Colors.white54, fontSize: 11, letterSpacing: 1)),
+            Text(location, style: const TextStyle(color: TekInk.muted, fontSize: 11, letterSpacing: 1)),
           ],
           const SizedBox(height: 10),
           PressScale(
@@ -11023,9 +11024,9 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00FF41),
+                backgroundColor: TekColors.signal,
                 padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(borderRadius: TekShape.br),
               ),
               child: const Text('OPEN MISSION HUB',
                   style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 12)),
@@ -11051,10 +11052,10 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
           Text(title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Color(0xFF00FF41), fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
+              style: const TextStyle(color: TekColors.signal, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
           const SizedBox(height: 2),
           Text('T-${_fmtCountdown(diff)}',
-              style: const TextStyle(color: Colors.white54, fontSize: 12, letterSpacing: 2, fontFamily: 'monospace')),
+              style: const TextStyle(color: TekInk.muted, fontSize: 12, letterSpacing: 2, fontFamily: 'monospace')),
           const SizedBox(height: 10),
           PressScale(
             child: OutlinedButton(
@@ -11067,12 +11068,12 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
                 );
               },
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Color(0xFF00FF41)),
+                side: const BorderSide(color: TekColors.signal),
                 padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(borderRadius: TekShape.br),
               ),
               child: const Text('OPEN BRIEF',
-                  style: TextStyle(color: Color(0xFF00FF41), fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 12)),
+                  style: TextStyle(color: TekColors.signal, fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 12)),
             ),
           ),
         ],
@@ -11108,17 +11109,17 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
                 child: Text(title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Color(0xFF00FF41), fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                    style: const TextStyle(color: TekColors.signal, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00FF41).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0xFF00FF41).withValues(alpha: 0.5)),
+                  color: TekColors.signal.withValues(alpha: 0.12),
+                  borderRadius: TekShape.br,
+                  border: Border.all(color: TekColors.signal.withValues(alpha: 0.5)),
                 ),
                 child: Text('+$xp XP',
-                    style: const TextStyle(color: Color(0xFF00FF41), fontWeight: FontWeight.bold, fontSize: 11)),
+                    style: const TextStyle(color: TekColors.signal, fontWeight: FontWeight.bold, fontSize: 11)),
               ),
             ],
           ),
@@ -11134,7 +11135,7 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
                 child: Text(
                   subtitle,
                   style: const TextStyle(
-                    color: Color(0xFFB8B8C0),
+                    color: TekColors.steel,
                     fontSize: 11,
                     height: 1.3,
                   ),
@@ -11153,7 +11154,7 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
                 child: Text(
                   '● $n OP${n == 1 ? '' : 'S'} HIT THIS',
                   style: const TextStyle(
-                    color: Color(0xFF00FF41),
+                    color: TekColors.signal,
                     fontSize: 9,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 2,
@@ -11185,9 +11186,9 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00FF41),
+                      backgroundColor: TekColors.signal,
                       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(borderRadius: TekShape.br),
                     ),
                     child: const Text('OPEN BRIEF',
                         style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 12)),
@@ -11200,7 +11201,7 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
                   HapticFeedback.selectionClick();
                   _dismissHero(mission.id);
                 },
-                icon: const Icon(Icons.close, color: Colors.white38, size: 20),
+                icon: const Icon(Icons.close, color: TekInk.faint, size: 20),
                 tooltip: 'Hide',
                 padding: const EdgeInsets.all(8),
                 constraints: const BoxConstraints(),
@@ -11300,7 +11301,7 @@ class _StoriesRowState extends State<_StoriesRow> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Story upload failed: $e'),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
         ));
       }
     } finally {
@@ -11356,12 +11357,12 @@ class _StoriesRowState extends State<_StoriesRow> {
                               width: 60, height: 60,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                border: Border.all(color: const Color(0xFF00FF41).withValues(alpha: 0.5), width: 1.5),
+                                border: Border.all(color: TekColors.signal.withValues(alpha: 0.5), width: 1.5),
                                 color: Colors.black,
                               ),
                               child: _userImageUrl != null && _userImageUrl!.isNotEmpty
                                   ? ClipOval(child: FadeInNetImage(url: _userImageUrl!, avatarSize: 56))
-                                  : const Icon(Icons.person, color: Colors.white24, size: 28),
+                                  : const Icon(Icons.person, color: TekInk.line, size: 28),
                             ),
                             Positioned(
                               bottom: 0,
@@ -11370,7 +11371,7 @@ class _StoriesRowState extends State<_StoriesRow> {
                                 width: 22, height: 22,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: const Color(0xFF00FF41),
+                                  color: TekColors.signal,
                                   border: Border.all(color: Colors.black, width: 2),
                                 ),
                                 child: _uploading
@@ -11385,7 +11386,7 @@ class _StoriesRowState extends State<_StoriesRow> {
                         ),
                         const SizedBox(height: 4),
                         const Text('YOUR STORY',
-                            style: TextStyle(color: Colors.white54, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                            style: TextStyle(color: TekInk.muted, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
                       ],
                     ),
                   ),
@@ -11417,7 +11418,7 @@ class _StoriesRowState extends State<_StoriesRow> {
                           gradient: const LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [Color(0xFF00FF41), Color(0xFF005521)],
+                            colors: [TekColors.signal, Color(0xFF005521)],
                           ),
                         ),
                         child: Container(
@@ -11427,7 +11428,7 @@ class _StoriesRowState extends State<_StoriesRow> {
                           child: url.isNotEmpty
                               ? ClipOval(child: FadeInNetImage(url: url, avatarSize: 52))
                               : Container(
-                                  decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF00FF41)),
+                                  decoration: const BoxDecoration(shape: BoxShape.circle, color: TekColors.signal),
                                   child: Center(
                                     child: Text(
                                       name.trim().isEmpty ? '?' : name.trim()[0].toUpperCase(),
@@ -11445,7 +11446,7 @@ class _StoriesRowState extends State<_StoriesRow> {
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.white70, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1),
+                          style: const TextStyle(color: TekInk.body, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1),
                         ),
                       ),
                     ],
@@ -11557,16 +11558,16 @@ class _StoryViewerScreenState extends State<_StoryViewerScreen> with SingleTicke
                           return Container(
                             height: 2,
                             decoration: BoxDecoration(
-                              color: Colors.white24,
-                              borderRadius: BorderRadius.circular(2),
+                              color: TekInk.line,
+                              borderRadius: TekShape.brTight,
                             ),
                             child: FractionallySizedBox(
                               alignment: Alignment.centerLeft,
                               widthFactor: v,
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF00FF41),
-                                  borderRadius: BorderRadius.circular(2),
+                                  color: TekColors.signal,
+                                  borderRadius: TekShape.brTight,
                                 ),
                               ),
                             ),
@@ -11589,7 +11590,7 @@ class _StoryViewerScreenState extends State<_StoryViewerScreen> with SingleTicke
                   else
                     Container(
                       width: 32, height: 32,
-                      decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF00FF41)),
+                      decoration: const BoxDecoration(shape: BoxShape.circle, color: TekColors.signal),
                       child: Center(
                         child: Text(
                           (story['userName'] as String? ?? '?').trim().isEmpty
@@ -11602,14 +11603,14 @@ class _StoryViewerScreenState extends State<_StoryViewerScreen> with SingleTicke
                   const SizedBox(width: 10),
                   Text(
                     (story['userName'] as String? ?? '').toUpperCase(),
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 1),
+                    style: const TextStyle(color: TekInk.high, fontWeight: FontWeight.bold, letterSpacing: 1),
                   ),
                   const SizedBox(width: 8),
                   Text(_timeAgo(story['createdAt'] as Timestamp?),
-                      style: const TextStyle(color: Colors.white54, fontSize: 11)),
+                      style: const TextStyle(color: TekInk.muted, fontSize: 11)),
                   const Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
+                    icon: const Icon(Icons.close, color: TekInk.high),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
@@ -11644,14 +11645,14 @@ const List<_TierLoungeDef> _tierLounges = [
     id: 'inner_circle',
     name: 'INNER CIRCLE',
     icon: Icons.diamond,
-    color: Color(0xFF9F59FF),
+    color: TekColors.silver,
     xpRequired: 4000,
   ),
   _TierLoungeDef(
     id: 'black_card',
     name: 'BLACK CARD',
     icon: Icons.workspace_premium,
-    color: Color(0xFFE63946),
+    color: TekColors.signal,
     xpRequired: 6000,
   ),
 ];
@@ -11676,17 +11677,17 @@ class _TierLoungesSection extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFF7A7A7A).withValues(alpha: 0.3)),
+            borderRadius: TekShape.br,
+            border: Border.all(color: TekColors.chrome.withValues(alpha: 0.3)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Row(children: [
-                Icon(Icons.lock_outline, color: Color(0xFF7A7A7A), size: 14),
+                Icon(Icons.lock_outline, color: TekColors.chrome, size: 14),
                 SizedBox(width: 6),
                 Text('TIER LOUNGES — ELITE CHANNELS',
-                    style: TextStyle(color: Color(0xFF7A7A7A), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                    style: TextStyle(color: TekColors.chrome, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
               ]),
               const SizedBox(height: 10),
               for (final lounge in _tierLounges) ...[
@@ -11726,14 +11727,14 @@ class _TierLoungeRow extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: unlocked ? lounge.color.withValues(alpha: 0.10) : Colors.white.withValues(alpha: 0.03),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: unlocked ? lounge.color.withValues(alpha: 0.6) : Colors.white12, width: 1),
+            color: unlocked ? lounge.color.withValues(alpha: 0.10) : TekInk.high.withValues(alpha: 0.03),
+            borderRadius: TekShape.br,
+            border: Border.all(color: unlocked ? lounge.color.withValues(alpha: 0.6) : TekInk.hairline, width: 1),
           ),
           child: Row(
             children: [
               Icon(unlocked ? lounge.icon : Icons.lock,
-                  color: unlocked ? lounge.color : Colors.white24, size: 18),
+                  color: unlocked ? lounge.color : TekInk.line, size: 18),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -11741,7 +11742,7 @@ class _TierLoungeRow extends StatelessWidget {
                   children: [
                     Text(lounge.name,
                         style: TextStyle(
-                          color: unlocked ? lounge.color : Colors.white54,
+                          color: unlocked ? lounge.color : TekInk.muted,
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.5,
@@ -11750,7 +11751,7 @@ class _TierLoungeRow extends StatelessWidget {
                     Text(
                       unlocked ? 'ACCESS GRANTED' : '$xpToGo XP TO UNLOCK',
                       style: TextStyle(
-                        color: unlocked ? Colors.white70 : Colors.white38,
+                        color: unlocked ? TekInk.body : TekInk.faint,
                         fontSize: 10,
                         letterSpacing: 1,
                       ),
@@ -11759,7 +11760,7 @@ class _TierLoungeRow extends StatelessWidget {
                 ),
               ),
               Icon(unlocked ? Icons.chevron_right : Icons.lock_outline,
-                  color: unlocked ? lounge.color : Colors.white24, size: 18),
+                  color: unlocked ? lounge.color : TekInk.line, size: 18),
             ],
           ),
         ),
@@ -11865,7 +11866,7 @@ class _TierLoungeChatScreenState extends State<_TierLoungeChatScreen> {
                 if (docs.isEmpty) {
                   return const Center(
                     child: Text('CHANNEL OPEN — TRANSMIT',
-                        style: TextStyle(color: Color(0xFF00FF41), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                        style: TextStyle(color: TekColors.signal, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
                   );
                 }
                 return ListView.builder(
@@ -11886,10 +11887,10 @@ class _TierLoungeChatScreenState extends State<_TierLoungeChatScreen> {
                         decoration: BoxDecoration(
                           color: isMine
                               ? widget.lounge.color.withValues(alpha: 0.18)
-                              : Colors.white.withValues(alpha: 0.07),
-                          borderRadius: BorderRadius.circular(12),
+                              : TekInk.high.withValues(alpha: 0.07),
+                          borderRadius: TekShape.br,
                           border: Border.all(
-                            color: isMine ? widget.lounge.color.withValues(alpha: 0.5) : Colors.white12,
+                            color: isMine ? widget.lounge.color.withValues(alpha: 0.5) : TekInk.hairline,
                           ),
                         ),
                         child: Column(
@@ -11898,7 +11899,7 @@ class _TierLoungeChatScreenState extends State<_TierLoungeChatScreen> {
                             if (!isMine)
                               Text(name.toUpperCase(),
                                   style: TextStyle(color: widget.lounge.color, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
-                            Text(text, style: const TextStyle(color: Colors.white, fontSize: 14)),
+                            Text(text, style: const TextStyle(color: TekInk.high, fontSize: 14)),
                           ],
                         ),
                       ),
@@ -11916,14 +11917,14 @@ class _TierLoungeChatScreenState extends State<_TierLoungeChatScreen> {
                 Expanded(
                   child: TextField(
                     controller: _msgController,
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                    style: const TextStyle(color: TekInk.high, fontSize: 14),
                     decoration: InputDecoration(
                       hintText: 'TRANSMIT TO ${widget.lounge.name}...',
-                      hintStyle: const TextStyle(color: Colors.white38, letterSpacing: 1, fontSize: 12),
+                      hintStyle: const TextStyle(color: TekInk.faint, letterSpacing: 1, fontSize: 12),
                       filled: true,
-                      fillColor: Colors.white.withValues(alpha: 0.06),
+                      fillColor: TekInk.high.withValues(alpha: 0.06),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                      border: OutlineInputBorder(borderRadius: TekShape.br, borderSide: BorderSide.none),
                     ),
                     onSubmitted: (_) => _send(),
                   ),
@@ -11978,20 +11979,20 @@ class _CrewListTile extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.04),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white10),
+            color: TekInk.high.withValues(alpha: 0.04),
+            borderRadius: TekShape.br,
+            border: Border.all(color: TekInk.wash),
           ),
           child: Row(
             children: [
               Container(
                 width: 46, height: 46,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00FF41).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFF00FF41).withValues(alpha: 0.3)),
+                  color: TekColors.signal.withValues(alpha: 0.1),
+                  borderRadius: TekShape.br,
+                  border: Border.all(color: TekColors.signal.withValues(alpha: 0.3)),
                 ),
-                child: const Center(child: Icon(Icons.groups, color: Color(0xFF00FF41), size: 24)),
+                child: const Center(child: Icon(Icons.groups, color: TekColors.signal, size: 24)),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -11999,9 +12000,9 @@ class _CrewListTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(name,
-                        style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                        style: const TextStyle(color: TekInk.high, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
                     Text('${memberCodes.length} members',
-                        style: const TextStyle(color: Colors.white38, fontSize: 11)),
+                        style: const TextStyle(color: TekInk.faint, fontSize: 11)),
                   ],
                 ),
               ),
@@ -12009,14 +12010,14 @@ class _CrewListTile extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF00FF41).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
+                    color: TekColors.signal.withValues(alpha: 0.1),
+                    borderRadius: TekShape.br,
                   ),
                   child: Text('$xpTotal XP',
-                      style: const TextStyle(color: Color(0xFF00FF41), fontSize: 11, fontWeight: FontWeight.bold)),
+                      style: const TextStyle(color: TekColors.signal, fontSize: 11, fontWeight: FontWeight.bold)),
                 ),
               const SizedBox(width: 8),
-              const Icon(Icons.chevron_right, color: Colors.white30, size: 20),
+              const Icon(Icons.chevron_right, color: TekInk.dim, size: 20),
             ],
           ),
         ),
@@ -12046,16 +12047,16 @@ class _CrewLeaderboard extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFF00FF41).withValues(alpha: 0.3)),
+            borderRadius: TekShape.br,
+            border: Border.all(color: TekColors.signal.withValues(alpha: 0.3)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Row(children: [
-                Icon(Icons.emoji_events, color: Color(0xFF00FF41), size: 14),
+                Icon(Icons.emoji_events, color: TekColors.signal, size: 14),
                 SizedBox(width: 6),
-                Text('CREW RANKINGS', style: TextStyle(color: Color(0xFF00FF41), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                Text('CREW RANKINGS', style: TextStyle(color: TekColors.signal, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
               ]),
               const SizedBox(height: 10),
               ...List.generate(docs.length > 5 ? 5 : docs.length, (i) {
@@ -12064,12 +12065,12 @@ class _CrewLeaderboard extends StatelessWidget {
                 final xp = (d['xpTotal'] as num?)?.toInt() ?? 0;
                 final medals = ['🥇', '🥈', '🥉'];
                 final rankColor = i == 0
-                    ? const Color(0xFFFFD700)
+                    ? TekColors.platinum
                     : i == 1
-                        ? const Color(0xFFC0C0C0)
+                        ? TekColors.silver
                         : i == 2
-                            ? const Color(0xFFCD7F32)
-                            : Colors.white38;
+                            ? TekColors.gunmetal
+                            : TekInk.faint;
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Row(children: [
@@ -12177,7 +12178,7 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Could not pick image: $e'),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
         ),
       );
     }
@@ -12228,19 +12229,19 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
           : <TextInputFormatter>[
               FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
             ],
-      style: const TextStyle(color: Color(0xFFB8B8C0)),
+      style: const TextStyle(color: TekColors.steel),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Colors.white38),
+        hintStyle: const TextStyle(color: TekInk.faint),
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.05),
+        fillColor: TekInk.high.withValues(alpha: 0.05),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.white24),
+          borderRadius: TekShape.br,
+          borderSide: const BorderSide(color: TekInk.line),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF00FF41), width: 2),
+          borderRadius: TekShape.br,
+          borderSide: const BorderSide(color: TekColors.signal, width: 2),
         ),
       ),
     );
@@ -12252,7 +12253,7 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Title and date/time are required'),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
           ),
         );
       }
@@ -12273,7 +12274,7 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
               content: Text(
                 'Please enter a valid ticket price (numbers only) or leave it empty for free.',
               ),
-              backgroundColor: Colors.red,
+              backgroundColor: TekColors.danger,
             ),
           );
         }
@@ -12316,7 +12317,7 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Could not create event: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
           ),
         );
       }
@@ -12333,12 +12334,12 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
         title: const Text(
           'Create Event',
           style: TextStyle(
-            color: Color(0xFFB8B8C0),
+            color: TekColors.steel,
             fontWeight: FontWeight.bold,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Color(0xFFB8B8C0)),
+          icon: const Icon(Icons.close, color: TekColors.steel),
           onPressed: _isSubmitting
               ? null
               : () => Navigator.of(context).pop(false),
@@ -12355,28 +12356,28 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
                 child: Container(
                   height: 150,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: TekShape.br,
                     border: Border.all(
                       color: _eventImage != null
-                          ? const Color(0xFF00FF41)
-                          : Colors.white24,
+                          ? TekColors.signal
+                          : TekInk.line,
                       width: 2,
                     ),
-                    color: Colors.white.withValues(alpha: 0.05),
+                    color: TekInk.high.withValues(alpha: 0.05),
                   ),
                   child: _eventImage != null
                       ? ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: TekShape.br,
                           child: Image.file(_eventImage!, fit: BoxFit.cover),
                         )
                       : const Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.image, color: Colors.white70, size: 40),
+                            Icon(Icons.image, color: TekInk.body, size: 40),
                             SizedBox(height: 8),
                             Text(
                               'Tap to pick event image',
-                              style: TextStyle(color: Colors.white70),
+                              style: TextStyle(color: TekInk.body),
                             ),
                           ],
                         ),
@@ -12406,12 +12407,12 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.04),
-                  borderRadius: BorderRadius.circular(10),
+                  color: TekInk.high.withValues(alpha: 0.04),
+                  borderRadius: TekShape.br,
                   border: Border.all(
                     color: _hidden
-                        ? const Color(0xFFFF8800).withValues(alpha: 0.6)
-                        : Colors.white12,
+                        ? TekColors.silver.withValues(alpha: 0.6)
+                        : TekInk.hairline,
                   ),
                 ),
                 child: Row(
@@ -12419,8 +12420,8 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
                     Icon(
                       _hidden ? Icons.visibility_off : Icons.visibility,
                       color: _hidden
-                          ? const Color(0xFFFF8800)
-                          : Colors.white54,
+                          ? TekColors.silver
+                          : TekInk.muted,
                       size: 18,
                     ),
                     const SizedBox(width: 10),
@@ -12432,8 +12433,8 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
                             _hidden ? 'HIDDEN FROM USERS' : 'VISIBLE TO USERS',
                             style: TextStyle(
                               color: _hidden
-                                  ? const Color(0xFFFF8800)
-                                  : Colors.white70,
+                                  ? TekColors.silver
+                                  : TekInk.body,
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1.5,
@@ -12443,7 +12444,7 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
                           const Text(
                             'Use for staging / test events. Only admins see hidden events.',
                             style: TextStyle(
-                                color: Colors.white38, fontSize: 10),
+                                color: TekInk.faint, fontSize: 10),
                           ),
                         ],
                       ),
@@ -12451,11 +12452,11 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
                     Switch(
                       value: _hidden,
                       onChanged: (v) => setState(() => _hidden = v),
-                      activeThumbColor: const Color(0xFFFF8800),
+                      activeThumbColor: TekColors.silver,
                       activeTrackColor:
-                          const Color(0xFFFF8800).withValues(alpha: 0.4),
-                      inactiveThumbColor: Colors.white38,
-                      inactiveTrackColor: Colors.white12,
+                          TekColors.silver.withValues(alpha: 0.4),
+                      inactiveThumbColor: TekInk.faint,
+                      inactiveTrackColor: TekInk.hairline,
                     ),
                   ],
                 ),
@@ -12468,14 +12469,14 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
                       _startDate != null
                           ? 'Date: ${_startDate!.toLocal()}'
                           : 'Pick date & time',
-                      style: const TextStyle(color: Colors.white70),
+                      style: const TextStyle(color: TekInk.body),
                     ),
                   ),
                   TextButton(
                     onPressed: _pickDateTime,
                     child: const Text(
                       'Pick',
-                      style: TextStyle(color: Color(0xFF00FF41)),
+                      style: TextStyle(color: TekColors.signal),
                     ),
                   ),
                 ],
@@ -12486,9 +12487,9 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _createEvent,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF00FF41),
+                    backgroundColor: TekColors.signal,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: TekShape.br,
                     ),
                   ),
                   child: Text(
@@ -12590,7 +12591,7 @@ class _EventChatScreenState extends State<EventChatScreen> with SingleTickerProv
                 ? 'Only people checked in at the venue can post here. Check in to join the room.'
                 : 'Could not send: ${e.message ?? e.code}',
           ),
-          backgroundColor: Colors.orange,
+          backgroundColor: TekColors.danger,
         ),
       );
     } catch (_) {
@@ -12598,7 +12599,7 @@ class _EventChatScreenState extends State<EventChatScreen> with SingleTickerProv
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Could not send. Reconnecting…'),
-          backgroundColor: Colors.orange,
+          backgroundColor: TekColors.danger,
         ),
       );
     }
@@ -12615,7 +12616,7 @@ class _EventChatScreenState extends State<EventChatScreen> with SingleTickerProv
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
-            iconTheme: const IconThemeData(color: Colors.white54),
+            iconTheme: const IconThemeData(color: TekInk.muted),
             title: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -12623,7 +12624,7 @@ class _EventChatScreenState extends State<EventChatScreen> with SingleTickerProv
                   opacity: _dotAnim,
                   child: Container(
                     width: 8, height: 8,
-                    decoration: const BoxDecoration(color: Color(0xFF00FF41), shape: BoxShape.circle),
+                    decoration: const BoxDecoration(color: TekColors.signal, shape: BoxShape.circle),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -12631,7 +12632,7 @@ class _EventChatScreenState extends State<EventChatScreen> with SingleTickerProv
                   child: Text(
                     widget.eventTitle.toUpperCase(),
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Color(0xFF00FF41), fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                    style: const TextStyle(color: TekColors.signal, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.5),
                   ),
                 ),
               ],
@@ -12644,9 +12645,9 @@ class _EventChatScreenState extends State<EventChatScreen> with SingleTickerProv
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 10),
-                  color: Colors.red.withValues(alpha: 0.15),
+                  color: TekColors.danger.withValues(alpha: 0.15),
                   child: const Text('CHAT HAS ENDED', textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                      style: TextStyle(color: TekColors.danger, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 2)),
                 ),
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
@@ -12661,7 +12662,7 @@ class _EventChatScreenState extends State<EventChatScreen> with SingleTickerProv
                     final docs = snap.data?.docs ?? [];
                     if (docs.isEmpty) {
                       return const Center(child: Text('CHANNEL SILENT — INITIATE TRANSMISSION',
-                          style: TextStyle(color: Colors.white38, fontSize: 12, letterSpacing: 1.5, fontWeight: FontWeight.bold)));
+                          style: TextStyle(color: TekInk.faint, fontSize: 12, letterSpacing: 1.5, fontWeight: FontWeight.bold)));
                     }
                     return ListView.builder(
                       reverse: true,
@@ -12680,11 +12681,11 @@ class _EventChatScreenState extends State<EventChatScreen> with SingleTickerProv
                             constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
                             decoration: BoxDecoration(
                               color: isMine
-                                  ? const Color(0xFF00FF41).withValues(alpha: 0.15)
-                                  : Colors.white.withValues(alpha: 0.07),
-                              borderRadius: BorderRadius.circular(12),
+                                  ? TekColors.signal.withValues(alpha: 0.15)
+                                  : TekInk.high.withValues(alpha: 0.07),
+                              borderRadius: TekShape.br,
                               border: Border.all(
-                                color: isMine ? const Color(0xFF00FF41).withValues(alpha: 0.4) : Colors.white12,
+                                color: isMine ? TekColors.signal.withValues(alpha: 0.4) : TekInk.hairline,
                               ),
                             ),
                             child: Column(
@@ -12692,8 +12693,8 @@ class _EventChatScreenState extends State<EventChatScreen> with SingleTickerProv
                               children: [
                                 if (!isMine)
                                   Text(name.toUpperCase(),
-                                      style: const TextStyle(color: Color(0xFF00FF41), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
-                                Text(text, style: const TextStyle(color: Colors.white, fontSize: 14)),
+                                      style: const TextStyle(color: TekColors.signal, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                Text(text, style: const TextStyle(color: TekInk.high, fontSize: 14)),
                               ],
                             ),
                           ),
@@ -12712,14 +12713,14 @@ class _EventChatScreenState extends State<EventChatScreen> with SingleTickerProv
                       Expanded(
                         child: TextField(
                           controller: _msgController,
-                          style: const TextStyle(color: Colors.white, fontSize: 14),
+                          style: const TextStyle(color: TekInk.high, fontSize: 14),
                           decoration: InputDecoration(
                             hintText: 'Message...',
-                            hintStyle: const TextStyle(color: Colors.white38),
+                            hintStyle: const TextStyle(color: TekInk.faint),
                             filled: true,
-                            fillColor: Colors.white.withValues(alpha: 0.06),
+                            fillColor: TekInk.high.withValues(alpha: 0.06),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                            border: OutlineInputBorder(borderRadius: TekShape.br, borderSide: BorderSide.none),
                           ),
                           onSubmitted: (_) => _send(),
                         ),
@@ -12729,7 +12730,7 @@ class _EventChatScreenState extends State<EventChatScreen> with SingleTickerProv
                         onTap: _send,
                         child: Container(
                           width: 40, height: 40,
-                          decoration: const BoxDecoration(color: Color(0xFF00FF41), shape: BoxShape.circle),
+                          decoration: const BoxDecoration(color: TekColors.signal, shape: BoxShape.circle),
                           child: const Icon(Icons.send, color: Colors.black, size: 18),
                         ),
                       ),
@@ -12778,24 +12779,24 @@ class _LiveChatButtonState extends State<_LiveChatButton> with SingleTickerProvi
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: const Color(0xFF00FF41).withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF00FF41), width: 1.5),
+          color: TekColors.signal.withValues(alpha: 0.1),
+          borderRadius: TekShape.br,
+          border: Border.all(color: TekColors.signal, width: 1.5),
         ),
         child: Row(children: [
           FadeTransition(
             opacity: _anim,
             child: Container(
               width: 10, height: 10,
-              decoration: const BoxDecoration(color: Color(0xFF00FF41), shape: BoxShape.circle),
+              decoration: const BoxDecoration(color: TekColors.signal, shape: BoxShape.circle),
             ),
           ),
           const SizedBox(width: 10),
           const Expanded(
             child: Text('JOIN LIVE CHAT',
-                style: TextStyle(color: Color(0xFF00FF41), fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                style: TextStyle(color: TekColors.signal, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 2)),
           ),
-          const Icon(Icons.chat_bubble_outline, color: Color(0xFF00FF41), size: 18),
+          const Icon(Icons.chat_bubble_outline, color: TekColors.signal, size: 18),
         ]),
       ),
     );
@@ -12839,7 +12840,7 @@ class _EventsScreenState extends State<EventsScreen>
       ),
       floatingActionButton: widget.isAdmin
           ? FloatingActionButton(
-              backgroundColor: const Color(0xFF00FF41),
+              backgroundColor: TekColors.signal,
               onPressed: () async {
                 try {
                   final created = await Navigator.of(context).push<bool>(
@@ -12863,7 +12864,7 @@ class _EventsScreenState extends State<EventsScreen>
           Container(
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: Colors.white10, width: 1),
+                bottom: BorderSide(color: TekInk.wash, width: 1),
               ),
             ),
             child: TabBar(
@@ -12872,14 +12873,14 @@ class _EventsScreenState extends State<EventsScreen>
                 Tab(text: 'UPCOMING EVENTS'),
                 Tab(text: 'PREVIOUS EVENTS'),
               ],
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.white70,
+              labelColor: TekInk.high,
+              unselectedLabelColor: TekInk.body,
               labelStyle: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1,
               ),
-              indicatorColor: const Color(0xFF00FF41),
+              indicatorColor: TekColors.signal,
             ),
           ),
           Expanded(
@@ -12912,7 +12913,7 @@ class _EventsScreenState extends State<EventsScreen>
           return const Center(
             child: Text(
               'TRANSMISSION SILENT — STAND BY',
-              style: TextStyle(color: Color(0xFF00FF41), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2),
+              style: TextStyle(color: TekColors.signal, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2),
             ),
           );
         }
@@ -12931,7 +12932,7 @@ class _EventsScreenState extends State<EventsScreen>
           return Center(
             child: Text(
               upcoming ? 'NO UPCOMING TRANSMISSIONS' : 'NO PREVIOUS OPS LOGGED',
-              style: const TextStyle(color: Colors.white70),
+              style: const TextStyle(color: TekInk.body),
             ),
           );
         }
@@ -12981,8 +12982,8 @@ class _EventsScreenState extends State<EventsScreen>
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white10),
+          borderRadius: TekShape.br,
+          border: Border.all(color: TekInk.wash),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.5),
@@ -12991,12 +12992,12 @@ class _EventsScreenState extends State<EventsScreen>
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: TekShape.br,
           child: Stack(
             children: [
               Container(
                 height: 150,
-                color: Colors.grey[900],
+                color: TekColors.surface,
                 child:
                     data['imageUrl'] != null &&
                         data['imageUrl'].toString().isNotEmpty
@@ -13009,7 +13010,7 @@ class _EventsScreenState extends State<EventsScreen>
                           height: 150,
                         ),
                       )
-                    : const Icon(Icons.image, color: Colors.white30, size: 50),
+                    : const Icon(Icons.image, color: TekInk.dim, size: 50),
               ),
               Positioned(
                 top: 10,
@@ -13021,13 +13022,13 @@ class _EventsScreenState extends State<EventsScreen>
                   ),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.65),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: Colors.white10),
+                    borderRadius: TekShape.br,
+                    border: Border.all(color: TekInk.wash),
                   ),
                   child: Text(
                     priceLabel,
                     style: const TextStyle(
-                      color: Color(0xFFB8B8C0),
+                      color: TekColors.steel,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.5,
@@ -13058,7 +13059,7 @@ class _EventsScreenState extends State<EventsScreen>
                       Text(
                         data['title'] ?? 'Event',
                         style: const TextStyle(
-                          color: Color(0xFFB8B8C0),
+                          color: TekColors.steel,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -13067,7 +13068,7 @@ class _EventsScreenState extends State<EventsScreen>
                       Text(
                         dateLabel,
                         style: const TextStyle(
-                          color: Colors.white70,
+                          color: TekInk.body,
                           fontSize: 12,
                         ),
                       ),
@@ -13076,7 +13077,7 @@ class _EventsScreenState extends State<EventsScreen>
                         Text(
                           data['location'],
                           style: const TextStyle(
-                            color: Colors.white70,
+                            color: TekInk.body,
                             fontSize: 12,
                           ),
                         ),
@@ -13181,7 +13182,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
+          icon: const Icon(Icons.arrow_back, color: TekColors.steel),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -13198,7 +13199,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   width: double.infinity,
                   height: 220,
                   fit: BoxFit.cover,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: TekShape.br,
                 ),
               )
             else
@@ -13206,12 +13207,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 height: 180,
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white10),
-                  color: Colors.grey[900],
+                  borderRadius: TekShape.br,
+                  border: Border.all(color: TekInk.wash),
+                  color: TekColors.surface,
                 ),
                 child: const Center(
-                  child: Icon(Icons.image, color: Colors.white30, size: 60),
+                  child: Icon(Icons.image, color: TekInk.dim, size: 60),
                 ),
               ),
             const SizedBox(height: 20),
@@ -13223,7 +13224,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   Text(
                     data['title'] ?? 'Event',
                     style: const TextStyle(
-                      color: Color(0xFFB8B8C0),
+                      color: TekColors.steel,
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1,
@@ -13234,7 +13235,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     Text(
                       DateFormat('EEE, MMM d · HH:mm').format(start),
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: TekInk.body,
                         fontSize: 14,
                       ),
                     ),
@@ -13243,7 +13244,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     Text(
                       data['location'],
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: TekInk.body,
                         fontSize: 14,
                       ),
                     ),
@@ -13254,7 +13255,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     Text(
                       data['description'],
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: TekInk.body,
                         fontSize: 14,
                       ),
                     ),
@@ -13262,7 +13263,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   Text(
                     'Price: ${data['price'] ?? 0}',
                     style: const TextStyle(
-                      color: Color(0xFFB8B8C0),
+                      color: TekColors.steel,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -13270,7 +13271,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     const SizedBox(height: 4),
                     Text(
                       'Remaining: $remaining / $capacity',
-                      style: const TextStyle(color: Colors.white70),
+                      style: const TextStyle(color: TekInk.body),
                     ),
                   ],
                   const SizedBox(height: 20),
@@ -13311,10 +13312,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                       )
                                     : _purchaseTicket),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF00FF41),
+                            backgroundColor: TekColors.signal,
                             minimumSize: const Size(double.infinity, 50),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: TekShape.br,
                             ),
                           ),
                           child: _loading
@@ -13343,7 +13344,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   if (_userCode == null)
                     const Text(
                       'Login to purchase tickets.',
-                      style: TextStyle(color: Colors.redAccent),
+                      style: TextStyle(color: TekColors.danger),
                     ),
                   const SizedBox(height: 16),
                   _EventMissionsSection(
@@ -13377,13 +13378,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           .update({'chatOpen': !(data['chatOpen'] == true)}),
                       icon: Icon(
                         data['chatOpen'] == true ? Icons.chat_bubble : Icons.chat_bubble_outline,
-                        color: const Color(0xFF00FF41), size: 16),
+                        color: TekColors.signal, size: 16),
                       label: Text(
                         data['chatOpen'] == true ? 'CLOSE LIVE CHAT' : 'OPEN LIVE CHAT',
-                        style: const TextStyle(color: Color(0xFF00FF41), fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                        style: const TextStyle(color: TekColors.signal, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFF00FF41)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        side: const BorderSide(color: TekColors.signal),
+                        shape: RoundedRectangleBorder(borderRadius: TekShape.br),
                       ),
                     ),
                   ],
@@ -13495,12 +13496,12 @@ class _EventMissionsSection extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Divider(color: Colors.white10),
+            const Divider(color: TekInk.wash),
             const SizedBox(height: 12),
             const Text(
               'EVENT MISSIONS',
               style: TextStyle(
-                color: Colors.white70,
+                color: TekInk.body,
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 2,
@@ -13531,13 +13532,13 @@ class _EventMissionsSection extends StatelessWidget {
                       horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
                     color: done
-                        ? Colors.white.withValues(alpha: 0.03)
-                        : const Color(0xFF00FF41).withValues(alpha: 0.06),
-                    borderRadius: BorderRadius.circular(10),
+                        ? TekInk.high.withValues(alpha: 0.03)
+                        : TekColors.signal.withValues(alpha: 0.06),
+                    borderRadius: TekShape.br,
                     border: Border.all(
                       color: done
-                          ? Colors.white10
-                          : const Color(0xFF00FF41).withValues(alpha: 0.3),
+                          ? TekInk.wash
+                          : TekColors.signal.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
@@ -13545,8 +13546,8 @@ class _EventMissionsSection extends StatelessWidget {
                       Icon(
                         done ? Icons.check_circle : Icons.bolt,
                         color: done
-                            ? Colors.white24
-                            : const Color(0xFF00FF41),
+                            ? TekInk.line
+                            : TekColors.signal,
                         size: 18,
                       ),
                       const SizedBox(width: 10),
@@ -13555,7 +13556,7 @@ class _EventMissionsSection extends StatelessWidget {
                           title,
                           style: TextStyle(
                             color:
-                                done ? Colors.white38 : Colors.white,
+                                done ? TekInk.faint : TekInk.high,
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
                           ),
@@ -13565,13 +13566,13 @@ class _EventMissionsSection extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF00FF41).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(6),
+                          color: TekColors.signal.withValues(alpha: 0.1),
+                          borderRadius: TekShape.br,
                         ),
                         child: Text(
                           '+$xp XP',
                           style: const TextStyle(
-                            color: Color(0xFF00FF41),
+                            color: TekColors.signal,
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
                           ),
@@ -13649,24 +13650,24 @@ class _GoingSectionState extends State<_GoingSection> {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.4),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFF00FF41).withValues(alpha: 0.3)),
+            borderRadius: TekShape.br,
+            border: Border.all(color: TekColors.signal.withValues(alpha: 0.3)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(children: [
-                const Icon(Icons.people_alt, color: Color(0xFF00FF41), size: 14),
+                const Icon(Icons.people_alt, color: TekColors.signal, size: 14),
                 const SizedBox(width: 6),
                 const Text('GOING',
-                    style: TextStyle(color: Color(0xFF00FF41), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                    style: TextStyle(color: TekColors.signal, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
                 const Spacer(),
                 Text('${docs.length}',
-                    style: const TextStyle(color: Color(0xFF00FF41), fontSize: 12, fontWeight: FontWeight.bold)),
+                    style: const TextStyle(color: TekColors.signal, fontSize: 12, fontWeight: FontWeight.bold)),
               ]),
               const SizedBox(height: 10),
               if (docs.isEmpty)
-                const Text('AWAITING FIRST RSVP', style: TextStyle(color: Color(0xFF00FF41), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5))
+                const Text('AWAITING FIRST RSVP', style: TextStyle(color: TekColors.signal, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5))
               else
                 SizedBox(
                   height: 44,
@@ -13686,12 +13687,12 @@ class _GoingSectionState extends State<_GoingSection> {
                                 width: 38, height: 38,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: const Color(0xFF00FF41).withValues(alpha: 0.15),
-                                  border: Border.all(color: const Color(0xFF00FF41), width: 1),
+                                  color: TekColors.signal.withValues(alpha: 0.15),
+                                  border: Border.all(color: TekColors.signal, width: 1),
                                 ),
                                 child: Center(
                                   child: Text(name.trim().isEmpty ? '?' : name.trim()[0].toUpperCase(),
-                                      style: const TextStyle(color: Color(0xFF00FF41), fontWeight: FontWeight.bold)),
+                                      style: const TextStyle(color: TekColors.signal, fontWeight: FontWeight.bold)),
                                 ),
                               ),
                       );
@@ -13704,19 +13705,19 @@ class _GoingSectionState extends State<_GoingSection> {
                 child: ElevatedButton.icon(
                   onPressed: _saving ? null : () => _toggle(iAmGoing),
                   icon: Icon(iAmGoing ? Icons.check_circle : Icons.celebration,
-                      color: iAmGoing ? Colors.black : const Color(0xFF00FF41), size: 18),
+                      color: iAmGoing ? Colors.black : TekColors.signal, size: 18),
                   label: Text(iAmGoing ? "I'M GOING" : "I'M GOING",
                       style: TextStyle(
-                          color: iAmGoing ? Colors.black : const Color(0xFF00FF41),
+                          color: iAmGoing ? Colors.black : TekColors.signal,
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 2)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: iAmGoing ? const Color(0xFF00FF41) : Colors.transparent,
+                    backgroundColor: iAmGoing ? TekColors.signal : Colors.transparent,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: const BorderSide(color: Color(0xFF00FF41), width: 1.5),
+                      borderRadius: TekShape.br,
+                      side: const BorderSide(color: TekColors.signal, width: 1.5),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
@@ -13795,7 +13796,7 @@ class _CheckInSectionState extends State<_CheckInSection> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Error: $e'), backgroundColor: TekColors.danger),
         );
       }
     } finally {
@@ -13809,7 +13810,7 @@ class _CheckInSectionState extends State<_CheckInSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Divider(color: Colors.white10),
+        const Divider(color: TekInk.wash),
         const SizedBox(height: 12),
         SizedBox(
           width: double.infinity,
@@ -13818,12 +13819,12 @@ class _CheckInSectionState extends State<_CheckInSection> {
             icon: Icon(
               _checkedIn ? Icons.location_on : Icons.location_off,
               size: 16,
-              color: _checkedIn ? const Color(0xFF00FF41) : Colors.white54,
+              color: _checkedIn ? TekColors.signal : TekInk.muted,
             ),
             label: Text(
               _checkedIn ? 'CHECKED IN' : 'CHECK IN',
               style: TextStyle(
-                color: _checkedIn ? const Color(0xFF00FF41) : Colors.white54,
+                color: _checkedIn ? TekColors.signal : TekInk.muted,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1,
@@ -13832,11 +13833,11 @@ class _CheckInSectionState extends State<_CheckInSection> {
             style: OutlinedButton.styleFrom(
               side: BorderSide(
                 color: _checkedIn
-                    ? const Color(0xFF00FF41).withValues(alpha: 0.5)
-                    : Colors.white24,
+                    ? TekColors.signal.withValues(alpha: 0.5)
+                    : TekInk.line,
               ),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                  borderRadius: TekShape.br),
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
           ),
@@ -13871,9 +13872,9 @@ class _CheckInSectionState extends State<_CheckInSection> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00FF41),
+                  backgroundColor: TekColors.signal,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                      borderRadius: TekShape.br),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   elevation: 0,
                 ),
@@ -13897,7 +13898,7 @@ class _CheckInSectionState extends State<_CheckInSection> {
                 Text(
                   '${docs.length} AT THIS EVENT',
                   style: const TextStyle(
-                    color: Colors.white70,
+                    color: TekInk.body,
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.5,
@@ -13916,7 +13917,7 @@ class _CheckInSectionState extends State<_CheckInSection> {
                       children: [
                         CircleAvatar(
                           radius: 22,
-                          backgroundColor: Colors.white10,
+                          backgroundColor: TekInk.wash,
                           backgroundImage: imgUrl != null
                               ? NetworkImage(imgUrl)
                               : null,
@@ -13926,7 +13927,7 @@ class _CheckInSectionState extends State<_CheckInSection> {
                                       ? name[0].toUpperCase()
                                       : '?',
                                   style: const TextStyle(
-                                    color: Color(0xFF00FF41),
+                                    color: TekColors.signal,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
                                   ),
@@ -13941,7 +13942,7 @@ class _CheckInSectionState extends State<_CheckInSection> {
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              color: Colors.white54,
+                              color: TekInk.muted,
                               fontSize: 9,
                             ),
                           ),
@@ -14063,7 +14064,7 @@ class _RadarPreviewPageState extends State<_RadarPreviewPage>
         title: const Text(
           'TEK RADAR',
           style: TextStyle(
-            color: Color(0xFF00FF41),
+            color: TekColors.signal,
             letterSpacing: 4,
             fontWeight: FontWeight.bold,
           ),
@@ -14363,11 +14364,11 @@ class _TekRadarPageState extends State<_TekRadarPage>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF00FF41)),
+        iconTheme: const IconThemeData(color: TekColors.signal),
         title: const Text(
           'TEK RADAR',
           style: TextStyle(
-            color: Color(0xFF00FF41),
+            color: TekColors.signal,
             fontSize: 16,
             fontWeight: FontWeight.bold,
             letterSpacing: 3,
@@ -14385,12 +14386,12 @@ class _TekRadarPageState extends State<_TekRadarPage>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircularProgressIndicator(color: Color(0xFF00FF41)),
+            CircularProgressIndicator(color: TekColors.signal),
             SizedBox(height: 16),
             Text(
               'ACQUIRING SIGNAL...',
               style: TextStyle(
-                color: Colors.white54,
+                color: TekInk.muted,
                 fontSize: 11,
                 letterSpacing: 3,
                 fontWeight: FontWeight.bold,
@@ -14408,12 +14409,12 @@ class _TekRadarPageState extends State<_TekRadarPage>
             mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(Icons.location_disabled,
-                  color: Colors.redAccent, size: 48),
+                  color: TekColors.danger, size: 48),
               const SizedBox(height: 16),
               Text(
                 _error!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white70, fontSize: 13),
+                style: const TextStyle(color: TekInk.body, fontSize: 13),
               ),
             ],
           ),
@@ -14460,14 +14461,14 @@ class _TekRadarPageState extends State<_TekRadarPage>
                   Row(
                     children: [
                       const Icon(Icons.people,
-                          color: Color(0xFF00FF41), size: 14),
+                          color: TekColors.signal, size: 14),
                       const SizedBox(width: 6),
                       Text(
                         blips.isEmpty
                             ? 'NO FRIENDS ON RADAR'
                             : '${blips.length} FRIEND${blips.length == 1 ? "" : "S"} ON RADAR',
                         style: const TextStyle(
-                          color: Color(0xFF00FF41),
+                          color: TekColors.signal,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 2,
@@ -14479,7 +14480,7 @@ class _TekRadarPageState extends State<_TekRadarPage>
                   if (blips.isEmpty) ...[
                     const Text(
                       'Friends only show on radar when they open this screen at the same venue. Bring more operators in to see signal.',
-                      style: TextStyle(color: Colors.white54, fontSize: 11, height: 1.4),
+                      style: TextStyle(color: TekInk.muted, fontSize: 11, height: 1.4),
                     ),
                     const SizedBox(height: 10),
                     OutlinedButton.icon(
@@ -14493,11 +14494,11 @@ class _TekRadarPageState extends State<_TekRadarPage>
                         );
                       },
                       icon: const Icon(Icons.person_add_alt_1,
-                          color: Color(0xFF00FF41), size: 16),
+                          color: TekColors.signal, size: 16),
                       label: const Text(
                         'INVITE A FRIEND',
                         style: TextStyle(
-                          color: Color(0xFF00FF41),
+                          color: TekColors.signal,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.5,
@@ -14505,13 +14506,13 @@ class _TekRadarPageState extends State<_TekRadarPage>
                       ),
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(
-                          color: const Color(0xFF00FF41).withValues(alpha: 0.5),
+                          color: TekColors.signal.withValues(alpha: 0.5),
                           width: 0.8,
                         ),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 14, vertical: 8),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: TekShape.br,
                         ),
                       ),
                     ),
@@ -14522,14 +14523,14 @@ class _TekRadarPageState extends State<_TekRadarPage>
                           child: Row(
                             children: [
                               const Icon(Icons.adjust,
-                                  color: Color(0xFF00FF41), size: 10),
+                                  color: TekColors.signal, size: 10),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   b.userName.toUpperCase(),
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
-                                    color: Colors.white,
+                                    color: TekInk.high,
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 1,
@@ -14539,7 +14540,7 @@ class _TekRadarPageState extends State<_TekRadarPage>
                               Text(
                                 _fmtDistance(b.distanceMeters),
                                 style: const TextStyle(
-                                  color: Color(0xFF00FF41),
+                                  color: TekColors.signal,
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'monospace',
@@ -14574,7 +14575,7 @@ class _RadarPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final maxRadius = math.min(size.width, size.height) * 0.42;
-    const green = Color(0xFF00FF41);
+    const green = TekColors.signal;
     final t = sweepProgress * 2 * math.pi;
     final breathe = 0.5 + 0.5 * math.sin(t);
 
@@ -14680,7 +14681,7 @@ class _RadarPainter extends CustomPainter {
       9,
       Paint()
         ..shader = const RadialGradient(
-          colors: [Colors.white, green],
+          colors: [TekInk.high, green],
         ).createShader(Rect.fromCircle(center: center, radius: 9)),
     );
 
@@ -14770,7 +14771,7 @@ class _RadarPainter extends CustomPainter {
         5.5,
         Paint()
           ..shader = const RadialGradient(
-            colors: [Colors.white, green],
+            colors: [TekInk.high, green],
           ).createShader(Rect.fromCircle(center: blipCenter, radius: 5.5)),
       );
 
@@ -14803,7 +14804,7 @@ class _RadarPainter extends CustomPainter {
         text: TextSpan(
           text: distLabel,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.75),
+            color: TekInk.high.withValues(alpha: 0.75),
             fontSize: 9.5,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,
@@ -14880,7 +14881,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Photo upload failed: $e'),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
         ));
       }
     } finally {
@@ -14944,7 +14945,7 @@ class _ChatScreenState extends State<ChatScreen> {
             content: Text(
               'You cannot message this user because one of you has blocked the other.',
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
           ),
         );
       }
@@ -15002,7 +15003,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error sending message: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
           ),
         );
       }
@@ -15025,7 +15026,7 @@ class _ChatScreenState extends State<ChatScreen> {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF00FF41).withValues(alpha: 0.12),
+                  color: TekColors.signal.withValues(alpha: 0.12),
                   blurRadius: 24,
                   spreadRadius: 3,
                 ),
@@ -15039,7 +15040,7 @@ class _ChatScreenState extends State<ChatScreen> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFF7A7A7A).withValues(alpha: 0.5),
+                color: TekColors.chrome.withValues(alpha: 0.5),
                 width: 1.2,
               ),
             ),
@@ -15051,7 +15052,7 @@ class _ChatScreenState extends State<ChatScreen> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFF00FF41).withValues(alpha: 0.2),
+                color: TekColors.signal.withValues(alpha: 0.2),
                 width: 0.8,
               ),
             ),
@@ -15063,7 +15064,7 @@ class _ChatScreenState extends State<ChatScreen> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFF8A8A8A).withValues(alpha: 0.35),
+                color: TekColors.chrome.withValues(alpha: 0.35),
                 width: 1.2,
               ),
             ),
@@ -15075,12 +15076,12 @@ class _ChatScreenState extends State<ChatScreen> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFF00FF41).withValues(alpha: 0.35),
+                color: TekColors.signal.withValues(alpha: 0.35),
                 width: 1.2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF00FF41).withValues(alpha: 0.1),
+                  color: TekColors.signal.withValues(alpha: 0.1),
                   blurRadius: 8,
                   spreadRadius: 1,
                 ),
@@ -15103,10 +15104,10 @@ class _ChatScreenState extends State<ChatScreen> {
                       errorBuilder: (context, error, stackTrace) => Container(
                         width: size,
                         height: size,
-                        color: Colors.grey[800],
+                        color: TekColors.surfaceLift,
                         child: const Icon(
                           Icons.person,
-                          color: Colors.white30,
+                          color: TekInk.dim,
                           size: 36,
                         ),
                       ),
@@ -15114,10 +15115,10 @@ class _ChatScreenState extends State<ChatScreen> {
                   : Container(
                       width: size,
                       height: size,
-                      color: Colors.grey[800],
+                      color: TekColors.surfaceLift,
                       child: const Icon(
                         Icons.person,
-                        color: Colors.white30,
+                        color: TekInk.dim,
                         size: 36,
                       ),
                     ),
@@ -15138,7 +15139,7 @@ class _ChatScreenState extends State<ChatScreen> {
           title: Text(widget.friendName),
         ),
         body: const Center(
-          child: CircularProgressIndicator(color: Color(0xFF00FF41)),
+          child: CircularProgressIndicator(color: TekColors.signal),
         ),
       );
     }
@@ -15150,13 +15151,13 @@ class _ChatScreenState extends State<ChatScreen> {
         elevation: 0,
         toolbarHeight: 44,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
+          icon: const Icon(Icons.arrow_back, color: TekColors.steel),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
             tooltip: 'Challenges',
-            icon: const Icon(Icons.sports_kabaddi, color: Color(0xFF00FF41)),
+            icon: const Icon(Icons.sports_kabaddi, color: TekColors.signal),
             onPressed: () {
               HapticFeedback.lightImpact();
               Navigator.push(
@@ -15167,7 +15168,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           IconButton(
             tooltip: 'Relay XP',
-            icon: const Icon(Icons.bolt_outlined, color: Color(0xFF00FF41)),
+            icon: const Icon(Icons.bolt_outlined, color: TekColors.signal),
             onPressed: _isBlocked
                 ? null
                 : () {
@@ -15216,7 +15217,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 Text(
                   widget.friendName,
                   style: const TextStyle(
-                    color: Color(0xFFB8B8C0),
+                    color: TekColors.steel,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1,
@@ -15231,13 +15232,13 @@ class _ChatScreenState extends State<ChatScreen> {
               margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.12),
-                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
-                borderRadius: BorderRadius.circular(12),
+                color: TekColors.danger.withValues(alpha: 0.12),
+                border: Border.all(color: TekColors.danger.withValues(alpha: 0.3)),
+                borderRadius: TekShape.br,
               ),
               child: const Text(
                 'This conversation is blocked. Messaging is disabled until the user is unblocked.',
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(color: TekInk.body),
               ),
             ),
           Expanded(
@@ -15251,7 +15252,7 @@ class _ChatScreenState extends State<ChatScreen> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF00FF41)),
+                    child: CircularProgressIndicator(color: TekColors.signal),
                   );
                 }
 
@@ -15259,7 +15260,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   return Center(
                     child: Text(
                       'CHANNEL OPEN — TRANSMIT',
-                      style: TextStyle(color: Colors.white70),
+                      style: TextStyle(color: TekInk.body),
                     ),
                   );
                 }
@@ -15277,7 +15278,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   return Center(
                     child: Text(
                       'CHANNEL OPEN — TRANSMIT',
-                      style: TextStyle(color: Colors.white70),
+                      style: TextStyle(color: TekInk.body),
                     ),
                   );
                 }
@@ -15313,9 +15314,9 @@ class _ChatScreenState extends State<ChatScreen> {
                             ),
                             decoration: BoxDecoration(
                               color: isMe
-                                  ? const Color(0xFF00FF41)
-                                  : Colors.white.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
+                                  ? TekColors.signal
+                                  : TekInk.high.withValues(alpha: 0.1),
+                              borderRadius: TekShape.br,
                             ),
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -15331,7 +15332,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                       cinematicRoute(_FullscreenImageView(url: msgData['photoUrl'] as String)),
                                     ),
                                     child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: TekShape.br,
                                       child: ConstrainedBox(
                                         constraints: const BoxConstraints(maxHeight: 240),
                                         child: FadeInNetImage(
@@ -15347,7 +15348,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                   Text(
                                     msgData['message'] ?? '',
                                     style: TextStyle(
-                                      color: isMe ? Colors.black : Colors.white,
+                                      color: isMe ? Colors.black : TekInk.high,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -15358,7 +15359,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                   style: TextStyle(
                                     color: isMe
                                         ? Colors.black54
-                                        : Colors.white54,
+                                        : TekInk.muted,
                                     fontSize: 11,
                                   ),
                                 ),
@@ -15376,7 +15377,7 @@ class _ChatScreenState extends State<ChatScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: Colors.white10)),
+              border: Border(top: BorderSide(color: TekInk.wash)),
             ),
             child: Row(
               children: [
@@ -15388,48 +15389,48 @@ class _ChatScreenState extends State<ChatScreen> {
                     margin: const EdgeInsets.only(right: 8),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.08),
-                      border: Border.all(color: Colors.white24),
+                      color: TekInk.high.withValues(alpha: 0.08),
+                      border: Border.all(color: TekInk.line),
                     ),
                     child: _sendingPhoto
                         ? const Center(
                             child: SizedBox(
                               width: 16, height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF00FF41)),
+                              child: CircularProgressIndicator(strokeWidth: 2, color: TekColors.signal),
                             ),
                           )
-                        : const Icon(Icons.photo_camera, color: Color(0xFF00FF41), size: 20),
+                        : const Icon(Icons.photo_camera, color: TekColors.signal, size: 20),
                   ),
                 ),
                 Expanded(
                   child: TextField(
                     controller: _messageController,
                     enabled: !_isBlocked,
-                    style: const TextStyle(color: Color(0xFFB8B8C0)),
+                    style: const TextStyle(color: TekColors.steel),
                     maxLines: 1,
                     decoration: InputDecoration(
                       hintText: _isBlocked
                           ? 'Messaging disabled'
                           : 'Type a message...',
-                      hintStyle: const TextStyle(color: Colors.white38),
+                      hintStyle: const TextStyle(color: TekInk.faint),
                       filled: true,
-                      fillColor: Colors.white.withValues(alpha: 0.05),
+                      fillColor: TekInk.high.withValues(alpha: 0.05),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 12,
                       ),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: const BorderSide(color: Colors.white24),
+                        borderRadius: TekShape.br,
+                        borderSide: const BorderSide(color: TekInk.line),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: const BorderSide(color: Colors.white24),
+                        borderRadius: TekShape.br,
+                        borderSide: const BorderSide(color: TekInk.line),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: TekShape.br,
                         borderSide: const BorderSide(
-                          color: Color(0xFF00FF41),
+                          color: TekColors.signal,
                           width: 2,
                         ),
                       ),
@@ -15445,8 +15446,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: _isBlocked
-                          ? Colors.white24
-                          : const Color(0xFF00FF41),
+                          ? TekInk.line
+                          : TekColors.signal,
                     ),
                     child: const Icon(
                       Icons.send,
@@ -15470,10 +15471,10 @@ class _ChatScreenState extends State<ChatScreen> {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (sbContext, setDialogState) => AlertDialog(
-          backgroundColor: const Color(0xFF1a1a1a),
+          backgroundColor: TekColors.surface,
           title: const Text(
             'Report User',
-            style: TextStyle(color: Color(0xFFB8B8C0)),
+            style: TextStyle(color: TekColors.steel),
           ),
           content: SingleChildScrollView(
             child: Column(
@@ -15482,21 +15483,21 @@ class _ChatScreenState extends State<ChatScreen> {
               children: [
                 Text(
                   'Tell us why you are reporting ${widget.friendName}. We review reports within 24 hours.',
-                  style: const TextStyle(color: Colors.white70),
+                  style: const TextStyle(color: TekInk.body),
                 ),
                 const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white24),
+                    borderRadius: TekShape.br,
+                    border: Border.all(color: TekInk.line),
                   ),
                   child: DropdownButton<String>(
                     value: selectedCategory,
-                    dropdownColor: const Color(0xFF1a1a1a),
+                    dropdownColor: TekColors.surface,
                     isExpanded: true,
                     underline: const SizedBox.shrink(),
-                    style: const TextStyle(color: Color(0xFFB8B8C0)),
+                    style: const TextStyle(color: TekColors.steel),
                     items: _ugcReportCategories
                         .map(
                           (category) => DropdownMenuItem<String>(
@@ -15517,23 +15518,23 @@ class _ChatScreenState extends State<ChatScreen> {
                 TextField(
                   controller: reasonController,
                   maxLines: 4,
-                  style: const TextStyle(color: Color(0xFFB8B8C0)),
+                  style: const TextStyle(color: TekColors.steel),
                   decoration: InputDecoration(
                     hintText: 'Add details that will help our moderation team.',
-                    hintStyle: const TextStyle(color: Colors.white38),
+                    hintStyle: const TextStyle(color: TekInk.faint),
                     filled: true,
-                    fillColor: Colors.white.withValues(alpha: 0.05),
+                    fillColor: TekInk.high.withValues(alpha: 0.05),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.white24),
+                      borderRadius: TekShape.br,
+                      borderSide: const BorderSide(color: TekInk.line),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.white24),
+                      borderRadius: TekShape.br,
+                      borderSide: const BorderSide(color: TekInk.line),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFF00FF41)),
+                      borderRadius: TekShape.br,
+                      borderSide: const BorderSide(color: TekColors.signal),
                     ),
                   ),
                 ),
@@ -15545,7 +15546,7 @@ class _ChatScreenState extends State<ChatScreen> {
               onPressed: () => Navigator.pop(dialogContext),
               child: const Text(
                 'Cancel',
-                style: TextStyle(color: Colors.white54),
+                style: TextStyle(color: TekInk.muted),
               ),
             ),
             TextButton(
@@ -15554,7 +15555,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 Navigator.pop(dialogContext);
                 _submitReport(category: selectedCategory, details: details);
               },
-              child: const Text('Report', style: TextStyle(color: Colors.red)),
+              child: const Text('Report', style: TextStyle(color: TekColors.danger)),
             ),
           ],
         ),
@@ -15566,10 +15567,10 @@ class _ChatScreenState extends State<ChatScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Color(0xFF1a1a1a),
+        backgroundColor: TekColors.surface,
         title: const Text(
           'Block User',
-          style: TextStyle(color: Color(0xFFB8B8C0)),
+          style: TextStyle(color: TekColors.steel),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -15577,12 +15578,12 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             Text(
               'Block ${widget.friendName}?',
-              style: const TextStyle(color: Colors.white70),
+              style: const TextStyle(color: TekInk.body),
             ),
             const SizedBox(height: 12),
             const Text(
               'You won\'t be able to message them and they won\'t be able to message you.',
-              style: TextStyle(color: Colors.white54, fontSize: 12),
+              style: TextStyle(color: TekInk.muted, fontSize: 12),
             ),
           ],
         ),
@@ -15591,7 +15592,7 @@ class _ChatScreenState extends State<ChatScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'Cancel',
-              style: TextStyle(color: Colors.white54),
+              style: TextStyle(color: TekInk.muted),
             ),
           ),
           TextButton(
@@ -15599,7 +15600,7 @@ class _ChatScreenState extends State<ChatScreen> {
               _blockUser();
               Navigator.pop(context);
             },
-            child: const Text('Block', style: TextStyle(color: Colors.red)),
+            child: const Text('Block', style: TextStyle(color: TekColors.danger)),
           ),
         ],
       ),
@@ -15632,7 +15633,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Report submitted. Thank you!'),
-            backgroundColor: Colors.green,
+            backgroundColor: TekColors.signal,
           ),
         );
       }
@@ -15641,7 +15642,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error submitting report: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
           ),
         );
       }
@@ -15663,7 +15664,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${widget.friendName} has been blocked.'),
-            backgroundColor: Colors.green,
+            backgroundColor: TekColors.signal,
           ),
         );
       }
@@ -15672,7 +15673,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error blocking user: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
           ),
         );
       }
@@ -15710,11 +15711,11 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.event_busy, size: 80, color: Colors.white30),
+            Icon(Icons.event_busy, size: 80, color: TekInk.dim),
             const SizedBox(height: 16),
             Text(
               'No events found',
-              style: TextStyle(color: Colors.white70, fontSize: 16),
+              style: TextStyle(color: TekInk.body, fontSize: 16),
             ),
           ],
         ),
@@ -15735,15 +15736,15 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
         final capacity = eventData['capacity'] ?? 0;
 
         return Card(
-          color: Colors.white.withValues(alpha: 0.05),
+          color: TekInk.high.withValues(alpha: 0.05),
           margin: const EdgeInsets.only(bottom: 12),
           clipBehavior: Clip.antiAlias,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: TekShape.br,
             side: BorderSide(
               color: isPast
-                  ? Colors.white24
-                  : const Color(0xFF00FF41).withValues(alpha: 0.3),
+                  ? TekInk.line
+                  : TekColors.signal.withValues(alpha: 0.3),
             ),
           ),
           child: InkWell(
@@ -15756,8 +15757,8 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
                 ),
               ),
             ),
-            splashColor: const Color(0xFF00FF41).withValues(alpha: 0.1),
-            highlightColor: const Color(0xFF00FF41).withValues(alpha: 0.05),
+            splashColor: TekColors.signal.withValues(alpha: 0.1),
+            highlightColor: TekColors.signal.withValues(alpha: 0.05),
             child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -15767,14 +15768,14 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: TekShape.br,
+                    color: TekInk.high.withValues(alpha: 0.1),
                   ),
                   child:
                       eventData['imageUrl'] != null &&
                           eventData['imageUrl'].toString().isNotEmpty
                       ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: TekShape.br,
                           child: Image.network(
                             eventData['imageUrl'],
                             fit: BoxFit.cover,
@@ -15782,7 +15783,7 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
                               return const Icon(
                                 Icons.event,
                                 size: 40,
-                                color: Colors.white30,
+                                color: TekInk.dim,
                               );
                             },
                           ),
@@ -15790,7 +15791,7 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
                       : const Icon(
                           Icons.event,
                           size: 40,
-                          color: Colors.white30,
+                          color: TekInk.dim,
                         ),
                 ),
                 const SizedBox(width: 12),
@@ -15802,7 +15803,7 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
                       Text(
                         eventData['title'] ?? 'Untitled Event',
                         style: const TextStyle(
-                          color: Color(0xFFB8B8C0),
+                          color: TekColors.steel,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -15813,7 +15814,7 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
                       Text(
                         DateFormat('MMM d, y • HH:mm').format(startAt),
                         style: TextStyle(
-                          color: isPast ? Colors.white38 : Colors.white70,
+                          color: isPast ? TekInk.faint : TekInk.body,
                           fontSize: 12,
                         ),
                       ),
@@ -15821,7 +15822,7 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
                       Text(
                         '$ticketsSold / $capacity tickets sold',
                         style: const TextStyle(
-                          color: Color(0xFF00FF41),
+                          color: TekColors.signal,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
@@ -15836,13 +15837,13 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white24,
-                                borderRadius: BorderRadius.circular(4),
+                                color: TekInk.line,
+                                borderRadius: TekShape.br,
                               ),
                               child: const Text(
                                 'PAST',
                                 style: TextStyle(
-                                  color: Colors.white70,
+                                  color: TekInk.body,
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -15856,18 +15857,18 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFF8800)
+                                color: TekColors.silver
                                     .withValues(alpha: 0.25),
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: TekShape.br,
                                 border: Border.all(
-                                  color: const Color(0xFFFF8800)
+                                  color: TekColors.silver
                                       .withValues(alpha: 0.6),
                                 ),
                               ),
                               child: const Text(
                                 'HIDDEN',
                                 style: TextStyle(
-                                  color: Color(0xFFFF8800),
+                                  color: TekColors.silver,
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 1,
@@ -15883,12 +15884,12 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
                 Column(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.edit, color: Color(0xFF00FF41)),
+                      icon: const Icon(Icons.edit, color: TekColors.signal),
                       onPressed: () => _editEvent(event.id, eventData),
                       tooltip: 'Edit',
                     ),
                     IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
+                      icon: const Icon(Icons.delete, color: TekColors.danger),
                       onPressed: () =>
                           _confirmDelete(event.id, eventData['title']),
                       tooltip: 'Delete',
@@ -15915,7 +15916,7 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
           elevation: 0,
           centerTitle: true,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
+            icon: const Icon(Icons.arrow_back, color: TekColors.steel),
             onPressed: () => Navigator.pop(context),
           ),
           title: const Text(
@@ -15923,14 +15924,14 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFFB8B8C0),
+              color: TekColors.steel,
               letterSpacing: 1,
             ),
           ),
           bottom: const TabBar(
-            indicatorColor: Color(0xFF00FF41),
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
+            indicatorColor: TekColors.signal,
+            labelColor: TekInk.high,
+            unselectedLabelColor: TekInk.body,
             tabs: [
               Tab(text: 'UPCOMING'),
               Tab(text: 'PAST'),
@@ -15944,14 +15945,14 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF00FF41)),
+                    child: CircularProgressIndicator(color: TekColors.signal),
                   );
                 }
                 if (!snapshot.hasData) {
                   return const Center(
                     child: Text(
                       'No events found',
-                      style: TextStyle(color: Colors.white70),
+                      style: TextStyle(color: TekInk.body),
                     ),
                   );
                 }
@@ -15963,14 +15964,14 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF00FF41)),
+                    child: CircularProgressIndicator(color: TekColors.signal),
                   );
                 }
                 if (!snapshot.hasData) {
                   return const Center(
                     child: Text(
                       'No events found',
-                      style: TextStyle(color: Colors.white70),
+                      style: TextStyle(color: TekInk.body),
                     ),
                   );
                 }
@@ -15996,21 +15997,21 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Color(0xFF1A1A1A).withValues(alpha: 0.85),
+        backgroundColor: TekColors.surface.withValues(alpha: 0.85),
         title: const Text(
           'Delete Event',
-          style: TextStyle(color: Color(0xFFB8B8C0)),
+          style: TextStyle(color: TekColors.steel),
         ),
         content: Text(
           'Are you sure you want to delete "${title ?? 'this event'}"?\n\nThis will also delete all associated tickets.',
-          style: const TextStyle(color: Colors.white70),
+          style: const TextStyle(color: TekInk.body),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'Cancel',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: TekInk.body),
             ),
           ),
           TextButton(
@@ -16018,7 +16019,7 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
               Navigator.pop(context);
               _deleteEvent(eventId);
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete', style: TextStyle(color: TekColors.danger)),
           ),
         ],
       ),
@@ -16050,7 +16051,7 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Event deleted successfully'),
-            backgroundColor: Color(0xFF00FF41),
+            backgroundColor: TekColors.signal,
           ),
         );
       }
@@ -16059,7 +16060,7 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error deleting event: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
           ),
         );
       }
@@ -16130,7 +16131,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
+          icon: const Icon(Icons.arrow_back, color: TekColors.steel),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
@@ -16138,7 +16139,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Color(0xFFB8B8C0),
+            color: TekColors.steel,
             letterSpacing: 1,
           ),
         ),
@@ -16155,20 +16156,20 @@ class _EditEventScreenState extends State<EditEventScreen> {
                 width: double.infinity,
                 height: 200,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(12),
+                  color: TekInk.high.withValues(alpha: 0.05),
+                  borderRadius: TekShape.br,
                   border: Border.all(
-                    color: const Color(0xFF00FF41).withValues(alpha: 0.3),
+                    color: TekColors.signal.withValues(alpha: 0.3),
                   ),
                 ),
                 child: _eventImage != null
                     ? ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: TekShape.br,
                         child: Image.file(_eventImage!, fit: BoxFit.cover),
                       )
                     : _existingImageUrl != null && _existingImageUrl!.isNotEmpty
                     ? ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: TekShape.br,
                         child: Image.network(
                           _existingImageUrl!,
                           fit: BoxFit.cover,
@@ -16179,13 +16180,13 @@ class _EditEventScreenState extends State<EditEventScreen> {
                                 Icon(
                                   Icons.add_photo_alternate,
                                   size: 50,
-                                  color: Colors.white38,
+                                  color: TekInk.faint,
                                 ),
                                 SizedBox(height: 8),
                                 Text(
                                   'Tap to change image',
                                   style: TextStyle(
-                                    color: Colors.white38,
+                                    color: TekInk.faint,
                                     fontSize: 14,
                                   ),
                                 ),
@@ -16200,13 +16201,13 @@ class _EditEventScreenState extends State<EditEventScreen> {
                           Icon(
                             Icons.add_photo_alternate,
                             size: 50,
-                            color: Colors.white38,
+                            color: TekInk.faint,
                           ),
                           SizedBox(height: 8),
                           Text(
                             'Tap to add image',
                             style: TextStyle(
-                              color: Colors.white38,
+                              color: TekInk.faint,
                               fontSize: 14,
                             ),
                           ),
@@ -16236,14 +16237,14 @@ class _EditEventScreenState extends State<EditEventScreen> {
                     _startDate != null
                         ? 'Date: ${DateFormat('MMM d, y • HH:mm').format(_startDate!)}'
                         : 'Pick date & time',
-                    style: const TextStyle(color: Colors.white70),
+                    style: const TextStyle(color: TekInk.body),
                   ),
                 ),
                 TextButton(
                   onPressed: _pickDateTime,
                   child: const Text(
                     'Change',
-                    style: TextStyle(color: Color(0xFF00FF41)),
+                    style: TextStyle(color: TekColors.signal),
                   ),
                 ),
               ],
@@ -16255,9 +16256,9 @@ class _EditEventScreenState extends State<EditEventScreen> {
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _updateEvent,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00FF41),
+                  backgroundColor: TekColors.signal,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: TekShape.br,
                   ),
                 ),
                 child: _isLoading
@@ -16295,19 +16296,19 @@ class _EditEventScreenState extends State<EditEventScreen> {
       controller: c,
       maxLines: maxLines,
       keyboardType: keyboard,
-      style: const TextStyle(color: Color(0xFFB8B8C0)),
+      style: const TextStyle(color: TekColors.steel),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Colors.white38),
+        hintStyle: const TextStyle(color: TekInk.faint),
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.05),
+        fillColor: TekInk.high.withValues(alpha: 0.05),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.white24),
+          borderRadius: TekShape.br,
+          borderSide: const BorderSide(color: TekInk.line),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF00FF41), width: 2),
+          borderRadius: TekShape.br,
+          borderSide: const BorderSide(color: TekColors.signal, width: 2),
         ),
       ),
     );
@@ -16354,7 +16355,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Title and date/time are required'),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
         ),
       );
       return;
@@ -16393,7 +16394,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Event updated successfully'),
-            backgroundColor: Color(0xFF00FF41),
+            backgroundColor: TekColors.signal,
           ),
         );
       }
@@ -16402,7 +16403,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error updating event: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
           ),
         );
       }
@@ -16428,10 +16429,10 @@ Future<void> showMemberQuickActions(
 
   await showModalBottomSheet<void>(
     context: context,
-    backgroundColor: const Color(0xFF0A0A0A),
+    backgroundColor: TekColors.surfaceDeep,
     barrierColor: Colors.black.withValues(alpha: 0.6),
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      borderRadius: TekShape.brSheet,
     ),
     builder: (sheetCtx) {
       Widget actionRow({
@@ -16440,7 +16441,7 @@ Future<void> showMemberQuickActions(
         required bool enabled,
         required VoidCallback onTap,
       }) {
-        final accent = enabled ? const Color(0xFF00FF41) : Colors.white24;
+        final accent = enabled ? TekColors.signal : TekInk.line;
         return InkWell(
           onTap: enabled
               ? () {
@@ -16461,7 +16462,7 @@ Future<void> showMemberQuickActions(
                     style: TextStyle(
                       color: enabled
                           ? const Color(0xFFE7E8ED)
-                          : Colors.white24,
+                          : TekInk.line,
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,
@@ -16469,7 +16470,7 @@ Future<void> showMemberQuickActions(
                   ),
                 ),
                 Icon(Icons.chevron_right,
-                    color: enabled ? Colors.white38 : Colors.white12,
+                    color: enabled ? TekInk.faint : TekInk.hairline,
                     size: 18),
               ],
             ),
@@ -16489,8 +16490,8 @@ Future<void> showMemberQuickActions(
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
+                color: TekInk.line,
+                borderRadius: TekShape.brTight,
               ),
             ),
             const SizedBox(height: 14),
@@ -16503,7 +16504,7 @@ Future<void> showMemberQuickActions(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                        color: const Color(0xFF00FF41), width: 1.5),
+                        color: TekColors.signal, width: 1.5),
                   ),
                   child: ClipOval(
                     child: (imageUrl != null && imageUrl.isNotEmpty)
@@ -16511,10 +16512,10 @@ Future<void> showMemberQuickActions(
                             fit: BoxFit.cover,
                             errorBuilder: (_, _, _) => const Icon(
                                 Icons.person,
-                                color: Colors.white30,
+                                color: TekInk.dim,
                                 size: 20))
                         : const Icon(Icons.person,
-                            color: Colors.white30, size: 20),
+                            color: TekInk.dim, size: 20),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -16530,7 +16531,7 @@ Future<void> showMemberQuickActions(
               ],
             ),
             const SizedBox(height: 14),
-            const Divider(color: Colors.white12, height: 1),
+            const Divider(color: TekInk.hairline, height: 1),
             actionRow(
               icon: Icons.chat_bubble_outline,
               label: 'MESSAGE',
@@ -16722,20 +16723,20 @@ class _UserProfileViewState extends State<UserProfileView> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Color(0xFF1A1A1A).withValues(alpha: 0.85),
-        title: Text('Block User', style: TextStyle(color: Color(0xFFB8B8C0))),
+        backgroundColor: TekColors.surface.withValues(alpha: 0.85),
+        title: Text('Block User', style: TextStyle(color: TekColors.steel)),
         content: Text(
           'Block ${widget.userData['name']}? Their content will be hidden from your feed.',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: TekInk.body),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel', style: TextStyle(color: Colors.white70)),
+            child: Text('Cancel', style: TextStyle(color: TekInk.body)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Block', style: TextStyle(color: Colors.red)),
+            child: Text('Block', style: TextStyle(color: TekColors.danger)),
           ),
         ],
       ),
@@ -16780,8 +16781,8 @@ class _UserProfileViewState extends State<UserProfileView> {
     final reported = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Color(0xFF1A1A1A).withValues(alpha: 0.85),
-        title: Text('Report User', style: TextStyle(color: Color(0xFFB8B8C0))),
+        backgroundColor: TekColors.surface.withValues(alpha: 0.85),
+        title: Text('Report User', style: TextStyle(color: TekColors.steel)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -16789,21 +16790,21 @@ class _UserProfileViewState extends State<UserProfileView> {
             children: [
               Text(
                 'Why are you reporting ${widget.userData['name']}?',
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(color: TekInk.body),
               ),
               SizedBox(height: 16),
               TextField(
                 controller: reasonController,
                 maxLines: 4,
-                style: TextStyle(color: Color(0xFFB8B8C0)),
+                style: TextStyle(color: TekColors.steel),
                 decoration: InputDecoration(
                   hintText: 'Provide details...',
-                  hintStyle: TextStyle(color: Colors.white38),
+                  hintStyle: TextStyle(color: TekInk.faint),
                   filled: true,
-                  fillColor: Colors.white.withValues(alpha: 0.05),
+                  fillColor: TekInk.high.withValues(alpha: 0.05),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.white24),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekInk.line),
                   ),
                 ),
               ),
@@ -16813,11 +16814,11 @@ class _UserProfileViewState extends State<UserProfileView> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel', style: TextStyle(color: Colors.white70)),
+            child: Text('Cancel', style: TextStyle(color: TekInk.body)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Report', style: TextStyle(color: Colors.orange)),
+            child: Text('Report', style: TextStyle(color: TekColors.danger)),
           ),
         ],
       ),
@@ -16925,7 +16926,7 @@ class _UserProfileViewState extends State<UserProfileView> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
+          icon: const Icon(Icons.arrow_back, color: TekColors.steel),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -16933,7 +16934,7 @@ class _UserProfileViewState extends State<UserProfileView> {
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Color(0xFFB8B8C0),
+            color: TekColors.steel,
             letterSpacing: 1,
           ),
         ),
@@ -16944,7 +16945,7 @@ class _UserProfileViewState extends State<UserProfileView> {
             IconButton(
               tooltip: 'Send message',
               icon: const Icon(Icons.chat_bubble_outline,
-                  color: Color(0xFF00FF41)),
+                  color: TekColors.signal),
               onPressed: () {
                 HapticFeedback.lightImpact();
                 Navigator.push(
@@ -17011,10 +17012,10 @@ class _UserProfileViewState extends State<UserProfileView> {
             height: 150,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFF00FF41), width: 3),
+              border: Border.all(color: TekColors.signal, width: 3),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF00FF41).withValues(alpha: 0.35),
+                  color: TekColors.signal.withValues(alpha: 0.35),
                   blurRadius: 24,
                   spreadRadius: 2,
                 ),
@@ -17026,15 +17027,15 @@ class _UserProfileViewState extends State<UserProfileView> {
                       imageUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (_, _, _) => Container(
-                        color: Colors.grey[800],
+                        color: TekColors.surfaceLift,
                         child: const Icon(Icons.person,
-                            size: 60, color: Colors.white30),
+                            size: 60, color: TekInk.dim),
                       ),
                     )
                   : Container(
-                      color: Colors.grey[800],
+                      color: TekColors.surfaceLift,
                       child: const Icon(Icons.person,
-                          size: 60, color: Colors.white30),
+                          size: 60, color: TekInk.dim),
                     ),
             ),
           ),
@@ -17043,7 +17044,7 @@ class _UserProfileViewState extends State<UserProfileView> {
           Text(
             live['name']?.toString() ?? 'Unknown User',
             style: const TextStyle(
-              color: Color(0xFFB8B8C0),
+              color: TekColors.steel,
               fontSize: 22,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.5,
@@ -17053,7 +17054,7 @@ class _UserProfileViewState extends State<UserProfileView> {
           if (isSelf)
             Text(
               '@${live['referralCode']}',
-              style: const TextStyle(color: Colors.white54, fontSize: 13),
+              style: const TextStyle(color: TekInk.muted, fontSize: 13),
             ),
           const SizedBox(height: 22),
           // LEVEL banner with XP bar to next reward
@@ -17064,25 +17065,25 @@ class _UserProfileViewState extends State<UserProfileView> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    const Color(0xFF00FF41).withValues(alpha: 0.18),
-                    const Color(0xFF00FF41).withValues(alpha: 0.04),
+                    TekColors.signal.withValues(alpha: 0.18),
+                    TekColors.signal.withValues(alpha: 0.04),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: TekShape.br,
                 border: Border.all(
-                    color: const Color(0xFF00FF41).withValues(alpha: 0.4)),
+                    color: TekColors.signal.withValues(alpha: 0.4)),
               ),
               child: Column(
                 children: [
                   Row(
                     children: [
                       const Icon(Icons.bolt,
-                          color: Color(0xFF00FF41), size: 18),
+                          color: TekColors.signal, size: 18),
                       const SizedBox(width: 6),
                       Text(
                         'LEVEL $level',
                         style: const TextStyle(
-                          color: Color(0xFF00FF41),
+                          color: TekColors.signal,
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 2,
@@ -17092,7 +17093,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                       Text(
                         '$xp XP',
                         style: const TextStyle(
-                          color: Colors.white70,
+                          color: TekInk.body,
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1,
@@ -17102,13 +17103,13 @@ class _UserProfileViewState extends State<UserProfileView> {
                   ),
                   const SizedBox(height: 12),
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: TekShape.br,
                     child: LinearProgressIndicator(
                       value: progress,
                       minHeight: 8,
-                      backgroundColor: Colors.white12,
+                      backgroundColor: TekInk.hairline,
                       valueColor: const AlwaysStoppedAnimation<Color>(
-                          Color(0xFF00FF41)),
+                          TekColors.signal),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -17121,8 +17122,8 @@ class _UserProfileViewState extends State<UserProfileView> {
                             : '${nextThreshold - xp} XP TO ${next.name}',
                         style: TextStyle(
                           color: next == null
-                              ? const Color(0xFFFFD700)
-                              : Colors.white70,
+                              ? TekColors.platinum
+                              : TekInk.body,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.2,
@@ -17164,11 +17165,11 @@ class _UserProfileViewState extends State<UserProfileView> {
                           : _sendFriendRequest,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: (_isFriend || _requestSent)
-                            ? Colors.grey[700]
-                            : const Color(0xFF00FF41),
-                        disabledBackgroundColor: Colors.grey[700],
+                            ? TekColors.chrome
+                            : TekColors.signal,
+                        disabledBackgroundColor: TekColors.chrome,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                            borderRadius: TekShape.br),
                       ),
                       child: _isLoading
                           ? const SizedBox(
@@ -17177,7 +17178,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor:
-                                    AlwaysStoppedAnimation(Colors.white),
+                                    AlwaysStoppedAnimation(TekInk.high),
                               ),
                             )
                           : Text(
@@ -17190,7 +17191,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                                           : 'SEND FRIEND REQUEST')),
                               style: TextStyle(
                                 color: (_isFriend || _requestSent)
-                                    ? Colors.white70
+                                    ? TekInk.body
                                     : Colors.black,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
@@ -17209,14 +17210,14 @@ class _UserProfileViewState extends State<UserProfileView> {
                             onPressed: _isLoading ? null : _reportUser,
                             style: OutlinedButton.styleFrom(
                               side: const BorderSide(
-                                  color: Colors.orange, width: 1.5),
+                                  color: TekColors.danger, width: 1.5),
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8)),
+                                  borderRadius: TekShape.br),
                             ),
                             child: const Text(
                               'REPORT',
                               style: TextStyle(
-                                color: Colors.orange,
+                                color: TekColors.danger,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
                               ),
@@ -17232,16 +17233,16 @@ class _UserProfileViewState extends State<UserProfileView> {
                             onPressed: _isLoading ? null : _blockUser,
                             style: OutlinedButton.styleFrom(
                               side: BorderSide(
-                                color: _isBlocked ? Colors.grey : Colors.red,
+                                color: _isBlocked ? TekColors.chrome : TekColors.danger,
                                 width: 1.5,
                               ),
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8)),
+                                  borderRadius: TekShape.br),
                             ),
                             child: Text(
                               _isBlocked ? 'BLOCKED' : 'BLOCK',
                               style: TextStyle(
-                                color: _isBlocked ? Colors.grey : Colors.red,
+                                color: _isBlocked ? TekColors.chrome : TekColors.danger,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
                               ),
@@ -17265,7 +17266,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                   const Text(
                     'BIO',
                     style: TextStyle(
-                      color: Color(0xFFB8B8C0),
+                      color: TekColors.steel,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1,
@@ -17275,7 +17276,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                   Text(
                     bio,
                     style: const TextStyle(
-                        color: Colors.white70, fontSize: 14, height: 1.4),
+                        color: TekInk.body, fontSize: 14, height: 1.4),
                   ),
                 ],
               ),
@@ -17308,7 +17309,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                   child: Text(
                     'BADGES',
                     style: TextStyle(
-                      color: Color(0xFFB8B8C0),
+                      color: TekColors.steel,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.5,
@@ -17347,7 +17348,7 @@ class _UserProfileViewState extends State<UserProfileView> {
         Text(
           '$label: ',
           style: const TextStyle(
-            color: Color(0xFFB8B8C0),
+            color: TekColors.steel,
             fontSize: 12,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
@@ -17356,7 +17357,7 @@ class _UserProfileViewState extends State<UserProfileView> {
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(color: Colors.white70, fontSize: 12),
+            style: const TextStyle(color: TekInk.body, fontSize: 12),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -17398,7 +17399,7 @@ class _UserProfileModalState extends State<UserProfileModal> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.black,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: TekShape.brSheet,
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -17411,14 +17412,14 @@ class _UserProfileModalState extends State<UserProfileModal> {
                 Text(
                   widget.name.toUpperCase(),
                   style: TextStyle(
-                    color: Color(0xFFB8B8C0),
+                    color: TekColors.steel,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1,
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.close, color: Color(0xFFB8B8C0)),
+                  icon: Icon(Icons.close, color: TekColors.steel),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
@@ -17429,7 +17430,7 @@ class _UserProfileModalState extends State<UserProfileModal> {
             Text(
               'LEVEL 7',
               style: TextStyle(
-                color: Colors.white70,
+                color: TekInk.body,
                 fontSize: 12,
                 letterSpacing: 1,
               ),
@@ -17441,14 +17442,14 @@ class _UserProfileModalState extends State<UserProfileModal> {
                 children: [
                   Text(
                     '24',
-                    style: TextStyle(color: Color(0xFFB8B8C0), fontSize: 12),
+                    style: TextStyle(color: TekColors.steel, fontSize: 12),
                   ),
                   SizedBox(width: 8),
-                  Icon(Icons.female, size: 12, color: Colors.white70),
+                  Icon(Icons.female, size: 12, color: TekInk.body),
                   SizedBox(width: 8),
                   Text(
                     'Female',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                    style: TextStyle(color: TekInk.body, fontSize: 12),
                   ),
                 ],
               ),
@@ -17458,7 +17459,7 @@ class _UserProfileModalState extends State<UserProfileModal> {
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 '@mialove',
-                style: TextStyle(color: Color(0xFFB8B8C0), fontSize: 12),
+                style: TextStyle(color: TekColors.steel, fontSize: 12),
               ),
             ),
             SizedBox(height: 12),
@@ -17467,7 +17468,7 @@ class _UserProfileModalState extends State<UserProfileModal> {
               child: Text(
                 'Clubbing enthusiast. Love to dance and always down for a good time! 🎉 Follow me on Instagram!',
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: TekInk.body,
                   fontSize: 12,
                   height: 1.5,
                 ),
@@ -17487,17 +17488,17 @@ class _UserProfileModalState extends State<UserProfileModal> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               side: BorderSide(
-                                color: Color(0xFFB8B8C0),
+                                color: TekColors.steel,
                                 width: 1,
                               ),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: TekShape.br,
                               ),
                             ),
                             child: Text(
                               'CHAT',
                               style: TextStyle(
-                                color: Color(0xFFB8B8C0),
+                                color: TekColors.steel,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -17514,21 +17515,21 @@ class _UserProfileModalState extends State<UserProfileModal> {
                                 SnackBar(
                                   content: Text('Removed from friends'),
                                   duration: Duration(seconds: 2),
-                                  backgroundColor: Color(0xFF00FF41),
+                                  backgroundColor: TekColors.signal,
                                 ),
                               );
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
-                              side: BorderSide(color: Colors.red, width: 1),
+                              side: BorderSide(color: TekColors.danger, width: 1),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: TekShape.br,
                               ),
                             ),
                             child: Text(
                               'UNFRIEND',
                               style: TextStyle(
-                                color: Colors.red,
+                                color: TekColors.danger,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -17547,7 +17548,7 @@ class _UserProfileModalState extends State<UserProfileModal> {
                             SnackBar(
                               content: Text('${widget.name} added to friends!'),
                               duration: Duration(seconds: 2),
-                              backgroundColor: Color(0xFF00FF41),
+                              backgroundColor: TekColors.signal,
                             ),
                           );
                         },
@@ -17555,16 +17556,16 @@ class _UserProfileModalState extends State<UserProfileModal> {
                           backgroundColor: Color(
                             0xFF00FF41,
                           ).withValues(alpha: 0.2),
-                          side: BorderSide(color: Color(0xFF00FF41), width: 2),
+                          side: BorderSide(color: TekColors.signal, width: 2),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: TekShape.br,
                           ),
                           padding: EdgeInsets.symmetric(vertical: 12),
                         ),
                         child: Text(
                           'ADD FRIEND',
                           style: TextStyle(
-                            color: Color(0xFF00FF41),
+                            color: TekColors.signal,
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1,
@@ -17596,7 +17597,7 @@ class _UserProfileModalState extends State<UserProfileModal> {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Color(0xFF00FF41).withValues(alpha: 0.15),
+                  color: TekColors.signal.withValues(alpha: 0.15),
                   blurRadius: 40,
                   spreadRadius: 5,
                 ),
@@ -17610,7 +17611,7 @@ class _UserProfileModalState extends State<UserProfileModal> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: Color(0xFF7A7A7A).withValues(alpha: 0.5),
+                color: TekColors.chrome.withValues(alpha: 0.5),
                 width: 1.5,
               ),
             ),
@@ -17622,7 +17623,7 @@ class _UserProfileModalState extends State<UserProfileModal> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: Color(0xFF00FF41).withValues(alpha: 0.2),
+                color: TekColors.signal.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -17634,7 +17635,7 @@ class _UserProfileModalState extends State<UserProfileModal> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: Color(0xFF8A8A8A).withValues(alpha: 0.35),
+                color: TekColors.chrome.withValues(alpha: 0.35),
                 width: 1.5,
               ),
             ),
@@ -17646,12 +17647,12 @@ class _UserProfileModalState extends State<UserProfileModal> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: Color(0xFF00FF41).withValues(alpha: 0.35),
+                color: TekColors.signal.withValues(alpha: 0.35),
                 width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Color(0xFF00FF41).withValues(alpha: 0.12),
+                  color: TekColors.signal.withValues(alpha: 0.12),
                   blurRadius: 12,
                   spreadRadius: 1,
                 ),
@@ -17663,7 +17664,7 @@ class _UserProfileModalState extends State<UserProfileModal> {
             width: size,
             height: size,
             decoration: BoxDecoration(shape: BoxShape.circle),
-            child: ClipOval(child: Container(color: Colors.grey[800])),
+            child: ClipOval(child: Container(color: TekColors.surfaceLift)),
           ),
         ],
       ),
@@ -17687,9 +17688,9 @@ class _UserProfileModalState extends State<UserProfileModal> {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white10),
-        color: Colors.grey[800],
+        borderRadius: TekShape.br,
+        border: Border.all(color: TekInk.wash),
+        color: TekColors.surfaceLift,
       ),
     );
   }
@@ -17716,7 +17717,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Color(0xFFB8B8C0),
+            color: TekColors.steel,
             letterSpacing: 2,
           ),
         ),
@@ -17869,7 +17870,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Account deleted successfully.'),
-                      backgroundColor: Colors.green,
+                      backgroundColor: TekColors.signal,
                     ),
                   );
                   Navigator.of(context).pushAndRemoveUntil(
@@ -17883,7 +17884,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Error deleting account: $e'),
-                      backgroundColor: Colors.red,
+                      backgroundColor: TekColors.danger,
                     ),
                   );
                 }
@@ -17898,28 +17899,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  backgroundColor: Color(0xFF1A1A1A).withValues(alpha: 0.85),
+                  backgroundColor: TekColors.surface.withValues(alpha: 0.85),
                   title: Text(
                     'Logout',
-                    style: TextStyle(color: Color(0xFFB8B8C0)),
+                    style: TextStyle(color: TekColors.steel),
                   ),
                   content: Text(
                     'Are you sure you want to logout?',
-                    style: TextStyle(color: Colors.white70),
+                    style: TextStyle(color: TekInk.body),
                   ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
                       child: Text(
                         'CANCEL',
-                        style: TextStyle(color: Colors.white70),
+                        style: TextStyle(color: TekInk.body),
                       ),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, true),
                       child: Text(
                         'LOGOUT',
-                        style: TextStyle(color: Color(0xFF00FF41)),
+                        style: TextStyle(color: TekColors.signal),
                       ),
                     ),
                   ],
@@ -17967,18 +17968,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: Colors.white10, width: 0.5)),
+          border: Border(bottom: BorderSide(color: TekInk.wash, width: 0.5)),
         ),
         child: Row(
           children: [
-            Icon(icon, color: Colors.white70, size: 24),
+            Icon(icon, color: TekInk.body, size: 24),
             SizedBox(width: 16),
             Text(
               title,
-              style: TextStyle(color: Color(0xFFB8B8C0), fontSize: 16),
+              style: TextStyle(color: TekColors.steel, fontSize: 16),
             ),
             Spacer(),
-            Icon(Icons.arrow_forward, color: Colors.white30, size: 20),
+            Icon(Icons.arrow_forward, color: TekInk.dim, size: 20),
           ],
         ),
       ),
@@ -18066,7 +18067,7 @@ class _ManageBlockedUsersPageState extends State<ManageBlockedUsersPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('User unblocked successfully.'),
-          backgroundColor: Colors.green,
+          backgroundColor: TekColors.signal,
         ),
       );
       setState(() {
@@ -18077,7 +18078,7 @@ class _ManageBlockedUsersPageState extends State<ManageBlockedUsersPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Unable to unblock user: $e'),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
         ),
       );
     } finally {
@@ -18101,7 +18102,7 @@ class _ManageBlockedUsersPageState extends State<ManageBlockedUsersPage> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Color(0xFFB8B8C0),
+            color: TekColors.steel,
             letterSpacing: 2,
           ),
         ),
@@ -18111,7 +18112,7 @@ class _ManageBlockedUsersPageState extends State<ManageBlockedUsersPage> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: Color(0xFF00FF41)),
+              child: CircularProgressIndicator(color: TekColors.signal),
             );
           }
 
@@ -18122,7 +18123,7 @@ class _ManageBlockedUsersPageState extends State<ManageBlockedUsersPage> {
                 padding: EdgeInsets.all(24),
                 child: Text(
                   'You have not blocked anyone.',
-                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                  style: TextStyle(color: TekInk.body, fontSize: 16),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -18131,7 +18132,7 @@ class _ManageBlockedUsersPageState extends State<ManageBlockedUsersPage> {
 
           return ListView.separated(
             itemCount: blockedUsers.length,
-            separatorBuilder: (_, _) => const Divider(color: Colors.white10),
+            separatorBuilder: (_, _) => const Divider(color: TekInk.wash),
             itemBuilder: (context, index) {
               final user = blockedUsers[index];
               final referralCode = user['referralCode'] as String? ?? '';
@@ -18140,23 +18141,23 @@ class _ManageBlockedUsersPageState extends State<ManageBlockedUsersPage> {
 
               return ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: Colors.white12,
+                  backgroundColor: TekInk.hairline,
                   backgroundImage: user['profileImageUrl'] != null
                       ? NetworkImage(user['profileImageUrl'] as String)
                       : null,
                   child: user['profileImageUrl'] == null
-                      ? const Icon(Icons.person, color: Colors.white54)
+                      ? const Icon(Icons.person, color: TekInk.muted)
                       : null,
                 ),
                 title: Text(
                   user['name'] as String? ?? referralCode,
-                  style: const TextStyle(color: Color(0xFFB8B8C0)),
+                  style: const TextStyle(color: TekColors.steel),
                 ),
                 subtitle: Text(
                   instagram.isEmpty
                       ? referralCode
                       : '@${instagram.replaceAll('@', '')}',
-                  style: const TextStyle(color: Colors.white54),
+                  style: const TextStyle(color: TekInk.muted),
                 ),
                 trailing: TextButton(
                   onPressed: isLoading
@@ -18164,7 +18165,7 @@ class _ManageBlockedUsersPageState extends State<ManageBlockedUsersPage> {
                       : () => _unblockUser(referralCode),
                   child: Text(
                     isLoading ? '...' : 'UNBLOCK',
-                    style: const TextStyle(color: Color(0xFF00FF41)),
+                    style: const TextStyle(color: TekColors.signal),
                   ),
                 ),
               );
@@ -18512,7 +18513,7 @@ class _MyTicketsPageState extends State<MyTicketsPage>
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Color(0xFFB8B8C0),
+            color: TekColors.steel,
             letterSpacing: 2,
           ),
         ),
@@ -18529,17 +18530,17 @@ class _MyTicketsPageState extends State<MyTicketsPage>
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Color(0xFFB8B8C0),
+                        color: TekColors.steel,
                       ),
                     )
-                  : const Icon(Icons.sync, color: Color(0xFFB8B8C0)),
+                  : const Icon(Icons.sync, color: TekColors.steel),
             ),
         ],
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: const Color(0xFF00FF41),
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
+          indicatorColor: TekColors.signal,
+          labelColor: TekInk.high,
+          unselectedLabelColor: TekInk.body,
           labelStyle: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,
@@ -18747,36 +18748,36 @@ class _TicketCard extends StatelessWidget {
         : null;
 
     return InkWell(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: TekShape.br,
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white10),
-          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: TekShape.br,
+          border: Border.all(color: TekInk.wash),
+          color: TekInk.high.withValues(alpha: 0.05),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: TekShape.br,
               child: Container(
                 width: 52,
                 height: 52,
-                color: Colors.white.withValues(alpha: 0.06),
+                color: TekInk.high.withValues(alpha: 0.06),
                 child: imageUrl != null
                     ? Image.network(
                         imageUrl!,
                         fit: BoxFit.cover,
                         errorBuilder: (_, _, _) => const Icon(
                           Icons.confirmation_num,
-                          color: Color(0xFF00FF41),
+                          color: TekColors.signal,
                         ),
                       )
                     : const Icon(
                         Icons.confirmation_num,
-                        color: Color(0xFF00FF41),
+                        color: TekColors.signal,
                       ),
               ),
             ),
@@ -18790,7 +18791,7 @@ class _TicketCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: Color(0xFFB8B8C0),
+                      color: TekColors.steel,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -18800,14 +18801,14 @@ class _TicketCard extends StatelessWidget {
                     Text(
                       whenText,
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: TekInk.body,
                         fontSize: 13,
                       ),
                     )
                   else
                     const Text(
                       'Date to be announced',
-                      style: TextStyle(color: Colors.white54, fontSize: 13),
+                      style: TextStyle(color: TekInk.muted, fontSize: 13),
                     ),
                   if (location.trim().isNotEmpty) ...[
                     const SizedBox(height: 2),
@@ -18816,7 +18817,7 @@ class _TicketCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: Colors.white54,
+                        color: TekInk.muted,
                         fontSize: 13,
                       ),
                     ),
@@ -18830,14 +18831,14 @@ class _TicketCard extends StatelessWidget {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(color: Colors.white12),
+                          borderRadius: TekShape.br,
+                          border: Border.all(color: TekInk.hairline),
                           color: Colors.black.withValues(alpha: 0.25),
                         ),
                         child: Text(
                           'CODE  ${_shortCode(code)}',
                           style: const TextStyle(
-                            color: Colors.white70,
+                            color: TekInk.body,
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1,
@@ -18849,7 +18850,7 @@ class _TicketCard extends StatelessWidget {
                         Text(
                           'x$quantity',
                           style: const TextStyle(
-                            color: Colors.white70,
+                            color: TekInk.body,
                             fontSize: 12,
                           ),
                         ),
@@ -18858,7 +18859,7 @@ class _TicketCard extends StatelessWidget {
                         Text(
                           paidText,
                           style: const TextStyle(
-                            color: Colors.white70,
+                            color: TekInk.body,
                             fontSize: 12,
                           ),
                         ),
@@ -18868,7 +18869,7 @@ class _TicketCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.chevron_right, color: Colors.white30),
+            const Icon(Icons.chevron_right, color: TekInk.dim),
           ],
         ),
       ),
@@ -18965,13 +18966,13 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
+          icon: Icon(Icons.arrow_back, color: TekColors.steel),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'EDIT INFORMATION',
           style: TextStyle(
-            color: Color(0xFFB8B8C0),
+            color: TekColors.steel,
             fontSize: 16,
             fontWeight: FontWeight.bold,
             letterSpacing: 1,
@@ -18983,7 +18984,7 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
             child: Text(
               'SAVE',
               style: TextStyle(
-                color: Color(0xFF00FF41),
+                color: TekColors.signal,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
@@ -18994,7 +18995,7 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: Colors.black,
-          border: Border(top: BorderSide(color: Colors.white10, width: 1)),
+          border: Border(top: BorderSide(color: TekInk.wash, width: 1)),
         ),
         child: BottomNavigationBar(
           backgroundColor: Colors.transparent,
@@ -19024,9 +19025,9 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
               ),
           ],
           selectedItemColor: isAdmin
-              ? const Color(0xFFFF0000)
-              : const Color(0xFF00FF41),
-          unselectedItemColor: Colors.white70,
+              ? TekColors.danger
+              : TekColors.signal,
+          unselectedItemColor: TekInk.body,
           selectedLabelStyle: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.bold,
@@ -19066,12 +19067,12 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: Color(0xFF00FF41),
+                            color: TekColors.signal,
                             width: 3,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Color(0xFF00FF41).withValues(alpha: 0.3),
+                              color: TekColors.signal.withValues(alpha: 0.3),
                               blurRadius: 20,
                               spreadRadius: 2,
                             ),
@@ -19089,21 +19090,21 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Container(
-                                      color: Colors.grey[800],
+                                      color: TekColors.surfaceLift,
                                       child: Icon(
                                         Icons.person,
                                         size: 60,
-                                        color: Colors.white30,
+                                        color: TekInk.dim,
                                       ),
                                     );
                                   },
                                 )
                               : Container(
-                                  color: Colors.grey[800],
+                                  color: TekColors.surfaceLift,
                                   child: Icon(
                                     Icons.person,
                                     size: 60,
-                                    color: Colors.white30,
+                                    color: TekInk.dim,
                                   ),
                                 ),
                         ),
@@ -19115,12 +19116,12 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
                       icon: Icon(
                         Icons.camera_alt,
                         size: 16,
-                        color: Color(0xFF00FF41),
+                        color: TekColors.signal,
                       ),
                       label: Text(
                         'CHANGE PHOTO',
                         style: TextStyle(
-                          color: Color(0xFF00FF41),
+                          color: TekColors.signal,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
@@ -19134,7 +19135,7 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
               Text(
                 'NAME',
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: TekInk.body,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1,
@@ -19143,21 +19144,21 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
               SizedBox(height: 8),
               TextFormField(
                 controller: _nameController,
-                style: TextStyle(color: Color(0xFFB8B8C0)),
+                style: TextStyle(color: TekColors.steel),
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: Colors.grey[900],
+                  fillColor: TekColors.surface,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white10),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekInk.wash),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white10),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekInk.wash),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Color(0xFF00FF41)),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekColors.signal),
                   ),
                 ),
                 validator: (value) =>
@@ -19168,7 +19169,7 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
               Text(
                 'EMAIL',
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: TekInk.body,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1,
@@ -19177,22 +19178,22 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
               SizedBox(height: 8),
               TextFormField(
                 controller: _emailController,
-                style: TextStyle(color: Color(0xFFB8B8C0)),
+                style: TextStyle(color: TekColors.steel),
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: Colors.grey[900],
+                  fillColor: TekColors.surface,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white10),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekInk.wash),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white10),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekInk.wash),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Color(0xFF00FF41)),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekColors.signal),
                   ),
                 ),
                 validator: (value) =>
@@ -19203,7 +19204,7 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
               Text(
                 'PHONE',
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: TekInk.body,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1,
@@ -19212,22 +19213,22 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
               SizedBox(height: 8),
               TextFormField(
                 controller: _phoneController,
-                style: TextStyle(color: Color(0xFFB8B8C0)),
+                style: TextStyle(color: TekColors.steel),
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: Colors.grey[900],
+                  fillColor: TekColors.surface,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white10),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekInk.wash),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white10),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekInk.wash),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Color(0xFF00FF41)),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekColors.signal),
                   ),
                 ),
                 validator: (value) =>
@@ -19238,7 +19239,7 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
               Text(
                 'INSTAGRAM',
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: TekInk.body,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1,
@@ -19247,23 +19248,23 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
               SizedBox(height: 8),
               TextFormField(
                 controller: _instagramController,
-                style: TextStyle(color: Color(0xFFB8B8C0)),
+                style: TextStyle(color: TekColors.steel),
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: Colors.grey[900],
+                  fillColor: TekColors.surface,
                   prefixText: '@',
-                  prefixStyle: TextStyle(color: Colors.white70),
+                  prefixStyle: TextStyle(color: TekInk.body),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white10),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekInk.wash),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white10),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekInk.wash),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Color(0xFF00FF41)),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekColors.signal),
                   ),
                 ),
                 validator: (value) =>
@@ -19274,7 +19275,7 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
               Text(
                 'BIO',
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: TekInk.body,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1,
@@ -19283,22 +19284,22 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
               SizedBox(height: 8),
               TextFormField(
                 controller: _bioController,
-                style: TextStyle(color: Color(0xFFB8B8C0)),
+                style: TextStyle(color: TekColors.steel),
                 maxLines: 4,
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: Colors.grey[900],
+                  fillColor: TekColors.surface,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white10),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekInk.wash),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white10),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekInk.wash),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Color(0xFF00FF41)),
+                    borderRadius: TekShape.br,
+                    borderSide: BorderSide(color: TekColors.signal),
                   ),
                 ),
                 validator: (value) =>
@@ -19354,13 +19355,13 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
+          icon: Icon(Icons.arrow_back, color: TekColors.steel),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'NOTIFICATIONS',
           style: TextStyle(
-            color: Color(0xFF00FF41),
+            color: TekColors.signal,
             fontSize: 18,
             fontWeight: FontWeight.bold,
             letterSpacing: 2,
@@ -19517,7 +19518,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           child: Text(
             title,
             style: TextStyle(
-              color: Color(0xFF00FF41),
+              color: TekColors.signal,
               fontSize: 12,
               fontWeight: FontWeight.bold,
               letterSpacing: 2,
@@ -19527,8 +19528,8 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         Container(
           decoration: BoxDecoration(
             border: Border(
-              top: BorderSide(color: Colors.white10, width: 0.5),
-              bottom: BorderSide(color: Colors.white10, width: 0.5),
+              top: BorderSide(color: TekInk.wash, width: 0.5),
+              bottom: BorderSide(color: TekInk.wash, width: 0.5),
             ),
           ),
           child: Column(children: children),
@@ -19547,7 +19548,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.white10, width: 0.5)),
+        border: Border(bottom: BorderSide(color: TekInk.wash, width: 0.5)),
       ),
       child: Row(
         children: [
@@ -19558,7 +19559,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                 Text(
                   title,
                   style: TextStyle(
-                    color: enabled ? Colors.white : Colors.white38,
+                    color: enabled ? TekInk.high : TekInk.faint,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -19567,7 +19568,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: enabled ? Colors.white54 : Colors.white24,
+                    color: enabled ? TekInk.muted : TekInk.line,
                     fontSize: 13,
                   ),
                 ),
@@ -19577,9 +19578,9 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           Switch(
             value: value,
             onChanged: enabled ? onChanged : null,
-            activeThumbColor: Color(0xFF00FF41),
-            inactiveThumbColor: Colors.white38,
-            inactiveTrackColor: Colors.white10,
+            activeThumbColor: TekColors.signal,
+            inactiveThumbColor: TekInk.faint,
+            inactiveTrackColor: TekInk.wash,
           ),
         ],
       ),
@@ -19603,10 +19604,10 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
             return Theme(
               data: ThemeData.dark().copyWith(
                 colorScheme: ColorScheme.dark(
-                  primary: Color(0xFF00FF41),
+                  primary: TekColors.signal,
                   onPrimary: Colors.black,
-                  surface: Color(0xFF1A1A1A).withValues(alpha: 0.85),
-                  onSurface: Colors.white,
+                  surface: TekColors.surface.withValues(alpha: 0.85),
+                  onSurface: TekInk.high,
                 ),
               ),
               child: child!,
@@ -19622,31 +19623,31 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: Colors.white10, width: 0.5)),
+          border: Border(bottom: BorderSide(color: TekInk.wash, width: 0.5)),
         ),
         child: Row(
           children: [
             Expanded(
               child: Text(
                 label,
-                style: TextStyle(color: Color(0xFFB8B8C0), fontSize: 16),
+                style: TextStyle(color: TekColors.steel, fontSize: 16),
               ),
             ),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white10,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Color(0xFF00FF41).withValues(alpha: 0.3)),
+                color: TekInk.wash,
+                borderRadius: TekShape.br,
+                border: Border.all(color: TekColors.signal.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.access_time, color: Color(0xFF00FF41), size: 16),
+                  Icon(Icons.access_time, color: TekColors.signal, size: 16),
                   SizedBox(width: 8),
                   Text(
                     time,
                     style: TextStyle(
-                      color: Color(0xFF00FF41),
+                      color: TekColors.signal,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -19684,13 +19685,13 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
+          icon: Icon(Icons.arrow_back, color: TekColors.steel),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'PRIVACY',
           style: TextStyle(
-            color: Color(0xFF00FF41),
+            color: TekColors.signal,
             fontSize: 18,
             fontWeight: FontWeight.bold,
             letterSpacing: 2,
@@ -19759,7 +19760,7 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
           child: Text(
             title,
             style: TextStyle(
-              color: Color(0xFF00FF41),
+              color: TekColors.signal,
               fontSize: 13,
               fontWeight: FontWeight.bold,
               letterSpacing: 1,
@@ -19781,7 +19782,7 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.white10, width: 0.5)),
+        border: Border(bottom: BorderSide(color: TekInk.wash, width: 0.5)),
       ),
       child: Row(
         children: [
@@ -19792,7 +19793,7 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
                 Text(
                   title,
                   style: TextStyle(
-                    color: enabled ? Colors.white : Colors.white38,
+                    color: enabled ? TekInk.high : TekInk.faint,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -19801,7 +19802,7 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: enabled ? Colors.white54 : Colors.white24,
+                    color: enabled ? TekInk.muted : TekInk.line,
                     fontSize: 13,
                   ),
                 ),
@@ -19811,9 +19812,9 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
           Switch(
             value: value,
             onChanged: enabled ? onChanged : null,
-            activeThumbColor: Color(0xFF00FF41),
-            inactiveThumbColor: Colors.white38,
-            inactiveTrackColor: Colors.white10,
+            activeThumbColor: TekColors.signal,
+            inactiveThumbColor: TekInk.faint,
+            inactiveTrackColor: TekInk.wash,
           ),
         ],
       ),
@@ -19832,13 +19833,13 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: Colors.white10, width: 0.5)),
+          border: Border(bottom: BorderSide(color: TekInk.wash, width: 0.5)),
         ),
         child: Row(
           children: [
             Icon(
               icon,
-              color: isDestructive ? Colors.red : Color(0xFF00FF41),
+              color: isDestructive ? TekColors.danger : TekColors.signal,
               size: 24,
             ),
             SizedBox(width: 16),
@@ -19849,7 +19850,7 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
                   Text(
                     title,
                     style: TextStyle(
-                      color: isDestructive ? Colors.red : Colors.white,
+                      color: isDestructive ? TekColors.danger : TekInk.high,
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
@@ -19857,12 +19858,12 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
                   SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: TextStyle(color: Colors.white54, fontSize: 13),
+                    style: TextStyle(color: TekInk.muted, fontSize: 13),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward, color: Colors.white30, size: 20),
+            Icon(Icons.arrow_forward, color: TekInk.dim, size: 20),
           ],
         ),
       ),
@@ -19873,19 +19874,19 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Color(0xFF1A1A1A).withValues(alpha: 0.85),
+        backgroundColor: TekColors.surface.withValues(alpha: 0.85),
         title: Text(
           'Terminate Account?',
-          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+          style: TextStyle(color: TekColors.danger, fontWeight: FontWeight.bold),
         ),
         content: Text(
           'This action cannot be undone. All your data will be permanently terminated.',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: TekInk.body),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('CANCEL', style: TextStyle(color: Colors.white70)),
+            child: Text('CANCEL', style: TextStyle(color: TekInk.body)),
           ),
           TextButton(
             onPressed: () {
@@ -19893,11 +19894,11 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Account termination request received'),
-                  backgroundColor: Colors.red,
+                  backgroundColor: TekColors.danger,
                 ),
               );
             },
-            child: Text('TERMINATE', style: TextStyle(color: Colors.red)),
+            child: Text('TERMINATE', style: TextStyle(color: TekColors.danger)),
           ),
         ],
       ),
@@ -19917,13 +19918,13 @@ class AboutPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
+          icon: Icon(Icons.arrow_back, color: TekColors.steel),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'ABOUT',
           style: TextStyle(
-            color: Color(0xFF00FF41),
+            color: TekColors.signal,
             fontSize: 18,
             fontWeight: FontWeight.bold,
             letterSpacing: 2,
@@ -19940,7 +19941,7 @@ class AboutPage extends StatelessWidget {
             // Version
             Text(
               'Version 1.0.0',
-              style: TextStyle(color: Colors.white70, fontSize: 16),
+              style: TextStyle(color: TekInk.body, fontSize: 16),
             ),
             SizedBox(height: 60),
             // Legal Links
@@ -19959,14 +19960,14 @@ class AboutPage extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: TekInk.high.withValues(alpha: 0.1)),
+        borderRadius: TekShape.br,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(text, style: TextStyle(color: Color(0xFFB8B8C0), fontSize: 15)),
-          Icon(Icons.arrow_forward, color: Colors.white30, size: 20),
+          Text(text, style: TextStyle(color: TekColors.steel, fontSize: 15)),
+          Icon(Icons.arrow_forward, color: TekInk.dim, size: 20),
         ],
       ),
     );
@@ -20013,7 +20014,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Enter a valid recipient email'),
-                    backgroundColor: Colors.red,
+                    backgroundColor: TekColors.danger,
                   ),
                 );
                 return;
@@ -20053,7 +20054,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
                           ? 'Test email sent. Code: $usedCode'
                           : 'Test email sent.',
                     ),
-                    backgroundColor: const Color(0xFF00FF41),
+                    backgroundColor: TekColors.signal,
                     duration: const Duration(seconds: 5),
                   ),
                 );
@@ -20063,7 +20064,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Failed to send test email ($msg)'),
-                      backgroundColor: Colors.red,
+                      backgroundColor: TekColors.danger,
                       duration: const Duration(seconds: 6),
                     ),
                   );
@@ -20073,7 +20074,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Failed to send test email: $e'),
-                      backgroundColor: Colors.red,
+                      backgroundColor: TekColors.danger,
                       duration: const Duration(seconds: 6),
                     ),
                   );
@@ -20089,7 +20090,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
               backgroundColor: Colors.transparent,
               title: const Text(
                 'Send test referral email',
-                style: TextStyle(color: Color(0xFFB8B8C0)),
+                style: TextStyle(color: TekColors.steel),
               ),
               content: SingleChildScrollView(
                 child: Column(
@@ -20098,38 +20099,38 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
                     TextField(
                       controller: toController,
                       enabled: !sending,
-                      style: const TextStyle(color: Color(0xFFB8B8C0)),
+                      style: const TextStyle(color: TekColors.steel),
                       decoration: const InputDecoration(
                         labelText: 'To email',
-                        labelStyle: TextStyle(color: Colors.white70),
+                        labelStyle: TextStyle(color: TekInk.body),
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: nameController,
                       enabled: !sending,
-                      style: const TextStyle(color: Color(0xFFB8B8C0)),
+                      style: const TextStyle(color: TekColors.steel),
                       decoration: const InputDecoration(
                         labelText: 'Name (optional)',
-                        labelStyle: TextStyle(color: Colors.white70),
+                        labelStyle: TextStyle(color: TekInk.body),
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: codeController,
                       enabled: !sending,
-                      style: const TextStyle(color: Color(0xFFB8B8C0)),
+                      style: const TextStyle(color: TekColors.steel),
                       decoration: const InputDecoration(
                         labelText: 'Referral code (optional)',
-                        labelStyle: TextStyle(color: Colors.white70),
+                        labelStyle: TextStyle(color: TekInk.body),
                         helperText: 'Leave blank to generate a random code',
-                        helperStyle: TextStyle(color: Colors.white38),
+                        helperStyle: TextStyle(color: TekInk.faint),
                       ),
                     ),
                     const SizedBox(height: 8),
                     const Text(
                       'This sends a preview email only (no Firestore write).',
-                      style: TextStyle(color: Colors.white38, fontSize: 12),
+                      style: TextStyle(color: TekInk.faint, fontSize: 12),
                     ),
                   ],
                 ),
@@ -20144,7 +20145,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
                 ElevatedButton(
                   onPressed: sending ? null : send,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF0000),
+                    backgroundColor: TekColors.danger,
                   ),
                   child: Text(sending ? 'Sending…' : 'Send'),
                 ),
@@ -20352,13 +20353,13 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
       if (skipped > 0) parts.add('$skipped unchanged');
       ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
         content: Text('Missions: ${parts.join(', ')}'),
-        backgroundColor: const Color(0xFF00FF41),
+        backgroundColor: TekColors.signal,
       ));
     } catch (e) {
       if (!ctx.mounted) return;
       ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
         content: Text('Seed failed: $e'),
-        backgroundColor: Colors.red,
+        backgroundColor: TekColors.danger,
       ));
     }
   }
@@ -20376,14 +20377,14 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
           children: [
             Icon(
               Icons.admin_panel_settings,
-              color: Color(0xFFFF0000),
+              color: TekColors.danger,
               size: 18,
             ),
             SizedBox(width: 8),
             Text(
               'TEK CONTROL',
               style: TextStyle(
-                color: Color(0xFFFF0000),
+                color: TekColors.danger,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 3,
@@ -20394,7 +20395,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.logout, color: Color(0xFFB8B8C0), size: 20),
+            icon: Icon(Icons.logout, color: TekColors.steel, size: 20),
             tooltip: 'Sign out of admin',
             onPressed: () async {
               HapticFeedback.lightImpact();
@@ -20403,20 +20404,20 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
                 builder: (ctx) => AlertDialog(
                   backgroundColor: const Color(0xFF0B0B0B),
                   title: const Text('Sign out of admin?',
-                      style: TextStyle(color: Color(0xFFB8B8C0))),
+                      style: TextStyle(color: TekColors.steel)),
                   content: const Text(
                       'You\'ll need to re-enter admin credentials to access CONTROL again.',
-                      style: TextStyle(color: Colors.white70)),
+                      style: TextStyle(color: TekInk.body)),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx, false),
                       child: const Text('Cancel',
-                          style: TextStyle(color: Colors.white54)),
+                          style: TextStyle(color: TekInk.muted)),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(ctx, true),
                       child: const Text('Sign out',
-                          style: TextStyle(color: Color(0xFFFF0000))),
+                          style: TextStyle(color: TekColors.danger)),
                     ),
                   ],
                 ),
@@ -20437,7 +20438,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
             },
           ),
           IconButton(
-            icon: Icon(Icons.settings, color: Color(0xFFB8B8C0), size: 20),
+            icon: Icon(Icons.settings, color: TekColors.steel, size: 20),
             onPressed: () {
               Navigator.push(
                 context,
@@ -20465,9 +20466,9 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
                     _isLoading ? '...' : '$_userCount',
                     Icons.people,
                   ),
-                  Container(width: 1, height: 40, color: Colors.white10),
+                  Container(width: 1, height: 40, color: TekInk.wash),
                   _buildAdminStat('EVENTS', '$_eventCount', Icons.event),
-                  Container(width: 1, height: 40, color: Colors.white10),
+                  Container(width: 1, height: 40, color: TekInk.wash),
                   _buildAdminStat(
                     'PENDING',
                     '$_pendingCount',
@@ -20478,7 +20479,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
             ),
 
             SizedBox(height: 30),
-            Divider(color: Colors.white10, thickness: 1),
+            Divider(color: TekInk.wash, thickness: 1),
 
             // Admin Actions
             _buildAdminSection('USER MANAGEMENT', [
@@ -20521,7 +20522,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Event created successfully!'),
-                          backgroundColor: Color(0xFF00FF41),
+                          backgroundColor: TekColors.signal,
                         ),
                       );
                     }
@@ -20622,7 +20623,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('No users found in the system'),
-          backgroundColor: Colors.orange,
+          backgroundColor: TekColors.danger,
         ),
       );
       return;
@@ -20646,12 +20647,12 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
   Widget _buildAdminStat(String label, String value, IconData icon) {
     return Column(
       children: [
-        Icon(icon, color: Color(0xFFFF0000), size: 24),
+        Icon(icon, color: TekColors.danger, size: 24),
         SizedBox(height: 8),
         Text(
           value,
           style: TextStyle(
-            color: Color(0xFFB8B8C0),
+            color: TekColors.steel,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -20660,7 +20661,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white54,
+            color: TekInk.muted,
             fontSize: 11,
             letterSpacing: 1,
           ),
@@ -20678,7 +20679,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
           child: Text(
             title,
             style: TextStyle(
-              color: Color(0xFFFF0000),
+              color: TekColors.danger,
               fontSize: 12,
               fontWeight: FontWeight.bold,
               letterSpacing: 2,
@@ -20686,7 +20687,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
           ),
         ),
         ...children,
-        Divider(color: Colors.white10, thickness: 1),
+        Divider(color: TekInk.wash, thickness: 1),
       ],
     );
   }
@@ -20697,30 +20698,30 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: Colors.white10, width: 0.5)),
+          border: Border(bottom: BorderSide(color: TekInk.wash, width: 0.5)),
         ),
         child: Row(
           children: [
             Container(
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Color(0xFFFF0000).withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
+                color: TekColors.danger.withValues(alpha: 0.2),
+                borderRadius: TekShape.br,
               ),
-              child: Icon(icon, color: Color(0xFFFF0000), size: 24),
+              child: Icon(icon, color: TekColors.danger, size: 24),
             ),
             SizedBox(width: 16),
             Expanded(
               child: Text(
                 title,
                 style: TextStyle(
-                  color: Color(0xFFB8B8C0),
+                  color: TekColors.steel,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-            Icon(Icons.arrow_forward_ios, color: Colors.white30, size: 16),
+            Icon(Icons.arrow_forward_ios, color: TekInk.dim, size: 16),
           ],
         ),
       ),
@@ -20794,18 +20795,18 @@ class _QuestFeatureFlagsPanel extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.white10, width: 0.5)),
+        border: Border(bottom: BorderSide(color: TekInk.wash, width: 0.5)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFFFF0000).withValues(alpha: dimmed ? 0.05 : 0.2),
-              borderRadius: BorderRadius.circular(8),
+              color: TekColors.danger.withValues(alpha: dimmed ? 0.05 : 0.2),
+              borderRadius: TekShape.br,
             ),
             child: Icon(icon,
-                color: dimmed ? Colors.white24 : const Color(0xFFFF0000),
+                color: dimmed ? TekInk.line : TekColors.danger,
                 size: 22),
           ),
           const SizedBox(width: 14),
@@ -20816,7 +20817,7 @@ class _QuestFeatureFlagsPanel extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    color: dimmed ? Colors.white30 : const Color(0xFFB8B8C0),
+                    color: dimmed ? TekInk.dim : TekColors.steel,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 1.2,
@@ -20826,7 +20827,7 @@ class _QuestFeatureFlagsPanel extends StatelessWidget {
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: dimmed ? Colors.white24 : Colors.white54,
+                    color: dimmed ? TekInk.line : TekInk.muted,
                     fontSize: 11,
                   ),
                 ),
@@ -20836,10 +20837,10 @@ class _QuestFeatureFlagsPanel extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeThumbColor: const Color(0xFF00FF41),
-            activeTrackColor: const Color(0xFF00FF41).withValues(alpha: 0.4),
-            inactiveThumbColor: Colors.white38,
-            inactiveTrackColor: Colors.white12,
+            activeThumbColor: TekColors.signal,
+            activeTrackColor: TekColors.signal.withValues(alpha: 0.4),
+            inactiveThumbColor: TekInk.faint,
+            inactiveTrackColor: TekInk.hairline,
           ),
         ],
       ),
@@ -20855,7 +20856,7 @@ class _QuestFeatureFlagsPanel extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to update: $e'),
-          backgroundColor: const Color(0xFFFF0000),
+          backgroundColor: TekColors.danger,
         ),
       );
     }
@@ -20970,19 +20971,19 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
             padding: EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.black,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Color(0xFFFF0000)),
+              borderRadius: TekShape.br,
+              border: Border.all(color: TekColors.danger),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation(Color(0xFFFF0000)),
+                  valueColor: AlwaysStoppedAnimation(TekColors.danger),
                 ),
                 SizedBox(height: 16),
                 Text(
                   'Deleting user...',
-                  style: TextStyle(color: Color(0xFFB8B8C0)),
+                  style: TextStyle(color: TekColors.steel),
                 ),
               ],
             ),
@@ -21029,13 +21030,13 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
+          icon: Icon(Icons.arrow_back, color: TekColors.steel),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'ALL USERS',
           style: TextStyle(
-            color: Color(0xFFFF0000),
+            color: TekColors.danger,
             fontSize: 16,
             fontWeight: FontWeight.bold,
             letterSpacing: 1,
@@ -21046,7 +21047,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
       body: _isLoading
           ? Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(Color(0xFFFF0000)),
+                valueColor: AlwaysStoppedAnimation(TekColors.danger),
               ),
             )
           : _users.isEmpty
@@ -21061,31 +21062,31 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
                   padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
                   child: TextField(
                     controller: _searchController,
-                    style: TextStyle(color: Colors.white, fontSize: 14),    
+                    style: TextStyle(color: TekInk.high, fontSize: 14),    
                     decoration: InputDecoration(
                       hintText: 'Search name, email, phone, IG...',
-                      hintStyle: TextStyle(color: Colors.white38, fontSize: 13),
-                      prefixIcon: Icon(Icons.search, color: Colors.white38, size: 20),
+                      hintStyle: TextStyle(color: TekInk.faint, fontSize: 13),
+                      prefixIcon: Icon(Icons.search, color: TekInk.faint, size: 20),
                       suffixIcon: _searchQuery.isNotEmpty
                           ? IconButton(
-                              icon: Icon(Icons.close, color: Colors.white38, size: 18),
+                              icon: Icon(Icons.close, color: TekInk.faint, size: 18),
                               onPressed: () => _searchController.clear(),
                             )
                           : null,
                       filled: true,
-                      fillColor: Color(0xFF1A1A1A).withValues(alpha: 0.9),
+                      fillColor: TekColors.surface.withValues(alpha: 0.9),
                       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.white10),
+                        borderRadius: TekShape.br,
+                        borderSide: BorderSide(color: TekInk.wash),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.white10),
+                        borderRadius: TekShape.br,
+                        borderSide: BorderSide(color: TekInk.wash),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Color(0xFFFF0000), width: 1),
+                        borderRadius: TekShape.br,
+                        borderSide: BorderSide(color: TekColors.danger, width: 1),
                       ),
                     ),
                   ),
@@ -21098,7 +21099,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
                       _searchQuery.isEmpty
                           ? '${_users.length} users'
                           : '${_filteredUsers.length} of ${_users.length} users',
-                      style: TextStyle(color: Colors.white38, fontSize: 11),
+                      style: TextStyle(color: TekInk.faint, fontSize: 11),
                     ),
                   ),
                 ),
@@ -21107,7 +21108,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
                       ? Center(
                           child: Text(
                             'No users match "${_searchController.text}"',
-                            style: TextStyle(color: Colors.white38, fontSize: 14),
+                            style: TextStyle(color: TekInk.faint, fontSize: 14),
                           ),
                         )
                       : ListView.builder(
@@ -21130,9 +21131,9 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
       margin: EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Color(0xFF1A1A1A).withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white10),
+        color: TekColors.surface.withValues(alpha: 0.85),
+        borderRadius: TekShape.br,
+        border: Border.all(color: TekInk.wash),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -21144,10 +21145,10 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
                 height: 50,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFFFF0000).withValues(alpha: 0.2),
-                  border: Border.all(color: Color(0xFFFF0000), width: 2),
+                  color: TekColors.danger.withValues(alpha: 0.2),
+                  border: Border.all(color: TekColors.danger, width: 2),
                 ),
-                child: Icon(Icons.person, color: Color(0xFFFF0000), size: 24),
+                child: Icon(Icons.person, color: TekColors.danger, size: 24),
               ),
               SizedBox(width: 12),
               Expanded(
@@ -21160,7 +21161,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
                           child: Text(
                             user['name'] ?? 'Unknown',
                             style: TextStyle(
-                              color: Color(0xFFB8B8C0),
+                              color: TekColors.steel,
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
@@ -21176,7 +21177,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
                               color: _getStatusColor(
                                 normalizedStatus,
                               ).withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: TekShape.br,
                               border: Border.all(
                                 color: _getStatusColor(normalizedStatus),
                                 width: 1,
@@ -21198,7 +21199,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
                     SizedBox(height: 4),
                     Text(
                       user['email'] ?? 'No email',
-                      style: TextStyle(color: Colors.white54, fontSize: 12),
+                      style: TextStyle(color: TekInk.muted, fontSize: 12),
                     ),
                   ],
                 ),
@@ -21206,19 +21207,19 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Color(0xFF00FF41).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Color(0xFF00FF41)),
+                  color: TekColors.signal.withValues(alpha: 0.1),
+                  borderRadius: TekShape.br,
+                  border: Border.all(color: TekColors.signal),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.stars, color: Color(0xFF00FF41), size: 14),
+                    Icon(Icons.stars, color: TekColors.signal, size: 14),
                     SizedBox(width: 4),
                     Text(
                       '${user['xpPoints'] ?? user['xp'] ?? 0} XP',
                       style: TextStyle(
-                        color: Color(0xFF00FF41),
+                        color: TekColors.signal,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
@@ -21229,14 +21230,14 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
             ],
           ),
           SizedBox(height: 12),
-          Divider(color: Colors.white10, height: 1),
+          Divider(color: TekInk.wash, height: 1),
           SizedBox(height: 12),
           Row(
             children: [
               Expanded(
                 child: _buildUserInfo(Icons.phone, user['phone'] ?? 'N/A'),
               ),
-              Container(width: 1, height: 30, color: Colors.white10),
+              Container(width: 1, height: 30, color: TekInk.wash),
               Expanded(
                 child: _buildUserInfo(
                   Icons.alternate_email,
@@ -21249,16 +21250,16 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
             SizedBox(height: 12),
             Row(
               children: [
-                Icon(Icons.qr_code, color: Colors.white54, size: 16),
+                Icon(Icons.qr_code, color: TekInk.muted, size: 16),
                 SizedBox(width: 8),
                 Text(
                   'Code: ',
-                  style: TextStyle(color: Colors.white54, fontSize: 12),
+                  style: TextStyle(color: TekInk.muted, fontSize: 12),
                 ),
                 Text(
                   user['referralCode'],
                   style: TextStyle(
-                    color: Color(0xFFFF0000),
+                    color: TekColors.danger,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
@@ -21267,7 +21268,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
                 if (user['submittedAt'] != null)
                   Text(
                     AppUtils.formatDate(user['submittedAt']),
-                    style: TextStyle(color: Colors.white38, fontSize: 11),
+                    style: TextStyle(color: TekInk.faint, fontSize: 11),
                   ),
               ],
             ),
@@ -21286,11 +21287,11 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFFFF0000).withValues(alpha: 0.1),
-              foregroundColor: Color(0xFFFF0000),
-              side: BorderSide(color: Color(0xFFFF0000), width: 1),
+              backgroundColor: TekColors.danger.withValues(alpha: 0.1),
+              foregroundColor: TekColors.danger,
+              side: BorderSide(color: TekColors.danger, width: 1),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: TekShape.br,
               ),
               padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
               minimumSize: Size(double.infinity, 40),
@@ -21335,13 +21336,13 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'approved':
-        return Color(0xFF00FF41);
+        return TekColors.signal;
       case 'pending':
-        return Colors.orange;
+        return TekColors.danger;
       case 'denied':
-        return Color(0xFFFF0000);
+        return TekColors.danger;
       default:
-        return Colors.white54;
+        return TekInk.muted;
     }
   }
 
@@ -21349,12 +21350,12 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(icon, color: Colors.white54, size: 14),
+        Icon(icon, color: TekInk.muted, size: 14),
         SizedBox(width: 6),
         Flexible(
           child: Text(
             text,
-            style: TextStyle(color: Colors.white70, fontSize: 11),
+            style: TextStyle(color: TekInk.body, fontSize: 11),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -21493,14 +21494,14 @@ class _SendXPToUsersScreenState extends State<SendXPToUsersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: TekInk.high,
       appBar: AppBar(
         title: Text(
           'Send XP to Users',
-          style: TextStyle(color: Color(0xFFB8B8C0)),
+          style: TextStyle(color: TekColors.steel),
         ),
-        backgroundColor: Color(0xFFFF0000),
-        iconTheme: IconThemeData(color: Color(0xFFB8B8C0)),
+        backgroundColor: TekColors.danger,
+        iconTheme: IconThemeData(color: TekColors.steel),
         elevation: 2,
       ),
       body: _isLoading
@@ -21527,7 +21528,7 @@ class _SendXPToUsersScreenState extends State<SendXPToUsersScreen> {
                   margin: EdgeInsets.only(bottom: 12),
                   elevation: 2,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: TekShape.br,
                   ),
                   child: Padding(
                     padding: EdgeInsets.all(16),
@@ -21543,7 +21544,7 @@ class _SendXPToUsersScreenState extends State<SendXPToUsersScreen> {
                               ).withValues(alpha: 0.1),
                               child: Icon(
                                 Icons.person,
-                                color: Color(0xFFFF0000),
+                                color: TekColors.danger,
                               ),
                             ),
                             SizedBox(width: 12),
@@ -21563,7 +21564,7 @@ class _SendXPToUsersScreenState extends State<SendXPToUsersScreen> {
                                     email,
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Colors.grey[600],
+                                      color: TekColors.chrome,
                                     ),
                                   ),
                                 ],
@@ -21576,13 +21577,13 @@ class _SendXPToUsersScreenState extends State<SendXPToUsersScreen> {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.green,
-                                borderRadius: BorderRadius.circular(12),
+                                color: TekColors.signal,
+                                borderRadius: TekShape.br,
                               ),
                               child: Text(
                                 '${AppUtils.formatXP(currentXP)} XP',
                                 style: TextStyle(
-                                  color: Color(0xFFB8B8C0),
+                                  color: TekColors.steel,
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -21607,21 +21608,21 @@ class _SendXPToUsersScreenState extends State<SendXPToUsersScreen> {
                                   hintText: 'Enter XP to send',
                                   prefixIcon: Icon(
                                     Icons.stars,
-                                    color: Color(0xFFFF0000),
+                                    color: TekColors.danger,
                                   ),
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: TekShape.br,
                                   ),
                                   enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: TekShape.br,
                                     borderSide: BorderSide(
-                                      color: Colors.grey[300]!,
+                                      color: TekInk.high,
                                     ),
                                   ),
                                   focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: TekShape.br,
                                     borderSide: BorderSide(
-                                      color: Color(0xFFFF0000),
+                                      color: TekColors.danger,
                                       width: 2,
                                     ),
                                   ),
@@ -21639,14 +21640,14 @@ class _SendXPToUsersScreenState extends State<SendXPToUsersScreen> {
                                   ? null
                                   : () => _sendXP(userId, name),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xFFFF0000),
-                                foregroundColor: Colors.white,
+                                backgroundColor: TekColors.danger,
+                                foregroundColor: TekInk.high,
                                 padding: EdgeInsets.symmetric(
                                   horizontal: 20,
                                   vertical: 14,
                                 ),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: TekShape.br,
                                 ),
                               ),
                               child: isSending
@@ -21657,7 +21658,7 @@ class _SendXPToUsersScreenState extends State<SendXPToUsersScreen> {
                                         strokeWidth: 2,
                                         valueColor:
                                             AlwaysStoppedAnimation<Color>(
-                                              Colors.white,
+                                              TekInk.high,
                                             ),
                                       ),
                                     )
@@ -21785,11 +21786,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   ) {
     return Card(
       elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: TekShape.br),
       child: Container(
         padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: TekShape.br,
           gradient: LinearGradient(
             colors: [color.withValues(alpha: 0.8), color],
             begin: Alignment.topLeft,
@@ -21801,7 +21802,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: Color(0xFFB8B8C0), size: 28),
+            Icon(icon, color: TekColors.steel, size: 28),
             SizedBox(height: 8),
             Flexible(
               child: Text(
@@ -21809,7 +21810,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFFB8B8C0),
+                  color: TekColors.steel,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -21820,7 +21821,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 title,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: TekInk.high.withValues(alpha: 0.9),
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -21847,18 +21848,18 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               ),
               Text(
                 '$count users',
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 14, color: TekColors.chrome),
               ),
             ],
           ),
           SizedBox(height: 6),
           ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: TekShape.br,
             child: LinearProgressIndicator(
               value: percentage,
               minHeight: 10,
-              backgroundColor: Colors.grey[200],
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF0000)),
+              backgroundColor: TekInk.high,
+              valueColor: AlwaysStoppedAnimation<Color>(TekColors.danger),
             ),
           ),
         ],
@@ -21869,11 +21870,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: TekInk.high,
       appBar: AppBar(
-        title: Text('Statistics', style: TextStyle(color: Color(0xFFB8B8C0))),
-        backgroundColor: Color(0xFFFF0000),
-        iconTheme: IconThemeData(color: Color(0xFFB8B8C0)),
+        title: Text('Statistics', style: TextStyle(color: TekColors.steel)),
+        backgroundColor: TekColors.danger,
+        iconTheme: IconThemeData(color: TekColors.steel),
         elevation: 2,
         actions: [
           IconButton(
@@ -21889,7 +21890,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           ? AppUtils.buildLoadingIndicator(message: 'Loading statistics...')
           : RefreshIndicator(
               onRefresh: _loadStatistics,
-              color: Color(0xFFFF0000),
+              color: TekColors.danger,
               child: SingleChildScrollView(
                 physics: AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.all(16),
@@ -21902,7 +21903,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
+                        color: TekColors.surfaceLift,
                       ),
                     ),
                     SizedBox(height: 12),
@@ -21918,25 +21919,25 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           'Total Users',
                           '$_totalUsers',
                           Icons.people,
-                          Color(0xFFFF0000),
+                          TekColors.danger,
                         ),
                         _buildStatCard(
                           'Total XP',
                           AppUtils.formatXP(_totalXP),
                           Icons.stars,
-                          Colors.orange,
+                          TekColors.danger,
                         ),
                         _buildStatCard(
                           'Avg XP/User',
                           AppUtils.formatXP(_avgXP),
                           Icons.trending_up,
-                          Colors.blue,
+                          TekColors.signal,
                         ),
                         _buildStatCard(
                           'New This Week',
                           '$_newUsersThisWeek',
                           Icons.person_add,
-                          Colors.green,
+                          TekColors.signal,
                         ),
                       ],
                     ),
@@ -21948,14 +21949,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
+                        color: TekColors.surfaceLift,
                       ),
                     ),
                     SizedBox(height: 12),
                     Card(
                       elevation: 2,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: TekShape.br,
                       ),
                       child: Padding(
                         padding: EdgeInsets.all(16),
@@ -21978,7 +21979,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
+                        color: TekColors.surfaceLift,
                       ),
                     ),
                     SizedBox(height: 12),
@@ -21992,7 +21993,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       Card(
                         elevation: 2,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: TekShape.br,
                         ),
                         child: ListView.separated(
                           shrinkWrap: true,
@@ -22010,13 +22011,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                             Color? medalColor;
                             IconData? medalIcon;
                             if (index == 0) {
-                              medalColor = Color(0xFFFFD700); // Gold
+                              medalColor = TekColors.platinum; // Gold
                               medalIcon = Icons.emoji_events;
                             } else if (index == 1) {
-                              medalColor = Color(0xFFC0C0C0); // Silver
+                              medalColor = TekColors.silver; // Silver
                               medalIcon = Icons.emoji_events;
                             } else if (index == 2) {
-                              medalColor = Color(0xFFCD7F32); // Bronze
+                              medalColor = TekColors.gunmetal; // Bronze
                               medalIcon = Icons.emoji_events;
                             }
 
@@ -22029,14 +22030,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                 width: 40,
                                 height: 40,
                                 decoration: BoxDecoration(
-                                  color: medalColor ?? Colors.grey[200],
+                                  color: medalColor ?? TekInk.high,
                                   shape: BoxShape.circle,
                                 ),
                                 child: Center(
                                   child: medalIcon != null
                                       ? Icon(
                                           medalIcon,
-                                          color: Color(0xFFB8B8C0),
+                                          color: TekColors.steel,
                                           size: 20,
                                         )
                                       : Text(
@@ -22044,7 +22045,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 16,
-                                            color: Colors.grey[700],
+                                            color: TekColors.chrome,
                                           ),
                                         ),
                                 ),
@@ -22062,7 +22063,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                     : 'Code: $referralCode',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey[600],
+                                  color: TekColors.chrome,
                                 ),
                               ),
                               trailing: Container(
@@ -22071,13 +22072,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Color(0xFFFF0000),
-                                  borderRadius: BorderRadius.circular(12),
+                                  color: TekColors.danger,
+                                  borderRadius: TekShape.br,
                                 ),
                                 child: Text(
                                   '${AppUtils.formatXP(xp)} XP',
                                   style: TextStyle(
-                                    color: Color(0xFFB8B8C0),
+                                    color: TekColors.steel,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
                                   ),
@@ -22122,17 +22123,17 @@ class _ReportsScreenState extends State<ReportsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: TekInk.high,
       appBar: AppBar(
-        title: Text('Reports', style: TextStyle(color: Color(0xFFB8B8C0))),
-        backgroundColor: Color(0xFFFF0000),
-        iconTheme: IconThemeData(color: Color(0xFFB8B8C0)),
+        title: Text('Reports', style: TextStyle(color: TekColors.steel)),
+        backgroundColor: TekColors.danger,
+        iconTheme: IconThemeData(color: TekColors.steel),
         elevation: 2,
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: Colors.white,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
+          indicatorColor: TekInk.high,
+          labelColor: TekInk.high,
+          unselectedLabelColor: TekInk.body,
           tabs: [
             Tab(icon: Icon(Icons.swap_horiz), text: 'XP'),
             Tab(icon: Icon(Icons.timeline), text: 'Activity'),
@@ -22207,13 +22208,13 @@ class _XPTransactionsTabState extends State<XPTransactionsTab> {
           child: TextField(
             decoration: InputDecoration(
               hintText: 'Search by name or email...',
-              prefixIcon: Icon(Icons.search, color: Color(0xFFFF0000)),
+              prefixIcon: Icon(Icons.search, color: TekColors.danger),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: TekShape.br,
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Color(0xFFFF0000), width: 2),
+                borderRadius: TekShape.br,
+                borderSide: BorderSide(color: TekColors.danger, width: 2),
               ),
             ),
             onChanged: (value) => setState(() => _searchQuery = value),
@@ -22234,7 +22235,7 @@ class _XPTransactionsTabState extends State<XPTransactionsTab> {
                 )
               : RefreshIndicator(
                   onRefresh: _loadTransactions,
-                  color: Color(0xFFFF0000),
+                  color: TekColors.danger,
                   child: ListView.builder(
                     padding: EdgeInsets.symmetric(horizontal: 16),
                     itemCount: _filteredTransactions.length,
@@ -22251,13 +22252,13 @@ class _XPTransactionsTabState extends State<XPTransactionsTab> {
                         margin: EdgeInsets.only(bottom: 12),
                         elevation: 2,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: TekShape.br,
                         ),
                         child: ListTile(
                           contentPadding: EdgeInsets.all(16),
                           leading: CircleAvatar(
-                            backgroundColor: Colors.green.withValues(alpha: 0.1),
-                            child: Icon(Icons.add, color: Colors.green),
+                            backgroundColor: TekColors.signal.withValues(alpha: 0.1),
+                            child: Icon(Icons.add, color: TekColors.signal),
                           ),
                           title: Text(
                             userName,
@@ -22271,7 +22272,7 @@ class _XPTransactionsTabState extends State<XPTransactionsTab> {
                                 userEmail,
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey[600],
+                                  color: TekColors.chrome,
                                 ),
                               ),
                               SizedBox(height: 4),
@@ -22279,7 +22280,7 @@ class _XPTransactionsTabState extends State<XPTransactionsTab> {
                                 '$previousXP XP → $newXP XP',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey[700],
+                                  color: TekColors.chrome,
                                 ),
                               ),
                               if (timestamp != null)
@@ -22287,7 +22288,7 @@ class _XPTransactionsTabState extends State<XPTransactionsTab> {
                                   AppUtils.formatDate(timestamp.toDate()),
                                   style: TextStyle(
                                     fontSize: 11,
-                                    color: Colors.grey[500],
+                                    color: TekColors.chrome,
                                   ),
                                 ),
                             ],
@@ -22298,13 +22299,13 @@ class _XPTransactionsTabState extends State<XPTransactionsTab> {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.green,
-                              borderRadius: BorderRadius.circular(12),
+                              color: TekColors.signal,
+                              borderRadius: TekShape.br,
                             ),
                             child: Text(
                               '+$amount XP',
                               style: TextStyle(
-                                color: Color(0xFFB8B8C0),
+                                color: TekColors.steel,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -22378,7 +22379,7 @@ class _UserActivityTabState extends State<UserActivityTab> {
           )
         : RefreshIndicator(
             onRefresh: _loadActivity,
-            color: Color(0xFFFF0000),
+            color: TekColors.danger,
             child: ListView.builder(
               padding: EdgeInsets.all(16),
               itemCount: _activities.length,
@@ -22393,13 +22394,13 @@ class _UserActivityTabState extends State<UserActivityTab> {
                   margin: EdgeInsets.only(bottom: 12),
                   elevation: 2,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: TekShape.br,
                   ),
                   child: ListTile(
                     contentPadding: EdgeInsets.all(16),
                     leading: CircleAvatar(
-                      backgroundColor: Color(0xFFFF0000).withValues(alpha: 0.1),
-                      child: Icon(Icons.person_add, color: Color(0xFFFF0000)),
+                      backgroundColor: TekColors.danger.withValues(alpha: 0.1),
+                      child: Icon(Icons.person_add, color: TekColors.danger),
                     ),
                     title: Text(
                       'New Registration',
@@ -22423,7 +22424,7 @@ class _UserActivityTabState extends State<UserActivityTab> {
                           email,
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[600],
+                            color: TekColors.chrome,
                           ),
                         ),
                         if (referralCode.isNotEmpty)
@@ -22431,7 +22432,7 @@ class _UserActivityTabState extends State<UserActivityTab> {
                             'Code: $referralCode',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[700],
+                              color: TekColors.chrome,
                             ),
                           ),
                         if (timestamp != null)
@@ -22439,7 +22440,7 @@ class _UserActivityTabState extends State<UserActivityTab> {
                             AppUtils.timeAgo(timestamp.toDate()),
                             style: TextStyle(
                               fontSize: 11,
-                              color: Colors.grey[500],
+                              color: TekColors.chrome,
                             ),
                           ),
                       ],
@@ -22544,14 +22545,14 @@ class _UserRegistryTabState extends State<UserRegistryTab> {
                 child: TextField(
                   decoration: InputDecoration(
                     hintText: 'Search users...',
-                    prefixIcon: Icon(Icons.search, color: Color(0xFFFF0000)),
+                    prefixIcon: Icon(Icons.search, color: TekColors.danger),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: TekShape.br,
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: TekShape.br,
                       borderSide: BorderSide(
-                        color: Color(0xFFFF0000),
+                        color: TekColors.danger,
                         width: 2,
                       ),
                     ),
@@ -22565,11 +22566,11 @@ class _UserRegistryTabState extends State<UserRegistryTab> {
                 icon: Icon(Icons.download),
                 label: Text('Export'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFFF0000),
-                  foregroundColor: Colors.white,
+                  backgroundColor: TekColors.danger,
+                  foregroundColor: TekInk.high,
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: TekShape.br,
                   ),
                 ),
               ),
@@ -22589,7 +22590,7 @@ class _UserRegistryTabState extends State<UserRegistryTab> {
                 )
               : RefreshIndicator(
                   onRefresh: _loadUsers,
-                  color: Color(0xFFFF0000),
+                  color: TekColors.danger,
                   child: ListView.builder(
                     padding: EdgeInsets.symmetric(horizontal: 16),
                     itemCount: _filteredUsers.length,
@@ -22607,12 +22608,12 @@ class _UserRegistryTabState extends State<UserRegistryTab> {
                         margin: EdgeInsets.only(bottom: 12),
                         elevation: 2,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: TekShape.br,
                         ),
                         child: ExpansionTile(
                           leading: CircleAvatar(
-                            backgroundColor: Color(0xFFFF0000).withValues(alpha: 0.1),
-                            child: Icon(Icons.person, color: Color(0xFFFF0000)),
+                            backgroundColor: TekColors.danger.withValues(alpha: 0.1),
+                            child: Icon(Icons.person, color: TekColors.danger),
                           ),
                           title: Text(
                             name,
@@ -22625,13 +22626,13 @@ class _UserRegistryTabState extends State<UserRegistryTab> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.green,
-                              borderRadius: BorderRadius.circular(10),
+                              color: TekColors.signal,
+                              borderRadius: TekShape.br,
                             ),
                             child: Text(
                               '${AppUtils.formatXP(xp)} XP',
                               style: TextStyle(
-                                color: Color(0xFFB8B8C0),
+                                color: TekColors.steel,
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -22686,12 +22687,12 @@ class _UserRegistryTabState extends State<UserRegistryTab> {
               label,
               style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[700],
+                color: TekColors.chrome,
               ),
             ),
           ),
           Expanded(
-            child: Text(value, style: TextStyle(color: Colors.grey[800])),
+            child: Text(value, style: TextStyle(color: TekColors.surfaceLift)),
           ),
         ],
       ),
@@ -22713,15 +22714,15 @@ class _SendXPDialogState extends State<SendXPDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: Color(0xFF1A1A1A).withValues(alpha: 0.85),
+      backgroundColor: TekColors.surface.withValues(alpha: 0.85),
       title: Row(
         children: [
-          Icon(Icons.stars, color: Color(0xFFFF0000)),
+          Icon(Icons.stars, color: TekColors.danger),
           SizedBox(width: 8),
           Text(
             'Send XP to User',
             style: TextStyle(
-              color: Color(0xFFB8B8C0),
+              color: TekColors.steel,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -22736,7 +22737,7 @@ class _SendXPDialogState extends State<SendXPDialog> {
             Text(
               'Select User',
               style: TextStyle(
-                color: Color(0xFFFF0000),
+                color: TekColors.danger,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1,
@@ -22747,25 +22748,25 @@ class _SendXPDialogState extends State<SendXPDialog> {
               padding: EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color: Colors.black,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white10),
+                borderRadius: TekShape.br,
+                border: Border.all(color: TekInk.wash),
               ),
               child: DropdownButton<String>(
                 value: selectedUserId,
                 isExpanded: true,
                 hint: Text(
                   'Choose a user...',
-                  style: TextStyle(color: Colors.white54),
+                  style: TextStyle(color: TekInk.muted),
                 ),
-                dropdownColor: Color(0xFF1A1A1A).withValues(alpha: 0.85),
+                dropdownColor: TekColors.surface.withValues(alpha: 0.85),
                 underline: SizedBox(),
-                style: TextStyle(color: Color(0xFFB8B8C0)),
+                style: TextStyle(color: TekColors.steel),
                 items: widget.users.map((user) {
                   return DropdownMenuItem<String>(
                     value: user['docId'],
                     child: Text(
                       '${user['name'] ?? 'Unknown'} (${user['email'] ?? 'No email'})',
-                      style: TextStyle(color: Color(0xFFB8B8C0)),
+                      style: TextStyle(color: TekColors.steel),
                     ),
                   );
                 }).toList(),
@@ -22780,7 +22781,7 @@ class _SendXPDialogState extends State<SendXPDialog> {
             Text(
               'XP Amount',
               style: TextStyle(
-                color: Color(0xFFFF0000),
+                color: TekColors.danger,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1,
@@ -22790,25 +22791,25 @@ class _SendXPDialogState extends State<SendXPDialog> {
             TextField(
               controller: _xpController,
               keyboardType: TextInputType.number,
-              style: TextStyle(color: Color(0xFFB8B8C0)),
+              style: TextStyle(color: TekColors.steel),
               decoration: InputDecoration(
                 hintText: 'Enter XP amount',
-                hintStyle: TextStyle(color: Colors.white30),
+                hintStyle: TextStyle(color: TekInk.dim),
                 filled: true,
                 fillColor: Colors.black,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.white10),
+                  borderRadius: TekShape.br,
+                  borderSide: BorderSide(color: TekInk.wash),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.white10),
+                  borderRadius: TekShape.br,
+                  borderSide: BorderSide(color: TekInk.wash),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Color(0xFFFF0000), width: 2),
+                  borderRadius: TekShape.br,
+                  borderSide: BorderSide(color: TekColors.danger, width: 2),
                 ),
-                prefixIcon: Icon(Icons.add, color: Color(0xFFFF0000)),
+                prefixIcon: Icon(Icons.add, color: TekColors.danger),
               ),
             ),
           ],
@@ -22817,13 +22818,13 @@ class _SendXPDialogState extends State<SendXPDialog> {
       actions: [
         TextButton(
           onPressed: _isSending ? null : () => Navigator.pop(context),
-          child: Text('CANCEL', style: TextStyle(color: Colors.white54)),
+          child: Text('CANCEL', style: TextStyle(color: TekInk.muted)),
         ),
         ElevatedButton(
           onPressed: _isSending ? null : _sendXP,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xFFFF0000),
-            foregroundColor: Colors.white,
+            backgroundColor: TekColors.danger,
+            foregroundColor: TekInk.high,
           ),
           child: _isSending
               ? SizedBox(
@@ -22831,7 +22832,7 @@ class _SendXPDialogState extends State<SendXPDialog> {
                   height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation(Colors.white),
+                    valueColor: AlwaysStoppedAnimation(TekInk.high),
                   ),
                 )
               : Text('SEND XP'),
@@ -22845,7 +22846,7 @@ class _SendXPDialogState extends State<SendXPDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please select a user'),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
         ),
       );
       return;
@@ -22856,7 +22857,7 @@ class _SendXPDialogState extends State<SendXPDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please enter a valid XP amount'),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
         ),
       );
       return;
@@ -22891,7 +22892,7 @@ class _SendXPDialogState extends State<SendXPDialog> {
             content: Text(
               'Successfully sent $xpAmount XP to ${userData['name']}!',
             ),
-            backgroundColor: Color(0xFF00FF41),
+            backgroundColor: TekColors.signal,
           ),
         );
       }
@@ -22901,7 +22902,7 @@ class _SendXPDialogState extends State<SendXPDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error sending XP: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
           ),
         );
       }
@@ -22939,15 +22940,15 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: Color(0xFF1A1A1A).withValues(alpha: 0.85),
+      backgroundColor: TekColors.surface.withValues(alpha: 0.85),
       title: Row(
         children: [
-          Icon(Icons.notifications_active, color: Color(0xFFFF0000)),
+          Icon(Icons.notifications_active, color: TekColors.danger),
           SizedBox(width: 8),
           Text(
             'Send Notification',
             style: TextStyle(
-              color: Color(0xFFB8B8C0),
+              color: TekColors.steel,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -22962,7 +22963,7 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
             Text(
               'MESSAGE',
               style: TextStyle(
-                color: Color(0xFFFF0000),
+                color: TekColors.danger,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1,
@@ -22972,23 +22973,23 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
             TextField(
               controller: _messageController,
               maxLines: 4,
-              style: TextStyle(color: Color(0xFFB8B8C0)),
+              style: TextStyle(color: TekColors.steel),
               decoration: InputDecoration(
                 hintText: 'Enter your message to all users...',
-                hintStyle: TextStyle(color: Colors.white30),
+                hintStyle: TextStyle(color: TekInk.dim),
                 filled: true,
                 fillColor: Colors.black,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.white10),
+                  borderRadius: TekShape.br,
+                  borderSide: BorderSide(color: TekInk.wash),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.white10),
+                  borderRadius: TekShape.br,
+                  borderSide: BorderSide(color: TekInk.wash),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Color(0xFFFF0000), width: 2),
+                  borderRadius: TekShape.br,
+                  borderSide: BorderSide(color: TekColors.danger, width: 2),
                 ),
               ),
             ),
@@ -22996,7 +22997,7 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
             Text(
               'DELIVERY METHODS',
               style: TextStyle(
-                color: Color(0xFFFF0000),
+                color: TekColors.danger,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1,
@@ -23007,8 +23008,8 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.black,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white10),
+                borderRadius: TekShape.br,
+                border: Border.all(color: TekInk.wash),
               ),
               child: Column(
                 children: [
@@ -23017,39 +23018,39 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
                       children: [
                         Icon(
                           Icons.phone_android,
-                          color: Color(0xFFFF0000),
+                          color: TekColors.danger,
                           size: 20,
                         ),
                         SizedBox(width: 8),
                         Text(
                           'SMS (Text Message)',
-                          style: TextStyle(color: Color(0xFFB8B8C0)),
+                          style: TextStyle(color: TekColors.steel),
                         ),
                       ],
                     ),
                     value: _sendSMS,
                     onChanged: (value) =>
                         setState(() => _sendSMS = value ?? false),
-                    activeColor: Color(0xFFFF0000),
-                    checkColor: Colors.white,
+                    activeColor: TekColors.danger,
+                    checkColor: TekInk.high,
                     contentPadding: EdgeInsets.zero,
                   ),
                   CheckboxListTile(
                     title: Row(
                       children: [
-                        Icon(Icons.email, color: Color(0xFFFF0000), size: 20),
+                        Icon(Icons.email, color: TekColors.danger, size: 20),
                         SizedBox(width: 8),
                         Text(
                           'Email',
-                          style: TextStyle(color: Color(0xFFB8B8C0)),
+                          style: TextStyle(color: TekColors.steel),
                         ),
                       ],
                     ),
                     value: _sendEmail,
                     onChanged: (value) =>
                         setState(() => _sendEmail = value ?? false),
-                    activeColor: Color(0xFFFF0000),
-                    checkColor: Colors.white,
+                    activeColor: TekColors.danger,
+                    checkColor: TekInk.high,
                     contentPadding: EdgeInsets.zero,
                   ),
                   CheckboxListTile(
@@ -23057,21 +23058,21 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
                       children: [
                         Icon(
                           Icons.notifications,
-                          color: Color(0xFFFF0000),
+                          color: TekColors.danger,
                           size: 20,
                         ),
                         SizedBox(width: 8),
                         Text(
                           'In-App Notification',
-                          style: TextStyle(color: Color(0xFFB8B8C0)),
+                          style: TextStyle(color: TekColors.steel),
                         ),
                       ],
                     ),
                     value: _sendInApp,
                     onChanged: (value) =>
                         setState(() => _sendInApp = value ?? false),
-                    activeColor: Color(0xFFFF0000),
-                    checkColor: Colors.white,
+                    activeColor: TekColors.danger,
+                    checkColor: TekInk.high,
                     contentPadding: EdgeInsets.zero,
                   ),
                 ],
@@ -23081,7 +23082,7 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
             Text(
               'Sending to ${widget.users.length} user(s)',
               style: TextStyle(
-                color: Colors.white54,
+                color: TekInk.muted,
                 fontSize: 12,
                 fontStyle: FontStyle.italic,
               ),
@@ -23092,13 +23093,13 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
       actions: [
         TextButton(
           onPressed: _isSending ? null : () => Navigator.pop(context),
-          child: Text('CANCEL', style: TextStyle(color: Colors.white54)),
+          child: Text('CANCEL', style: TextStyle(color: TekInk.muted)),
         ),
         ElevatedButton(
           onPressed: _isSending ? null : _sendNotifications,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xFFFF0000),
-            foregroundColor: Colors.white,
+            backgroundColor: TekColors.danger,
+            foregroundColor: TekInk.high,
           ),
           child: _isSending
               ? SizedBox(
@@ -23106,7 +23107,7 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
                   height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation(Colors.white),
+                    valueColor: AlwaysStoppedAnimation(TekInk.high),
                   ),
                 )
               : Text('SEND TO ALL'),
@@ -23120,7 +23121,7 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please enter a message'),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
         ),
       );
       return;
@@ -23130,7 +23131,7 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please select at least one delivery method'),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
         ),
       );
       return;
@@ -23199,7 +23200,7 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
             content: Text(
               'Notification sent to ${widget.users.length} users via ${deliveryMethods.join(', ')}!',
             ),
-            backgroundColor: Color(0xFF00FF41),
+            backgroundColor: TekColors.signal,
             duration: Duration(seconds: 4),
           ),
         );
@@ -23210,7 +23211,7 @@ class _SendNotificationDialogState extends State<SendNotificationDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error sending notifications: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
           ),
         );
       }
@@ -23234,12 +23235,12 @@ class TermsOfServiceScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFFB8B8C0)),
+          icon: const Icon(Icons.arrow_back, color: TekColors.steel),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Terms of Service',
-          style: TextStyle(color: Color(0xFFB8B8C0), fontSize: 18),
+          style: TextStyle(color: TekColors.steel, fontSize: 18),
         ),
       ),
       body: SingleChildScrollView(
@@ -23250,7 +23251,7 @@ class TermsOfServiceScreen extends StatelessWidget {
             const Text(
               'Community Guidelines',
               style: TextStyle(
-                color: Color(0xFF00FF41),
+                color: TekColors.signal,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -23258,7 +23259,7 @@ class TermsOfServiceScreen extends StatelessWidget {
             const SizedBox(height: 12),
             const Text(
               'By using TEK, you agree to follow these community guidelines:',
-              style: TextStyle(color: Colors.white70, height: 1.6),
+              style: TextStyle(color: TekInk.body, height: 1.6),
             ),
             const SizedBox(height: 16),
             _buildGuidelineItem(
@@ -23289,7 +23290,7 @@ class TermsOfServiceScreen extends StatelessWidget {
             const Text(
               'Blocking & Safety',
               style: TextStyle(
-                color: Color(0xFF00FF41),
+                color: TekColors.signal,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -23297,13 +23298,13 @@ class TermsOfServiceScreen extends StatelessWidget {
             const SizedBox(height: 12),
             const Text(
               'You have full control over who can contact you. Use the Block User feature to prevent communication with any user.',
-              style: TextStyle(color: Colors.white70, height: 1.6),
+              style: TextStyle(color: TekInk.body, height: 1.6),
             ),
             const SizedBox(height: 24),
             const Text(
               'Content Moderation',
               style: TextStyle(
-                color: Color(0xFF00FF41),
+                color: TekColors.signal,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -23314,12 +23315,12 @@ class TermsOfServiceScreen extends StatelessWidget {
               'Our moderation team reviews all reports within 24 hours. '
               'Objectionable content will be removed and the offending user will be ejected from the platform. '
               'When you block a user, their content is instantly hidden from your feed and our team is notified for review.',
-              style: TextStyle(color: Colors.white70, height: 1.6),
+              style: TextStyle(color: TekInk.body, height: 1.6),
             ),
             const SizedBox(height: 24),
             const Text(
               '© 2026 TEK. All rights reserved.',
-              style: TextStyle(color: Colors.white38, fontSize: 12),
+              style: TextStyle(color: TekInk.faint, fontSize: 12),
             ),
             const SizedBox(height: 24),
           ],
@@ -23337,7 +23338,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           Text(
             title,
             style: const TextStyle(
-              color: Color(0xFFB8B8C0),
+              color: TekColors.steel,
               fontWeight: FontWeight.bold,
               fontSize: 14,
             ),
@@ -23346,7 +23347,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           Text(
             description,
             style: const TextStyle(
-              color: Colors.white70,
+              color: TekInk.body,
               fontSize: 13,
               height: 1.5,
             ),
@@ -23427,7 +23428,7 @@ class _SidequestScreenState extends State<SidequestScreen>
               title: const Text(
                 'SIDEQUESTS',
                 style: TextStyle(
-                  color: Color(0xFF00FF41),
+                  color: TekColors.signal,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 3,
@@ -23449,14 +23450,14 @@ class _SidequestScreenState extends State<SidequestScreen>
             leading: Navigator.canPop(context)
                 ? IconButton(
                     icon: const Icon(Icons.arrow_back,
-                        color: Color(0xFF00FF41)),
+                        color: TekColors.signal),
                     onPressed: () => Navigator.pop(context),
                   )
                 : null,
             title: const Text(
               'SIDEQUESTS',
               style: TextStyle(
-                color: Color(0xFF00FF41),
+                color: TekColors.signal,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 3,
@@ -23470,9 +23471,9 @@ class _SidequestScreenState extends State<SidequestScreen>
             ],
             bottom: TabBar(
               controller: _tabController,
-              indicatorColor: const Color(0xFF00FF41),
-              labelColor: const Color(0xFF00FF41),
-              unselectedLabelColor: Colors.white38,
+              indicatorColor: TekColors.signal,
+              labelColor: TekColors.signal,
+              unselectedLabelColor: TekInk.faint,
               labelStyle: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -23515,12 +23516,12 @@ class _QuestsDisabledPlaceholder extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: const [
-            Icon(Icons.power_settings_new, color: Color(0xFF00FF41), size: 48),
+            Icon(Icons.power_settings_new, color: TekColors.signal, size: 48),
             SizedBox(height: 16),
             Text(
               'QUESTS OFFLINE',
               style: TextStyle(
-                color: Color(0xFF00FF41),
+                color: TekColors.signal,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 3,
@@ -23530,7 +23531,7 @@ class _QuestsDisabledPlaceholder extends StatelessWidget {
             Text(
               'The mission system is temporarily disabled. Check back soon.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white54, fontSize: 13),
+              style: TextStyle(color: TekInk.muted, fontSize: 13),
             ),
           ],
         ),
@@ -23571,7 +23572,7 @@ class _MissionsTab extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               child: Text(
                 'Error loading quests:\n${snapshot.error}',
-                style: const TextStyle(color: Colors.red, fontSize: 13),
+                style: const TextStyle(color: TekColors.danger, fontSize: 13),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -23586,12 +23587,12 @@ class _MissionsTab extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: const [
-                Icon(Icons.bolt, color: Color(0xFF00FF41), size: 48),
+                Icon(Icons.bolt, color: TekColors.signal, size: 48),
                 SizedBox(height: 16),
                 Text(
                   'AWAITING ASSIGNMENT',
                   style: TextStyle(
-                    color: Color(0xFF00FF41),
+                    color: TekColors.signal,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 2,
@@ -23603,7 +23604,7 @@ class _MissionsTab extends StatelessWidget {
                   child: Text(
                     'New ops drop around events. Nothing live right now — check back tonight.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white54, fontSize: 13, height: 1.4),
+                    style: TextStyle(color: TekInk.muted, fontSize: 13, height: 1.4),
                   ),
                 ),
               ],
@@ -23705,13 +23706,13 @@ class _RewardProgressCard extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFF00FF41).withValues(alpha: 0.18),
-                  const Color(0xFF00FF41).withValues(alpha: 0.04),
+                  TekColors.signal.withValues(alpha: 0.18),
+                  TekColors.signal.withValues(alpha: 0.04),
                 ],
               ),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: TekShape.br,
               border: Border.all(
-                  color: const Color(0xFF00FF41).withValues(alpha: 0.45),
+                  color: TekColors.signal.withValues(alpha: 0.45),
                   width: 1),
             ),
             child: Column(
@@ -23720,12 +23721,12 @@ class _RewardProgressCard extends StatelessWidget {
                 Row(
                   children: [
                     const Icon(Icons.bolt,
-                        color: Color(0xFF00FF41), size: 18),
+                        color: TekColors.signal, size: 18),
                     const SizedBox(width: 6),
                     Text(
                       'LEVEL $level',
                       style: const TextStyle(
-                        color: Color(0xFF00FF41),
+                        color: TekColors.signal,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 2,
@@ -23735,7 +23736,7 @@ class _RewardProgressCard extends StatelessWidget {
                     Text(
                       '$xp XP',
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: TekInk.body,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1,
@@ -23743,18 +23744,18 @@ class _RewardProgressCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     const Icon(Icons.chevron_right,
-                        color: Colors.white38, size: 18),
+                        color: TekInk.faint, size: 18),
                   ],
                 ),
                 const SizedBox(height: 10),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: TekShape.br,
                   child: LinearProgressIndicator(
                     value: progress,
                     minHeight: 6,
-                    backgroundColor: Colors.white12,
+                    backgroundColor: TekInk.hairline,
                     valueColor:
-                        const AlwaysStoppedAnimation<Color>(Color(0xFF00FF41)),
+                        const AlwaysStoppedAnimation<Color>(TekColors.signal),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -23767,7 +23768,7 @@ class _RewardProgressCard extends StatelessWidget {
                         child: Text(
                           'NEXT: ${next.name} — ${target - xp} XP',
                           style: const TextStyle(
-                            color: Colors.white70,
+                            color: TekInk.body,
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1,
@@ -23776,13 +23777,13 @@ class _RewardProgressCard extends StatelessWidget {
                       ),
                     ] else ...[
                       const Icon(Icons.workspace_premium,
-                          size: 14, color: Color(0xFFFFD700)),
+                          size: 14, color: TekColors.platinum),
                       const SizedBox(width: 6),
                       const Expanded(
                         child: Text(
                           'ALL REWARDS UNLOCKED',
                           style: TextStyle(
-                            color: Color(0xFFFFD700),
+                            color: TekColors.platinum,
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1,
@@ -23827,16 +23828,16 @@ class _StreakBanner extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: TekShape.br,
                 border: Border.all(
-                  color: const Color(0xFFFF8800).withValues(alpha: 0.6),
+                  color: TekColors.silver.withValues(alpha: 0.6),
                   width: 1,
                 ),
               ),
               child: Row(
                 children: [
                   const Icon(Icons.local_fire_department,
-                      color: Color(0xFFFF8800), size: 24),
+                      color: TekColors.silver, size: 24),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
@@ -23845,7 +23846,7 @@ class _StreakBanner extends StatelessWidget {
                         Text(
                           '$days-DAY STREAK',
                           style: const TextStyle(
-                            color: Color(0xFFFF8800),
+                            color: TekColors.silver,
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 2,
@@ -23855,7 +23856,7 @@ class _StreakBanner extends StatelessWidget {
                         const Text(
                           'Stay active daily to bank milestone XP',
                           style: TextStyle(
-                            color: Colors.white54,
+                            color: TekInk.muted,
                             fontSize: 11,
                           ),
                         ),
@@ -23881,30 +23882,30 @@ class _VerificationBadge extends StatelessWidget {
     final vtype = data['verificationType'] as String? ?? 'honor';
     IconData? icon;
     String? label;
-    Color color = Colors.white38;
+    Color color = TekInk.faint;
 
     switch (vtype) {
       case 'qr_code':
         icon = Icons.qr_code_scanner;
         label = 'QR SCAN';
-        color = const Color(0xFF00FF41);
+        color = TekColors.signal;
         break;
       case 'timer':
         final mins = (data['timerMinutes'] as num?)?.toInt() ?? 60;
         icon = Icons.timer;
         label = '${mins}MIN';
-        color = Colors.amber;
+        color = TekColors.silver;
         break;
       case 'friend_added':
         final n = (data['requiredFriendCount'] as num?)?.toInt() ?? 1;
         icon = Icons.person_add;
         label = '+$n FRIEND${n > 1 ? 'S' : ''}';
-        color = Colors.lightBlueAccent;
+        color = TekColors.signal;
         break;
       case 'code_entry':
         icon = Icons.lock;
         label = 'CODE';
-        color = Colors.white38;
+        color = TekInk.faint;
         break;
       default:
         return const SizedBox.shrink();
@@ -23994,19 +23995,19 @@ class _SidequestCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 14),
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.6),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: TekShape.br,
           border: Border.all(
             color: lootActive
-                ? const Color(0xFFE63946)
+                ? TekColors.signal
                 : chainLocked
-                    ? Colors.white10
+                    ? TekInk.wash
                     : completed
-                        ? Colors.white12
-                        : const Color(0xFF00FF41).withValues(alpha: 0.4),
+                        ? TekInk.hairline
+                        : TekColors.signal.withValues(alpha: 0.4),
             width: lootActive ? 1.5 : 1,
           ),
           boxShadow: lootActive
-              ? [BoxShadow(color: const Color(0xFFE63946).withValues(alpha: 0.4), blurRadius: 18, spreadRadius: 1)]
+              ? [BoxShadow(color: TekColors.signal.withValues(alpha: 0.4), blurRadius: 18, spreadRadius: 1)]
               : null,
         ),
         child: Opacity(
@@ -24018,13 +24019,13 @@ class _SidequestCard extends StatelessWidget {
               children: [
                 if (lootActive) ...[
                   Row(children: [
-                    const Icon(Icons.bolt, color: Color(0xFFE63946), size: 12),
+                    const Icon(Icons.bolt, color: TekColors.signal, size: 12),
                     const SizedBox(width: 4),
                     const Text('LOOT DROP — TIME-LIMITED',
-                        style: TextStyle(color: Color(0xFFE63946), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                        style: TextStyle(color: TekColors.signal, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2)),
                     const Spacer(),
                     Text(_lootCountdown(lootExpires),
-                        style: const TextStyle(color: Color(0xFFE63946), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, fontFamily: 'monospace')),
+                        style: const TextStyle(color: TekColors.signal, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, fontFamily: 'monospace')),
                   ]),
                   const SizedBox(height: 8),
                 ],
@@ -24036,22 +24037,22 @@ class _SidequestCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: chainLocked
-                        ? Colors.white10
+                        ? TekInk.wash
                         : completed
-                            ? Colors.white12
-                            : const Color(0xFF00FF41).withValues(alpha: 0.12),
+                            ? TekInk.hairline
+                            : TekColors.signal.withValues(alpha: 0.12),
                     border: Border.all(
                       color: chainLocked
-                          ? Colors.white24
+                          ? TekInk.line
                           : completed
-                              ? Colors.white24
-                              : const Color(0xFF00FF41),
+                              ? TekInk.line
+                              : TekColors.signal,
                       width: 1.5,
                     ),
                   ),
                   child: Icon(
                     chainLocked ? Icons.lock : completed ? Icons.check : Icons.bolt,
-                    color: chainLocked ? Colors.white24 : completed ? Colors.white38 : const Color(0xFF00FF41),
+                    color: chainLocked ? TekInk.line : completed ? TekInk.faint : TekColors.signal,
                     size: 22,
                   ),
                 ),
@@ -24064,10 +24065,10 @@ class _SidequestCard extends StatelessWidget {
                         title,
                         style: TextStyle(
                           color: chainLocked
-                              ? Colors.white24
+                              ? TekInk.line
                               : completed
-                                  ? Colors.white38
-                                  : const Color(0xFF00FF41),
+                                  ? TekInk.faint
+                                  : TekColors.signal,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.2,
@@ -24079,7 +24080,7 @@ class _SidequestCard extends StatelessWidget {
                           'COMPLETE ${(prereqTitle ?? 'PREVIOUS MISSION').toUpperCase()} FIRST',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.white24, fontSize: 11, letterSpacing: 0.5),
+                          style: const TextStyle(color: TekInk.line, fontSize: 11, letterSpacing: 0.5),
                         )
                       else
                         Text(
@@ -24087,7 +24088,7 @@ class _SidequestCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            color: Colors.white54,
+                            color: TekInk.muted,
                             fontSize: 12,
                             height: 1.4,
                           ),
@@ -24104,13 +24105,13 @@ class _SidequestCard extends StatelessWidget {
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: completed
-                            ? Colors.white10
-                            : const Color(0xFF00FF41).withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(8),
+                            ? TekInk.wash
+                            : TekColors.signal.withValues(alpha: 0.15),
+                        borderRadius: TekShape.br,
                         border: Border.all(
                           color: completed
-                              ? Colors.white24
-                              : const Color(0xFF00FF41),
+                              ? TekInk.line
+                              : TekColors.signal,
                           width: 1,
                         ),
                       ),
@@ -24118,8 +24119,8 @@ class _SidequestCard extends StatelessWidget {
                         '+$xpReward XP',
                         style: TextStyle(
                           color: completed
-                              ? Colors.white38
-                              : const Color(0xFF00FF41),
+                              ? TekInk.faint
+                              : TekColors.signal,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,
@@ -24135,7 +24136,7 @@ class _SidequestCard extends StatelessWidget {
                       const Text(
                         'DONE',
                         style: TextStyle(
-                          color: Colors.white38,
+                          color: TekInk.faint,
                           fontSize: 10,
                           letterSpacing: 1,
                         ),
@@ -24162,14 +24163,14 @@ class _SidequestCard extends StatelessWidget {
                             height: 5,
                             decoration: const BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Color(0xFF00FF41),
+                              color: TekColors.signal,
                             ),
                           ),
                           const SizedBox(width: 6),
                           Text(
                             '$n OP${n == 1 ? '' : 'S'} HIT THIS',
                             style: const TextStyle(
-                              color: Color(0xFF00FF41),
+                              color: TekColors.signal,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1.5,
@@ -24240,8 +24241,8 @@ class _QuestProgressBar extends StatelessWidget {
                     isReady ? 'READY TO CLAIM' : '$progress / $target',
                     style: TextStyle(
                       color: isReady
-                          ? const Color(0xFF00FF41)
-                          : Colors.white70,
+                          ? TekColors.signal
+                          : TekInk.body,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,
@@ -24249,19 +24250,19 @@ class _QuestProgressBar extends StatelessWidget {
                   ),
                   if (isReady) ...[
                     const SizedBox(width: 6),
-                    const Icon(Icons.bolt, size: 12, color: Color(0xFF00FF41)),
+                    const Icon(Icons.bolt, size: 12, color: TekColors.signal),
                   ],
                 ],
               ),
               const SizedBox(height: 4),
               ClipRRect(
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: TekShape.brTight,
                 child: LinearProgressIndicator(
                   value: ratio,
                   minHeight: 4,
-                  backgroundColor: Colors.white12,
+                  backgroundColor: TekInk.hairline,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    isReady ? const Color(0xFF00FF41) : Colors.white54,
+                    isReady ? TekColors.signal : TekInk.muted,
                   ),
                 ),
               ),
@@ -24340,10 +24341,10 @@ class _QRScannerPageState extends State<_QRScannerPage>
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF00FF41)),
+        iconTheme: const IconThemeData(color: TekColors.signal),
         title: const Text('SCAN QR CODE',
             style: TextStyle(
-                color: Color(0xFF00FF41),
+                color: TekColors.signal,
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 2)),
@@ -24369,7 +24370,7 @@ class _QRScannerPageState extends State<_QRScannerPage>
               height: 240,
               child: CustomPaint(
                 painter: _QRCornerPainter(
-                  color: _wrongFlash ? Colors.red : const Color(0xFF00FF41),
+                  color: _wrongFlash ? TekColors.danger : TekColors.signal,
                 ),
               ),
             ),
@@ -24386,7 +24387,7 @@ class _QRScannerPageState extends State<_QRScannerPage>
                   child: const Text('SCANNING...',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                          color: Color(0xFF00FF41),
+                          color: TekColors.signal,
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 3)),
@@ -24398,7 +24399,7 @@ class _QRScannerPageState extends State<_QRScannerPage>
                       : 'ALIGN QR CODE WITH FRAME',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                      color: _wrongFlash ? Colors.red : Colors.white38,
+                      color: _wrongFlash ? TekColors.danger : TekInk.faint,
                       fontSize: 12,
                       letterSpacing: 1.5),
                 ),
@@ -24628,9 +24629,9 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
       context: context,
       barrierDismissible: true,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF0D0D1A),
+        backgroundColor: TekColors.void_,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: TekShape.br,
           side: BorderSide(color: reward.color, width: 1.5),
         ),
         contentPadding: const EdgeInsets.fromLTRB(24, 28, 24, 18),
@@ -24669,7 +24670,7 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
               reward.name,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Colors.white,
+                color: TekInk.high,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.5,
@@ -24680,7 +24681,7 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
               reward.description,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Colors.white70,
+                color: TekInk.body,
                 fontSize: 13,
                 height: 1.4,
               ),
@@ -24689,7 +24690,7 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
             Text(
               'LEVEL ${reward.level}  •  ${reward.xpRequired} XP',
               style: const TextStyle(
-                color: Colors.white38,
+                color: TekInk.faint,
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.5,
@@ -24770,7 +24771,7 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Already claimed.'),
-            backgroundColor: Color(0xFF00FF41),
+            backgroundColor: TekColors.signal,
           ),
         );
       } else {
@@ -24869,7 +24870,7 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to claim XP: ${e.message ?? e.code}'),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
         ),
       );
     } catch (e) {
@@ -24878,7 +24879,7 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to claim XP: $e'),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
         ),
       );
     }
@@ -24897,9 +24898,9 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFFB8B8C0)),
+        iconTheme: const IconThemeData(color: TekColors.steel),
         title: const Text('MISSION BRIEF',
-            style: TextStyle(color: Color(0xFF00FF41), fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 2)),
+            style: TextStyle(color: TekColors.signal, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 2)),
         centerTitle: true,
       ),
       body: Padding(
@@ -24912,37 +24913,37 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
               width: 80, height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFF00FF41), width: 2),
-                color: const Color(0xFF00FF41).withValues(alpha: 0.08),
-                boxShadow: [BoxShadow(color: const Color(0xFF00FF41).withValues(alpha: 0.25), blurRadius: 24, spreadRadius: 4)],
+                border: Border.all(color: TekColors.signal, width: 2),
+                color: TekColors.signal.withValues(alpha: 0.08),
+                boxShadow: [BoxShadow(color: TekColors.signal.withValues(alpha: 0.25), blurRadius: 24, spreadRadius: 4)],
               ),
-              child: const Icon(Icons.bolt, color: Color(0xFF00FF41), size: 40),
+              child: const Icon(Icons.bolt, color: TekColors.signal, size: 40),
             ),
             const SizedBox(height: 24),
             Text(title, textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFF00FF41), fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                style: const TextStyle(color: TekColors.signal, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2)),
             const SizedBox(height: 20),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFF00FF41).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: const Color(0xFF00FF41), width: 1),
+                color: TekColors.signal.withValues(alpha: 0.1),
+                borderRadius: TekShape.br,
+                border: Border.all(color: TekColors.signal, width: 1),
               ),
               child: Text('+$xpReward XP REWARD',
-                  style: const TextStyle(color: Color(0xFF00FF41), fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                  style: const TextStyle(color: TekColors.signal, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
             ),
             const SizedBox(height: 32),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.04),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white10),
+                color: TekInk.high.withValues(alpha: 0.04),
+                borderRadius: TekShape.br,
+                border: Border.all(color: TekInk.wash),
               ),
               child: Text(description, textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white70, fontSize: 15, height: 1.6)),
+                  style: const TextStyle(color: TekInk.body, fontSize: 15, height: 1.6)),
             ),
             const Spacer(),
             _buildVerificationSection(xpReward),
@@ -24960,13 +24961,13 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
                       userCode: widget.userCode!,
                     ),
                   ),
-                  icon: const Icon(Icons.person_add, color: Color(0xFF00FF41), size: 18),
+                  icon: const Icon(Icons.person_add, color: TekColors.signal, size: 18),
                   label: const Text('CHALLENGE A FRIEND',
-                      style: TextStyle(color: Color(0xFF00FF41), fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                      style: TextStyle(color: TekColors.signal, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFF00FF41)),
+                    side: const BorderSide(color: TekColors.signal),
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(borderRadius: TekShape.br),
                   ),
                 ),
               ),
@@ -24984,12 +24985,12 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
         child: ElevatedButton(
           onPressed: null,
           style: ElevatedButton.styleFrom(
-            disabledBackgroundColor: Colors.white12,
+            disabledBackgroundColor: TekInk.hairline,
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(borderRadius: TekShape.br),
           ),
           child: const Text('MISSION COMPLETE',
-              style: TextStyle(color: Colors.white38, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 2)),
+              style: TextStyle(color: TekInk.faint, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 2)),
         ),
       );
     }
@@ -25002,9 +25003,9 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
           child: ElevatedButton(
             onPressed: _claiming ? null : () { HapticFeedback.mediumImpact(); _claimXP(); },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00FF41),
+              backgroundColor: TekColors.signal,
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(borderRadius: TekShape.br),
             ),
             child: _claiming
                 ? const SizedBox(height: 20, width: 20,
@@ -25023,7 +25024,7 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
         return Column(children: [
           const Text('FIND THE HIDDEN QR CODE AND SCAN IT',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white38, fontSize: 12, letterSpacing: 1)),
+              style: TextStyle(color: TekInk.faint, fontSize: 12, letterSpacing: 1)),
           const SizedBox(height: 16),
           PressScale(
             child: GlowPulse(
@@ -25045,9 +25046,9 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
                 label: const Text('SCAN QR CODE',
                     style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, letterSpacing: 2)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00FF41),
+                  backgroundColor: TekColors.signal,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(borderRadius: TekShape.br),
                 ),
               ),
             ),
@@ -25061,7 +25062,7 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
           return Column(children: [
             Text('COMPLETE THIS MISSION FOR $timerMinutes MINUTES',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white38, fontSize: 12, letterSpacing: 1)),
+                style: const TextStyle(color: TekInk.faint, fontSize: 12, letterSpacing: 1)),
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
@@ -25071,9 +25072,9 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
                 label: const Text('START TIMER',
                     style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, letterSpacing: 2)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00FF41),
+                  backgroundColor: TekColors.signal,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(borderRadius: TekShape.br),
                 ),
               ),
             ),
@@ -25082,14 +25083,14 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
         return Column(children: [
           const Text('STAY OFF YOUR PHONE. TIMER IS RUNNING.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white38, fontSize: 12, letterSpacing: 1)),
+              style: TextStyle(color: TekInk.faint, fontSize: 12, letterSpacing: 1)),
           const SizedBox(height: 16),
           Text(_fmt(_secondsRemaining),
               style: const TextStyle(
-                  color: Color(0xFF00FF41), fontSize: 48, fontWeight: FontWeight.bold,
+                  color: TekColors.signal, fontSize: 48, fontWeight: FontWeight.bold,
                   fontFamily: 'monospace', letterSpacing: 4)),
           const SizedBox(height: 8),
-          const Text('remaining', style: TextStyle(color: Colors.white38, fontSize: 12)),
+          const Text('remaining', style: TextStyle(color: TekInk.faint, fontSize: 12)),
         ]);
 
       case 'friend_added':
@@ -25098,7 +25099,7 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
         return Column(children: [
           Text('ADD $required NEW TEK MEMBER${required > 1 ? 'S' : ''} TO UNLOCK',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white38, fontSize: 12, letterSpacing: 1)),
+              style: const TextStyle(color: TekInk.faint, fontSize: 12, letterSpacing: 1)),
           const SizedBox(height: 16),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             for (int i = 0; i < required; i++)
@@ -25106,45 +25107,45 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Icon(Icons.person,
                     size: 32,
-                    color: i < gained ? const Color(0xFF00FF41) : Colors.white12),
+                    color: i < gained ? TekColors.signal : TekInk.hairline),
               ),
           ]),
           const SizedBox(height: 8),
           Text('$gained / $required friends added',
-              style: const TextStyle(color: Colors.white38, fontSize: 12)),
+              style: const TextStyle(color: TekInk.faint, fontSize: 12)),
           const SizedBox(height: 8),
           const Text('Go to SOCIAL and add new members.',
-              style: TextStyle(color: Colors.white24, fontSize: 11)),
+              style: TextStyle(color: TekInk.line, fontSize: 11)),
         ]);
 
       case 'code_entry':
         return Column(children: [
           const Text('ENTER THE SECRET CODE TO UNLOCK',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white38, fontSize: 12, letterSpacing: 1)),
+              style: TextStyle(color: TekInk.faint, fontSize: 12, letterSpacing: 1)),
           const SizedBox(height: 12),
           TextField(
             controller: _codeController,
             textCapitalization: TextCapitalization.characters,
-            style: const TextStyle(color: Colors.white, fontSize: 16, letterSpacing: 2),
+            style: const TextStyle(color: TekInk.high, fontSize: 16, letterSpacing: 2),
             textAlign: TextAlign.center,
             decoration: InputDecoration(
               hintText: 'SECRET CODE',
-              hintStyle: const TextStyle(color: Colors.white24, letterSpacing: 2),
+              hintStyle: const TextStyle(color: TekInk.line, letterSpacing: 2),
               errorText: _codeWrong ? 'WRONG CODE — TRY AGAIN' : null,
-              errorStyle: const TextStyle(color: Colors.red, letterSpacing: 1),
+              errorStyle: const TextStyle(color: TekColors.danger, letterSpacing: 1),
               enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.white24)),
+                  borderRadius: TekShape.br,
+                  borderSide: const BorderSide(color: TekInk.line)),
               focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF00FF41))),
+                  borderRadius: TekShape.br,
+                  borderSide: const BorderSide(color: TekColors.signal)),
               errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.red)),
+                  borderRadius: TekShape.br,
+                  borderSide: const BorderSide(color: TekColors.danger)),
               focusedErrorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.red)),
+                  borderRadius: TekShape.br,
+                  borderSide: const BorderSide(color: TekColors.danger)),
             ),
           ),
           const SizedBox(height: 12),
@@ -25153,9 +25154,9 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
             child: ElevatedButton(
               onPressed: _submitCode,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00FF41),
+                backgroundColor: TekColors.signal,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: TekShape.br),
               ),
               child: const Text('SUBMIT',
                   style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, letterSpacing: 2)),
@@ -25169,12 +25170,12 @@ class _SidequestDetailPageState extends State<SidequestDetailPage> {
           child: ElevatedButton(
             onPressed: null,
             style: ElevatedButton.styleFrom(
-              disabledBackgroundColor: Colors.white10,
+              disabledBackgroundColor: TekInk.wash,
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(borderRadius: TekShape.br),
             ),
             child: const Text('MISSION LOCKED — CHECK BACK SOON',
-                style: TextStyle(color: Colors.white38, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                style: TextStyle(color: TekInk.faint, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
           ),
         );
     }
@@ -25206,11 +25207,11 @@ class ManageSidequestsScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFFB8B8C0)),
+        iconTheme: const IconThemeData(color: TekColors.steel),
         title: const Text(
           'MANAGE SIDEQUESTS',
           style: TextStyle(
-            color: Color(0xFFFF0000),
+            color: TekColors.danger,
             fontSize: 16,
             fontWeight: FontWeight.bold,
             letterSpacing: 2,
@@ -25219,7 +25220,7 @@ class ManageSidequestsScreen extends StatelessWidget {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.auto_awesome, color: Color(0xFF00FF41)),
+            icon: const Icon(Icons.auto_awesome, color: TekColors.signal),
             tooltip: 'AI mission designer',
             onPressed: () => showModalBottomSheet(
               context: context,
@@ -25229,7 +25230,7 @@ class ManageSidequestsScreen extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.add, color: Color(0xFF00FF41)),
+            icon: const Icon(Icons.add, color: TekColors.signal),
             tooltip: 'Create quest',
             onPressed: () => showDialog(
               context: context,
@@ -25246,7 +25247,7 @@ class ManageSidequestsScreen extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: Color(0xFFFF0000)),
+              child: CircularProgressIndicator(color: TekColors.danger),
             );
           }
           final docs = snapshot.data?.docs ?? [];
@@ -25255,16 +25256,16 @@ class ManageSidequestsScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: const [
-                  Icon(Icons.bolt, color: Colors.white24, size: 48),
+                  Icon(Icons.bolt, color: TekInk.line, size: 48),
                   SizedBox(height: 16),
                   Text(
                     'No sidequests yet.',
-                    style: TextStyle(color: Colors.white54),
+                    style: TextStyle(color: TekInk.muted),
                   ),
                   SizedBox(height: 8),
                   Text(
                     'Tap + to create one.',
-                    style: TextStyle(color: Colors.white38, fontSize: 13),
+                    style: TextStyle(color: TekInk.faint, fontSize: 13),
                   ),
                 ],
               ),
@@ -25286,9 +25287,9 @@ class ManageSidequestsScreen extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: TekShape.br,
                   border: Border.all(
-                    color: active ? Colors.white24 : Colors.white10,
+                    color: active ? TekInk.line : TekInk.wash,
                     width: 1,
                   ),
                 ),
@@ -25297,12 +25298,12 @@ class ManageSidequestsScreen extends StatelessWidget {
                       horizontal: 16, vertical: 8),
                   leading: Icon(
                     Icons.bolt,
-                    color: active ? const Color(0xFF00FF41) : Colors.white24,
+                    color: active ? TekColors.signal : TekInk.line,
                   ),
                   title: Text(
                     title,
                     style: TextStyle(
-                      color: active ? Colors.white : Colors.white38,
+                      color: active ? TekInk.high : TekInk.faint,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                       letterSpacing: 0.5,
@@ -25311,7 +25312,7 @@ class ManageSidequestsScreen extends StatelessWidget {
                   subtitle: Text(
                     '+$xpReward XP  •  $completions completions  •  ${_vtypeLabel(data['verificationType'] as String? ?? 'honor')}',
                     style: const TextStyle(
-                      color: Colors.white38,
+                      color: TekInk.faint,
                       fontSize: 12,
                     ),
                   ),
@@ -25320,8 +25321,8 @@ class ManageSidequestsScreen extends StatelessWidget {
                     children: [
                       Switch(
                         value: active,
-                        activeThumbColor: const Color(0xFF00FF41),
-                        activeTrackColor: const Color(0xFF00FF41).withValues(alpha: 0.4),
+                        activeThumbColor: TekColors.signal,
+                        activeTrackColor: TekColors.signal.withValues(alpha: 0.4),
                         onChanged: (val) =>
                             doc.reference.update({'active': val}),
                       ),
@@ -25329,14 +25330,14 @@ class ManageSidequestsScreen extends StatelessWidget {
                           (data['qrCodeValue'] as String? ?? '').isNotEmpty)
                         IconButton(
                           icon: const Icon(Icons.qr_code,
-                              color: Color(0xFF00FF41), size: 20),
+                              color: TekColors.signal, size: 20),
                           tooltip: 'View QR code',
                           onPressed: () => _showQRCode(
                               context, data['qrCodeValue'] as String, title),
                         ),
                       IconButton(
                         icon: const Icon(Icons.delete_outline,
-                            color: Colors.white38, size: 20),
+                            color: TekInk.faint, size: 20),
                         onPressed: () => _confirmDelete(context, doc),
                       ),
                     ],
@@ -25354,37 +25355,37 @@ class ManageSidequestsScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF0D0D1A),
+        backgroundColor: TekColors.void_,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFF00FF41)),
+          borderRadius: TekShape.br,
+          side: const BorderSide(color: TekColors.signal),
         ),
         title: Text(title,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Color(0xFF00FF41), fontSize: 14,
+            style: const TextStyle(color: TekColors.signal, fontSize: 14,
                 fontWeight: FontWeight.bold, letterSpacing: 1)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              color: Colors.white,
+              color: TekInk.high,
               padding: const EdgeInsets.all(12),
               child: qr_flutter.QrImageView(data: value, size: 200),
             ),
             const SizedBox(height: 12),
             Text('Code: $value',
-                style: const TextStyle(color: Colors.white54, fontSize: 12,
+                style: const TextStyle(color: TekInk.muted, fontSize: 12,
                     letterSpacing: 1)),
             const SizedBox(height: 4),
             const Text('Screenshot this to print and hide at the venue.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white38, fontSize: 11)),
+                style: TextStyle(color: TekInk.faint, fontSize: 11)),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('CLOSE', style: TextStyle(color: Color(0xFF00FF41))),
+            child: const Text('CLOSE', style: TextStyle(color: TekColors.signal)),
           ),
         ],
       ),
@@ -25398,24 +25399,24 @@ class ManageSidequestsScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF1A1A2E),
         title: const Text(
           'Delete sidequest?',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: TekInk.high),
         ),
         content: const Text(
           'This will permanently delete the quest. Completion records are kept.',
-          style: TextStyle(color: Colors.white54),
+          style: TextStyle(color: TekInk.muted),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('CANCEL',
-                style: TextStyle(color: Colors.white54)),
+                style: TextStyle(color: TekInk.muted)),
           ),
           TextButton(
             onPressed: () {
               doc.reference.delete();
               Navigator.pop(context);
             },
-            child: const Text('DELETE', style: TextStyle(color: Colors.red)),
+            child: const Text('DELETE', style: TextStyle(color: TekColors.danger)),
           ),
         ],
       ),
@@ -25483,33 +25484,33 @@ class _AiMissionDesignerSheetState extends State<_AiMissionDesignerSheet> {
       builder: (context, scrollController) => FrostedGlass(
         sigma: 24,
         opacity: 0.85,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: TekShape.brSheet,
         child: ListView(
           controller: scrollController,
           padding: const EdgeInsets.all(20),
           physics: const BouncingScrollPhysics(),
           children: [
             const Row(children: [
-              Icon(Icons.auto_awesome, color: Color(0xFF00FF41), size: 16),
+              Icon(Icons.auto_awesome, color: TekColors.signal, size: 16),
               SizedBox(width: 8),
               Text('AI MISSION DESIGNER',
-                  style: TextStyle(color: Color(0xFF00FF41), fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 3)),
+                  style: TextStyle(color: TekColors.signal, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 3)),
             ]),
             const SizedBox(height: 4),
             const Text('Describe a mission concept. AI generates title + brief in TEK voice.',
-                style: TextStyle(color: Colors.white54, fontSize: 11)),
+                style: TextStyle(color: TekInk.muted, fontSize: 11)),
             const SizedBox(height: 18),
             TextField(
               controller: _themeController,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
+              style: const TextStyle(color: TekInk.high, fontSize: 14),
               maxLines: 2,
               decoration: InputDecoration(
                 labelText: 'THEME',
-                labelStyle: const TextStyle(color: Color(0xFF00FF41), fontSize: 11, letterSpacing: 1.5),
+                labelStyle: const TextStyle(color: TekColors.signal, fontSize: 11, letterSpacing: 1.5),
                 hintText: 'e.g. meeting strangers / photo at venue / dance battle',
-                hintStyle: const TextStyle(color: Colors.white24, fontSize: 12),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.white24)),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF00FF41))),
+                hintStyle: const TextStyle(color: TekInk.line, fontSize: 12),
+                enabledBorder: OutlineInputBorder(borderRadius: TekShape.br, borderSide: const BorderSide(color: TekInk.line)),
+                focusedBorder: OutlineInputBorder(borderRadius: TekShape.br, borderSide: const BorderSide(color: TekColors.signal)),
               ),
             ),
             const SizedBox(height: 14),
@@ -25517,13 +25518,13 @@ class _AiMissionDesignerSheetState extends State<_AiMissionDesignerSheet> {
               Expanded(
                 child: DropdownButtonFormField<String>(
                   initialValue: _vtype,
-                  dropdownColor: const Color(0xFF0D0D1A),
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                  dropdownColor: TekColors.void_,
+                  style: const TextStyle(color: TekInk.high, fontSize: 12),
                   decoration: InputDecoration(
                     labelText: 'VERIFICATION',
-                    labelStyle: const TextStyle(color: Color(0xFF00FF41), fontSize: 10, letterSpacing: 1.5),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.white24)),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF00FF41))),
+                    labelStyle: const TextStyle(color: TekColors.signal, fontSize: 10, letterSpacing: 1.5),
+                    enabledBorder: OutlineInputBorder(borderRadius: TekShape.br, borderSide: const BorderSide(color: TekInk.line)),
+                    focusedBorder: OutlineInputBorder(borderRadius: TekShape.br, borderSide: const BorderSide(color: TekColors.signal)),
                   ),
                   items: const [
                     DropdownMenuItem(value: 'qr_code', child: Text('QR CODE')),
@@ -25539,13 +25540,13 @@ class _AiMissionDesignerSheetState extends State<_AiMissionDesignerSheet> {
                 width: 90,
                 child: TextField(
                   keyboardType: TextInputType.number,
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  style: const TextStyle(color: TekInk.high, fontSize: 14),
                   controller: TextEditingController(text: '$_xp'),
                   decoration: InputDecoration(
                     labelText: 'XP',
-                    labelStyle: const TextStyle(color: Color(0xFF00FF41), fontSize: 10, letterSpacing: 1.5),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.white24)),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF00FF41))),
+                    labelStyle: const TextStyle(color: TekColors.signal, fontSize: 10, letterSpacing: 1.5),
+                    enabledBorder: OutlineInputBorder(borderRadius: TekShape.br, borderSide: const BorderSide(color: TekInk.line)),
+                    focusedBorder: OutlineInputBorder(borderRadius: TekShape.br, borderSide: const BorderSide(color: TekColors.signal)),
                   ),
                   onChanged: (v) {
                     final n = int.tryParse(v);
@@ -25567,9 +25568,9 @@ class _AiMissionDesignerSheetState extends State<_AiMissionDesignerSheet> {
                     label: Text(_generating ? 'GENERATING...' : 'GENERATE',
                         style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, letterSpacing: 2)),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00FF41),
+                      backgroundColor: TekColors.signal,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(borderRadius: TekShape.br),
                     ),
                   ),
                 ),
@@ -25577,7 +25578,7 @@ class _AiMissionDesignerSheetState extends State<_AiMissionDesignerSheet> {
             ),
             if (_error != null) ...[
               const SizedBox(height: 14),
-              Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
+              Text(_error!, style: const TextStyle(color: TekColors.danger, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
             ],
             if (_generated != null) ...[
               const SizedBox(height: 18),
@@ -25585,21 +25586,21 @@ class _AiMissionDesignerSheetState extends State<_AiMissionDesignerSheet> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: _cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF00FF41).withValues(alpha: 0.5)),
-                  boxShadow: [BoxShadow(color: const Color(0xFF00FF41).withValues(alpha: 0.2), blurRadius: 20)],
+                  borderRadius: TekShape.br,
+                  border: Border.all(color: TekColors.signal.withValues(alpha: 0.5)),
+                  boxShadow: [BoxShadow(color: TekColors.signal.withValues(alpha: 0.2), blurRadius: 20)],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('GENERATED MISSION',
-                        style: TextStyle(color: Color(0xFF00FF41), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                        style: TextStyle(color: TekColors.signal, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2)),
                     const SizedBox(height: 8),
                     Text((_generated!['title'] ?? '').toString().toUpperCase(),
-                        style: const TextStyle(color: Color(0xFF00FF41), fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                        style: const TextStyle(color: TekColors.signal, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
                     const SizedBox(height: 8),
                     Text((_generated!['description'] ?? '').toString(),
-                        style: const TextStyle(color: Colors.white, fontSize: 13, height: 1.4)),
+                        style: const TextStyle(color: TekInk.high, fontSize: 13, height: 1.4)),
                   ],
                 ),
               ),
@@ -25610,12 +25611,12 @@ class _AiMissionDesignerSheetState extends State<_AiMissionDesignerSheet> {
                     child: OutlinedButton(
                       onPressed: _generate,
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.white38),
+                        side: const BorderSide(color: TekInk.faint),
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(borderRadius: TekShape.br),
                       ),
                       child: const Text('REGENERATE',
-                          style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 11)),
+                          style: TextStyle(color: TekInk.body, fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 11)),
                     ),
                   ),
                 ),
@@ -25634,9 +25635,9 @@ class _AiMissionDesignerSheetState extends State<_AiMissionDesignerSheet> {
                         ));
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00FF41),
+                        backgroundColor: TekColors.signal,
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(borderRadius: TekShape.br),
                       ),
                       child: const Text('USE THIS',
                           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 11)),
@@ -25746,15 +25747,15 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
       builder: (ctx) {
         final ctrl = TextEditingController();
         return AlertDialog(
-          backgroundColor: const Color(0xFF0D0D1A),
+          backgroundColor: TekColors.void_,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: const BorderSide(color: Color(0xFF00FF41), width: 1),
+            borderRadius: TekShape.br,
+            side: const BorderSide(color: TekColors.signal, width: 1),
           ),
           title: const Text(
             'AI DRAFT — THEME',
             style: TextStyle(
-              color: Color(0xFF00FF41),
+              color: TekColors.signal,
               fontSize: 14,
               fontWeight: FontWeight.bold,
               letterSpacing: 2,
@@ -25763,23 +25764,23 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
           content: TextField(
             controller: ctrl,
             autofocus: true,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
+            style: const TextStyle(color: TekInk.high, fontSize: 14),
             decoration: const InputDecoration(
               hintText: 'e.g. midnight rave, halloween, recruitment night',
-              hintStyle: TextStyle(color: Colors.white38, fontSize: 12),
+              hintStyle: TextStyle(color: TekInk.faint, fontSize: 12),
             ),
             onSubmitted: (v) => Navigator.of(ctx).pop(v.trim()),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+              child: const Text('Cancel', style: TextStyle(color: TekInk.muted)),
             ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(ctrl.text.trim()),
               child: const Text(
                 'GENERATE',
-                style: TextStyle(color: Color(0xFF00FF41), fontWeight: FontWeight.bold),
+                style: TextStyle(color: TekColors.signal, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -25813,7 +25814,7 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('AI draft applied — review before saving'),
-          backgroundColor: Color(0xFF00FF41),
+          backgroundColor: TekColors.signal,
         ),
       );
     } on FirebaseFunctionsException catch (e) {
@@ -25821,13 +25822,13 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('AI draft failed: ${e.message ?? e.code}'),
-          backgroundColor: Colors.red,
+          backgroundColor: TekColors.danger,
         ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('AI draft failed: $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text('AI draft failed: $e'), backgroundColor: TekColors.danger),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -25840,15 +25841,15 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
       builder: (ctx) {
         final ctrl = TextEditingController();
         return AlertDialog(
-          backgroundColor: const Color(0xFF0D0D1A),
+          backgroundColor: TekColors.void_,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: const BorderSide(color: Color(0xFF9F59FF), width: 1),
+            borderRadius: TekShape.br,
+            side: const BorderSide(color: TekColors.silver, width: 1),
           ),
           title: const Text(
             'AI BATCH — THEME',
             style: TextStyle(
-              color: Color(0xFF9F59FF),
+              color: TekColors.silver,
               fontSize: 14,
               fontWeight: FontWeight.bold,
               letterSpacing: 2,
@@ -25859,16 +25860,16 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
             children: [
               const Text(
                 'Generate 5 distinct mission concepts. Pick one to use.',
-                style: TextStyle(color: Colors.white54, fontSize: 11, height: 1.4),
+                style: TextStyle(color: TekInk.muted, fontSize: 11, height: 1.4),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: ctrl,
                 autofocus: true,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+                style: const TextStyle(color: TekInk.high, fontSize: 14),
                 decoration: const InputDecoration(
                   hintText: 'e.g. tek004 launch night',
-                  hintStyle: TextStyle(color: Colors.white38, fontSize: 12),
+                  hintStyle: TextStyle(color: TekInk.faint, fontSize: 12),
                 ),
                 onSubmitted: (v) => Navigator.of(ctx).pop(v.trim()),
               ),
@@ -25877,13 +25878,13 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+              child: const Text('Cancel', style: TextStyle(color: TekInk.muted)),
             ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(ctrl.text.trim()),
               child: const Text(
                 'GENERATE 5',
-                style: TextStyle(color: Color(0xFF9F59FF), fontWeight: FontWeight.bold),
+                style: TextStyle(color: TekColors.silver, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -25919,14 +25920,14 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Batch generate failed: ${e.message ?? e.code}'),
-            backgroundColor: Colors.red,
+            backgroundColor: TekColors.danger,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Batch generate failed: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Batch generate failed: $e'), backgroundColor: TekColors.danger),
         );
       }
     } finally {
@@ -25938,11 +25939,11 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
     // Show the 5 concepts as a bottom sheet — user taps one to apply.
     final picked = await showModalBottomSheet<Map<String, dynamic>>(
       context: context,
-      backgroundColor: const Color(0xFF0D0D1A),
+      backgroundColor: TekColors.void_,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        side: BorderSide(color: Color(0xFF9F59FF), width: 1),
+        borderRadius: TekShape.brSheet,
+        side: BorderSide(color: TekColors.silver, width: 1),
       ),
       builder: (ctx) => SafeArea(
         child: Padding(
@@ -25954,7 +25955,7 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
               const Text(
                 'AI BATCH — PICK ONE',
                 style: TextStyle(
-                  color: Color(0xFF9F59FF),
+                  color: TekColors.silver,
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 3,
@@ -25963,7 +25964,7 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
               const SizedBox(height: 4),
               Text(
                 'Theme: "$theme"',
-                style: const TextStyle(color: Colors.white54, fontSize: 11),
+                style: const TextStyle(color: TekInk.muted, fontSize: 11),
               ),
               const SizedBox(height: 16),
               Flexible(
@@ -25980,14 +25981,14 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
                         HapticFeedback.lightImpact();
                         Navigator.of(ctx).pop(q);
                       },
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: TekShape.br,
                       child: Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.04),
-                          borderRadius: BorderRadius.circular(12),
+                          color: TekInk.high.withValues(alpha: 0.04),
+                          borderRadius: TekShape.br,
                           border: Border.all(
-                            color: const Color(0xFF9F59FF).withValues(alpha: 0.4),
+                            color: TekColors.silver.withValues(alpha: 0.4),
                             width: 1,
                           ),
                         ),
@@ -26000,14 +26001,14 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
                                   width: 22, height: 22,
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF9F59FF).withValues(alpha: 0.18),
+                                    color: TekColors.silver.withValues(alpha: 0.18),
                                     shape: BoxShape.circle,
-                                    border: Border.all(color: const Color(0xFF9F59FF), width: 1),
+                                    border: Border.all(color: TekColors.silver, width: 1),
                                   ),
                                   child: Text(
                                     '${i + 1}',
                                     style: const TextStyle(
-                                      color: Color(0xFF9F59FF),
+                                      color: TekColors.silver,
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -26018,7 +26019,7 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
                                   child: Text(
                                     t,
                                     style: const TextStyle(
-                                      color: Colors.white,
+                                      color: TekInk.high,
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                       letterSpacing: 1.2,
@@ -26031,7 +26032,7 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
                             Text(
                               d,
                               style: const TextStyle(
-                                color: Colors.white70,
+                                color: TekInk.body,
                                 fontSize: 12,
                                 height: 1.45,
                               ),
@@ -26050,7 +26051,7 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
                   child: const Text(
                     'NONE OF THESE',
                     style: TextStyle(
-                      color: Colors.white54,
+                      color: TekInk.muted,
                       fontSize: 11,
                       letterSpacing: 2,
                       fontWeight: FontWeight.bold,
@@ -26075,7 +26076,7 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Concept applied — review before saving'),
-        backgroundColor: Color(0xFF9F59FF),
+        backgroundColor: TekColors.silver,
       ),
     );
   }
@@ -26086,7 +26087,7 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
     final xp = int.tryParse(_xpController.text.trim()) ?? 0;
     if (title.isEmpty || desc.isEmpty || xp <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Fill in all fields and set XP > 0'), backgroundColor: Colors.red));
+          const SnackBar(content: Text('Fill in all fields and set XP > 0'), backgroundColor: TekColors.danger));
       return;
     }
     setState(() => _saving = true);
@@ -26124,20 +26125,20 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
       if (!mounted) return;
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to create quest: $e'), backgroundColor: Colors.red));
+          SnackBar(content: Text('Failed to create quest: $e'), backgroundColor: TekColors.danger));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: const Color(0xFF0D0D1A),
+      backgroundColor: TekColors.void_,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFF00FF41), width: 1),
+        borderRadius: TekShape.br,
+        side: const BorderSide(color: TekColors.signal, width: 1),
       ),
       title: const Text('CREATE SIDEQUEST',
-          style: TextStyle(color: Color(0xFF00FF41), fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 2)),
+          style: TextStyle(color: TekColors.signal, fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 2)),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -26152,11 +26153,11 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
                   children: [
                     TextButton.icon(
                       onPressed: _saving ? null : _draftWithAI,
-                      icon: const Icon(Icons.auto_awesome, size: 16, color: Color(0xFF00FF41)),
+                      icon: const Icon(Icons.auto_awesome, size: 16, color: TekColors.signal),
                       label: const Text(
                         'AI DRAFT',
                         style: TextStyle(
-                          color: Color(0xFF00FF41),
+                          color: TekColors.signal,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.5,
@@ -26171,11 +26172,11 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
                     const SizedBox(width: 4),
                     TextButton.icon(
                       onPressed: _saving ? null : _draftBatchWithAI,
-                      icon: const Icon(Icons.dashboard_customize, size: 16, color: Color(0xFF9F59FF)),
+                      icon: const Icon(Icons.dashboard_customize, size: 16, color: TekColors.silver),
                       label: const Text(
                         'BATCH (5)',
                         style: TextStyle(
-                          color: Color(0xFF9F59FF),
+                          color: TekColors.silver,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.5,
@@ -26198,17 +26199,17 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
             const SizedBox(height: 14),
             DropdownButtonFormField<String>(
               initialValue: _vtype,
-              dropdownColor: const Color(0xFF0D0D1A),
-              style: const TextStyle(color: Colors.white, fontSize: 13),
+              dropdownColor: TekColors.void_,
+              style: const TextStyle(color: TekInk.high, fontSize: 13),
               decoration: InputDecoration(
                 labelText: 'VERIFICATION TYPE',
-                labelStyle: const TextStyle(color: Color(0xFF00FF41), fontSize: 12, letterSpacing: 1),
+                labelStyle: const TextStyle(color: TekColors.signal, fontSize: 12, letterSpacing: 1),
                 enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.white24)),
+                    borderRadius: TekShape.br,
+                    borderSide: const BorderSide(color: TekInk.line)),
                 focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xFF00FF41))),
+                    borderRadius: TekShape.br,
+                    borderSide: const BorderSide(color: TekColors.signal)),
               ),
               items: _vtypes.map((t) => DropdownMenuItem(value: t.$1,
                   child: Text(t.$2, style: const TextStyle(fontSize: 13)))).toList(),
@@ -26217,18 +26218,18 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
             const SizedBox(height: 14),
             DropdownButtonFormField<String?>(
               initialValue: _selectedEventId,
-              dropdownColor: const Color(0xFF0D0D1A),
-              style: const TextStyle(color: Colors.white, fontSize: 13),
+              dropdownColor: TekColors.void_,
+              style: const TextStyle(color: TekInk.high, fontSize: 13),
               decoration: InputDecoration(
                 labelText: 'LINK TO EVENT (optional)',
                 labelStyle: const TextStyle(
-                    color: Color(0xFF00FF41), fontSize: 12, letterSpacing: 1),
+                    color: TekColors.signal, fontSize: 12, letterSpacing: 1),
                 enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.white24)),
+                    borderRadius: TekShape.br,
+                    borderSide: const BorderSide(color: TekInk.line)),
                 focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xFF00FF41))),
+                    borderRadius: TekShape.br,
+                    borderSide: const BorderSide(color: TekColors.signal)),
               ),
               items: [
                 const DropdownMenuItem<String?>(
@@ -26251,17 +26252,17 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
             const SizedBox(height: 14),
             DropdownButtonFormField<String?>(
               initialValue: _selectedPrereqId,
-              dropdownColor: const Color(0xFF0D0D1A),
-              style: const TextStyle(color: Colors.white, fontSize: 13),
+              dropdownColor: TekColors.void_,
+              style: const TextStyle(color: TekInk.high, fontSize: 13),
               decoration: InputDecoration(
                 labelText: 'REQUIRES MISSION FIRST (optional)',
-                labelStyle: const TextStyle(color: Color(0xFF00FF41), fontSize: 12, letterSpacing: 1),
+                labelStyle: const TextStyle(color: TekColors.signal, fontSize: 12, letterSpacing: 1),
                 enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.white24)),
+                    borderRadius: TekShape.br,
+                    borderSide: const BorderSide(color: TekInk.line)),
                 focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xFF00FF41))),
+                    borderRadius: TekShape.br,
+                    borderSide: const BorderSide(color: TekColors.signal)),
               ),
               items: [
                 const DropdownMenuItem<String?>(
@@ -26282,12 +26283,12 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
             Row(children: [
               Switch(
                 value: _isLootDrop,
-                activeThumbColor: const Color(0xFFE63946),
+                activeThumbColor: TekColors.signal,
                 onChanged: (v) => setState(() => _isLootDrop = v),
               ),
               const SizedBox(width: 4),
               const Text('LOOT DROP — TIME-LIMITED',
-                  style: TextStyle(color: Color(0xFFE63946), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                  style: TextStyle(color: TekColors.signal, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
             ]),
             if (_isLootDrop) ...[
               const SizedBox(height: 8),
@@ -26315,14 +26316,14 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('CANCEL', style: TextStyle(color: Colors.white38)),
+          child: const Text('CANCEL', style: TextStyle(color: TekInk.faint)),
         ),
         ElevatedButton(
           onPressed: _saving ? null : _save,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF00FF41),
+            backgroundColor: TekColors.signal,
             foregroundColor: Colors.black,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(borderRadius: TekShape.br),
           ),
           child: _saving
               ? const SizedBox(height: 16, width: 16,
@@ -26343,24 +26344,24 @@ class _CreateSidequestDialogState extends State<CreateSidequestDialog> {
       controller: controller,
       maxLines: maxLines,
       keyboardType: keyboardType,
-      style: const TextStyle(color: Colors.white, fontSize: 14),
+      style: const TextStyle(color: TekInk.high, fontSize: 14),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(
-          color: Color(0xFF00FF41),
+          color: TekColors.signal,
           fontSize: 12,
           letterSpacing: 1,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.white24),
+          borderRadius: TekShape.br,
+          borderSide: const BorderSide(color: TekInk.line),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFF00FF41), width: 1.5),
+          borderRadius: TekShape.br,
+          borderSide: const BorderSide(color: TekColors.signal, width: 1.5),
         ),
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.04),
+        fillColor: TekInk.high.withValues(alpha: 0.04),
       ),
     );
   }
@@ -26379,7 +26380,7 @@ class _ChallengesTab extends StatelessWidget {
     if (userCode == null) {
       return const Center(
         child: Text('Log in to see challenges',
-            style: TextStyle(color: Colors.white54)),
+            style: TextStyle(color: TekInk.muted)),
       );
     }
 
@@ -26409,12 +26410,12 @@ class _ChallengesTab extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(Icons.sports_kabaddi,
-                          color: Color(0xFF00FF41), size: 48),
+                          color: TekColors.signal, size: 48),
                       const SizedBox(height: 16),
                       const Text(
                         'NO ACTIVE CHALLENGES',
                         style: TextStyle(
-                          color: Color(0xFF00FF41),
+                          color: TekColors.signal,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 2,
@@ -26424,19 +26425,19 @@ class _ChallengesTab extends StatelessWidget {
                       const Text(
                         'Challenge a friend to push them up the ranks. Two ways in:',
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+                        style: TextStyle(color: TekInk.body, fontSize: 13, height: 1.4),
                       ),
                       const SizedBox(height: 14),
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.touch_app_outlined,
-                              color: Color(0xFF00FF41), size: 14),
+                              color: TekColors.signal, size: 14),
                           SizedBox(width: 6),
                           Text(
                             'LONG-PRESS A FRIEND ROW',
                             style: TextStyle(
-                              color: Color(0xFFB8B8C0),
+                              color: TekColors.steel,
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1.2,
@@ -26448,7 +26449,7 @@ class _ChallengesTab extends StatelessWidget {
                       const Text(
                         'or open a mission and pick one from the brief.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white54, fontSize: 11, height: 1.4),
+                        style: TextStyle(color: TekInk.muted, fontSize: 11, height: 1.4),
                       ),
                     ],
                   ),
@@ -26489,7 +26490,7 @@ class _ChallengesTab extends StatelessWidget {
       child: Text(
         label,
         style: const TextStyle(
-          color: Colors.white38,
+          color: TekInk.faint,
           fontSize: 11,
           letterSpacing: 2,
           fontWeight: FontWeight.bold,
@@ -26515,7 +26516,7 @@ class _RanksTab extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
               child:
-                  CircularProgressIndicator(color: Color(0xFF00FF41)));
+                  CircularProgressIndicator(color: TekColors.signal));
         }
         final docs = snapshot.data?.docs ?? [];
         if (docs.isEmpty) {
@@ -26523,11 +26524,11 @@ class _RanksTab extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: const [
-                Icon(Icons.emoji_events, color: Colors.white24, size: 48),
+                Icon(Icons.emoji_events, color: TekInk.line, size: 48),
                 SizedBox(height: 16),
                 Text('No rankings yet.',
                     style:
-                        TextStyle(color: Colors.white54, fontSize: 15)),
+                        TextStyle(color: TekInk.muted, fontSize: 15)),
               ],
             ),
           );
@@ -26548,16 +26549,16 @@ class _RanksTab extends StatelessWidget {
             Color rankColor;
             IconData? medalIcon;
             if (rank == 1) {
-              rankColor = const Color(0xFFFFD700);
+              rankColor = TekColors.platinum;
               medalIcon = Icons.looks_one;
             } else if (rank == 2) {
-              rankColor = const Color(0xFFC0C0C0);
+              rankColor = TekColors.silver;
               medalIcon = Icons.looks_two;
             } else if (rank == 3) {
-              rankColor = const Color(0xFFCD7F32);
+              rankColor = TekColors.gunmetal;
               medalIcon = Icons.looks_3;
             } else {
-              rankColor = Colors.white38;
+              rankColor = TekInk.faint;
               medalIcon = null;
             }
 
@@ -26567,15 +26568,15 @@ class _RanksTab extends StatelessWidget {
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
                 color: isMe
-                    ? const Color(0xFF00FF41).withValues(alpha: 0.08)
-                    : Colors.white.withValues(alpha: 0.04),
-                borderRadius: BorderRadius.circular(12),
+                    ? TekColors.signal.withValues(alpha: 0.08)
+                    : TekInk.high.withValues(alpha: 0.04),
+                borderRadius: TekShape.br,
                 border: Border.all(
                   color: isMe
-                      ? const Color(0xFF00FF41).withValues(alpha: 0.4)
+                      ? TekColors.signal.withValues(alpha: 0.4)
                       : (rank <= 3
                           ? rankColor.withValues(alpha: 0.3)
-                          : Colors.white10),
+                          : TekInk.wash),
                 ),
               ),
               child: Row(
@@ -26596,13 +26597,13 @@ class _RanksTab extends StatelessWidget {
                   const SizedBox(width: 8),
                   CircleAvatar(
                     radius: 18,
-                    backgroundColor: Colors.white10,
+                    backgroundColor: TekInk.wash,
                     backgroundImage: profileImageUrl != null
                         ? NetworkImage(profileImageUrl)
                         : null,
                     child: profileImageUrl == null
                         ? const Icon(Icons.person,
-                            color: Colors.white38, size: 18)
+                            color: TekInk.faint, size: 18)
                         : null,
                   ),
                   const SizedBox(width: 12),
@@ -26614,8 +26615,8 @@ class _RanksTab extends StatelessWidget {
                           isMe ? '$name (YOU)' : name,
                           style: TextStyle(
                             color: isMe
-                                ? const Color(0xFF00FF41)
-                                : Colors.white,
+                                ? TekColors.signal
+                                : TekInk.high,
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
                           ),
@@ -26623,7 +26624,7 @@ class _RanksTab extends StatelessWidget {
                         Text(
                           'LVL $level',
                           style: const TextStyle(
-                            color: Colors.white38,
+                            color: TekInk.faint,
                             fontSize: 10,
                             letterSpacing: 0.5,
                           ),
@@ -26636,7 +26637,7 @@ class _RanksTab extends StatelessWidget {
                         horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
                       color: rankColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: TekShape.br,
                       border: Border.all(
                           color: rankColor.withValues(alpha: 0.4)),
                     ),
@@ -26704,7 +26705,7 @@ class _ChallengeCardState extends State<_ChallengeCard> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Error: $e'), backgroundColor: TekColors.danger),
         );
       }
     } finally {
@@ -26726,15 +26727,15 @@ class _ChallengeCardState extends State<_ChallengeCard> {
     String statusLabel;
     switch (status) {
       case 'accepted':
-        statusColor = const Color(0xFF00FF41);
+        statusColor = TekColors.signal;
         statusLabel = 'ACCEPTED';
         break;
       case 'denied':
-        statusColor = Colors.red;
+        statusColor = TekColors.danger;
         statusLabel = 'DENIED';
         break;
       default:
-        statusColor = Colors.amber;
+        statusColor = TekColors.silver;
         statusLabel = 'PENDING';
     }
 
@@ -26743,11 +26744,11 @@ class _ChallengeCardState extends State<_ChallengeCard> {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: TekShape.br,
         border: Border.all(
           color: widget.isIncoming && status == 'pending'
-              ? const Color(0xFF00FF41).withValues(alpha: 0.5)
-              : Colors.white12,
+              ? TekColors.signal.withValues(alpha: 0.5)
+              : TekInk.hairline,
         ),
       ),
       child: Column(
@@ -26756,13 +26757,13 @@ class _ChallengeCardState extends State<_ChallengeCard> {
           Row(
             children: [
               Icon(Icons.bolt,
-                  color: const Color(0xFF00FF41), size: 16),
+                  color: TekColors.signal, size: 16),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   questTitle,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: TekInk.high,
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                     letterSpacing: 0.5,
@@ -26774,7 +26775,7 @@ class _ChallengeCardState extends State<_ChallengeCard> {
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: TekShape.br,
                   border: Border.all(color: statusColor, width: 0.8),
                 ),
                 child: Text(
@@ -26792,7 +26793,7 @@ class _ChallengeCardState extends State<_ChallengeCard> {
             widget.isIncoming
                 ? '$otherName challenged you  •  +$xpReward XP'
                 : 'You challenged $otherName  •  +$xpReward XP',
-            style: const TextStyle(color: Colors.white54, fontSize: 12),
+            style: const TextStyle(color: TekInk.muted, fontSize: 12),
           ),
           if (widget.isIncoming && status == 'pending') ...[
             const SizedBox(height: 12),
@@ -26802,11 +26803,11 @@ class _ChallengeCardState extends State<_ChallengeCard> {
                   child: OutlinedButton(
                     onPressed: _responding ? null : () => _respond('denied'),
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.red),
-                      foregroundColor: Colors.red,
+                      side: const BorderSide(color: TekColors.danger),
+                      foregroundColor: TekColors.danger,
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
+                          borderRadius: TekShape.br),
                     ),
                     child: const Text('DENY',
                         style: TextStyle(
@@ -26818,11 +26819,11 @@ class _ChallengeCardState extends State<_ChallengeCard> {
                   child: ElevatedButton(
                     onPressed: _responding ? null : () => _respond('accepted'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00FF41),
+                      backgroundColor: TekColors.signal,
                       foregroundColor: Colors.black,
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
+                          borderRadius: TekShape.br),
                     ),
                     child: _responding
                         ? const SizedBox(
@@ -26961,14 +26962,14 @@ class _ChallengeFriendDialogState extends State<ChallengeFriendDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Challenge sent to $targetName'),
-          backgroundColor: const Color(0xFF00FF41),
+          backgroundColor: TekColors.signal,
         ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('Failed: $e'), backgroundColor: Colors.red),
+            content: Text('Failed: $e'), backgroundColor: TekColors.danger),
       );
     } finally {
       if (mounted) setState(() => _sendingTo = null);
@@ -26978,15 +26979,15 @@ class _ChallengeFriendDialogState extends State<ChallengeFriendDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: const Color(0xFF0D0D1A),
+      backgroundColor: TekColors.void_,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFF00FF41), width: 1),
+        borderRadius: TekShape.br,
+        side: const BorderSide(color: TekColors.signal, width: 1),
       ),
       title: const Text(
         'CHALLENGE A FRIEND',
         style: TextStyle(
-          color: Color(0xFF00FF41),
+          color: TekColors.signal,
           fontWeight: FontWeight.bold,
           fontSize: 15,
           letterSpacing: 2,
@@ -26998,13 +26999,13 @@ class _ChallengeFriendDialogState extends State<ChallengeFriendDialog> {
         child: _loading
             ? const Center(
                 child:
-                    CircularProgressIndicator(color: Color(0xFF00FF41)))
+                    CircularProgressIndicator(color: TekColors.signal))
             : _friends.isEmpty
                 ? const Center(
                     child: Text(
                       'Add friends first to challenge them.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white54, fontSize: 13),
+                      style: TextStyle(color: TekInk.muted, fontSize: 13),
                     ),
                   )
                 : ListView.builder(
@@ -27017,29 +27018,29 @@ class _ChallengeFriendDialogState extends State<ChallengeFriendDialog> {
                       return ListTile(
                         leading: CircleAvatar(
                           backgroundColor:
-                              const Color(0xFF00FF41).withValues(alpha: 0.15),
+                              TekColors.signal.withValues(alpha: 0.15),
                           child: Text(
                             name.isNotEmpty ? name[0].toUpperCase() : '?',
                             style: const TextStyle(
-                                color: Color(0xFF00FF41),
+                                color: TekColors.signal,
                                 fontWeight: FontWeight.bold),
                           ),
                         ),
                         title: Text(name,
                             style: const TextStyle(
-                                color: Colors.white, fontSize: 14)),
+                                color: TekInk.high, fontSize: 14)),
                         subtitle: Text(code,
                             style: const TextStyle(
-                                color: Colors.white38, fontSize: 11)),
+                                color: TekInk.faint, fontSize: 11)),
                         trailing: isSending
                             ? const SizedBox(
                                 height: 20,
                                 width: 20,
                                 child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    color: Color(0xFF00FF41)))
+                                    color: TekColors.signal))
                             : const Icon(Icons.send,
-                                color: Color(0xFF00FF41), size: 20),
+                                color: TekColors.signal, size: 20),
                         onTap: isSending ? null : () => _sendChallenge(f),
                       );
                     },
@@ -27049,7 +27050,7 @@ class _ChallengeFriendDialogState extends State<ChallengeFriendDialog> {
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: const Text('CANCEL',
-              style: TextStyle(color: Colors.white38)),
+              style: TextStyle(color: TekInk.faint)),
         ),
       ],
     );
@@ -27079,7 +27080,7 @@ class _TekNotificationBell extends StatelessWidget {
             clipBehavior: Clip.none,
             children: [
               const Icon(Icons.notifications_outlined,
-                  color: Color(0xFFB8B8C0)),
+                  color: TekColors.steel),
               if (count > 0)
                 Positioned(
                   top: -4,
@@ -27087,7 +27088,7 @@ class _TekNotificationBell extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(3),
                     decoration: const BoxDecoration(
-                      color: Color(0xFF00FF41),
+                      color: TekColors.signal,
                       shape: BoxShape.circle,
                     ),
                     constraints:
@@ -27138,10 +27139,10 @@ class _NotificationsSheet extends StatelessWidget {
     return Container(
       height: MediaQuery.of(context).size.height * 0.65,
       decoration: const BoxDecoration(
-        color: Color(0xFF0D0D1A),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        color: TekColors.void_,
+        borderRadius: TekShape.brSheet,
         border: Border(
-            top: BorderSide(color: Color(0xFF00FF41), width: 1)),
+            top: BorderSide(color: TekColors.signal, width: 1)),
       ),
       child: Column(
         children: [
@@ -27154,7 +27155,7 @@ class _NotificationsSheet extends StatelessWidget {
                 const Text(
                   'NOTIFICATIONS',
                   style: TextStyle(
-                    color: Color(0xFF00FF41),
+                    color: TekColors.signal,
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 2,
@@ -27171,14 +27172,14 @@ class _NotificationsSheet extends StatelessWidget {
                   },
                   child: const Text('MARK ALL READ',
                       style: TextStyle(
-                          color: Colors.white38,
+                          color: TekInk.faint,
                           fontSize: 11,
                           letterSpacing: 1)),
                 ),
               ],
             ),
           ),
-          const Divider(color: Colors.white10, height: 1),
+          const Divider(color: TekInk.wash, height: 1),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
@@ -27191,14 +27192,14 @@ class _NotificationsSheet extends StatelessWidget {
                 if (snap.connectionState == ConnectionState.waiting) {
                   return const Center(
                       child: CircularProgressIndicator(
-                          color: Color(0xFF00FF41)));
+                          color: TekColors.signal));
                 }
                 final docs = snap.data?.docs ?? [];
                 if (docs.isEmpty) {
                   return const Center(
                     child: Text('NO TRANSMISSIONS YET',
                         style:
-                            TextStyle(color: Colors.white38, fontSize: 13)),
+                            TextStyle(color: TekInk.faint, fontSize: 13)),
                   );
                 }
                 return ListView.builder(
@@ -27215,35 +27216,35 @@ class _NotificationsSheet extends StatelessWidget {
                     switch (type) {
                       case 'challenge_received':
                         icon = Icons.person_add;
-                        iconColor = const Color(0xFF00FF41);
+                        iconColor = TekColors.signal;
                         break;
                       case 'challenge_accepted':
                         icon = Icons.check_circle_outline;
-                        iconColor = const Color(0xFF00FF41);
+                        iconColor = TekColors.signal;
                         break;
                       case 'challenge_denied':
                         icon = Icons.cancel_outlined;
-                        iconColor = Colors.red;
+                        iconColor = TekColors.danger;
                         break;
                       case 'chat':
                         icon = Icons.chat_bubble_outline;
-                        iconColor = const Color(0xFF00FF41);
+                        iconColor = TekColors.signal;
                         break;
                       case 'friend_request':
                         icon = Icons.person_add_alt;
-                        iconColor = Colors.lightBlueAccent;
+                        iconColor = TekColors.signal;
                         break;
                       case 'friend_accepted':
                         icon = Icons.handshake;
-                        iconColor = const Color(0xFF00FF41);
+                        iconColor = TekColors.signal;
                         break;
                       case 'new_quest':
                         icon = Icons.bolt;
-                        iconColor = const Color(0xFF00FF41);
+                        iconColor = TekColors.signal;
                         break;
                       default:
                         icon = Icons.bolt;
-                        iconColor = const Color(0xFF00FF41);
+                        iconColor = TekColors.signal;
                     }
 
                     return InkWell(
@@ -27252,7 +27253,7 @@ class _NotificationsSheet extends StatelessWidget {
                       child: Container(
                         color: read
                             ? Colors.transparent
-                            : const Color(0xFF00FF41).withValues(alpha: 0.05),
+                            : TekColors.signal.withValues(alpha: 0.05),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 14),
                         child: Row(
@@ -27269,8 +27270,8 @@ class _NotificationsSheet extends StatelessWidget {
                                     title,
                                     style: TextStyle(
                                       color: read
-                                          ? Colors.white54
-                                          : Colors.white,
+                                          ? TekInk.muted
+                                          : TekInk.high,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,
                                       letterSpacing: 0.5,
@@ -27280,7 +27281,7 @@ class _NotificationsSheet extends StatelessWidget {
                                   Text(
                                     body,
                                     style: const TextStyle(
-                                        color: Colors.white38,
+                                        color: TekInk.faint,
                                         fontSize: 12,
                                         height: 1.4),
                                   ),
@@ -27294,7 +27295,7 @@ class _NotificationsSheet extends StatelessWidget {
                                 margin: const EdgeInsets.only(top: 4, left: 8),
                                 decoration: const BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Color(0xFF00FF41),
+                                  color: TekColors.signal,
                                 ),
                               ),
                           ],
