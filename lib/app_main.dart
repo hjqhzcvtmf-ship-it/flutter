@@ -835,7 +835,9 @@ class _PressScaleState extends State<PressScale> {
       child: AnimatedScale(
         scale: _down ? widget.scaleTo : 1.0,
         duration: widget.duration,
-        curve: _down ? Curves.easeOut : Curves.elasticOut,
+        // Vault door, not bouncy spring — the release settles hard instead
+        // of overshooting. This wrapper backs every press in the app.
+        curve: TekMotion.easeMechanical,
         child: widget.child,
       ),
     );
@@ -1897,7 +1899,7 @@ class _PushDiagnosticsPanelState extends State<_PushDiagnosticsPanel> {
             Text('PUSH DIAGNOSTICS',
                 style: TextStyle(
                     color: ok ? TekColors.signal : TekColors.danger,
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 2)),
             const Spacer(),
@@ -1919,7 +1921,7 @@ class _PushDiagnosticsPanelState extends State<_PushDiagnosticsPanel> {
           if (_error != null && _error!.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text('ERROR: $_error',
-                style: const TextStyle(color: TekColors.danger, fontSize: 10)),
+                style: const TextStyle(color: TekColors.danger, fontSize: 11)),
           ],
           const SizedBox(height: 8),
           if (ok)
@@ -1940,7 +1942,7 @@ class _PushDiagnosticsPanelState extends State<_PushDiagnosticsPanel> {
                   border: Border.all(color: TekColors.signal, width: 1),
                 ),
                 child: const Text('COPY TOKEN',
-                    style: TextStyle(color: TekColors.signal, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                    style: TextStyle(color: TekColors.signal, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
               ),
             ),
         ],
@@ -6155,7 +6157,7 @@ class _TrophyWallSection extends StatelessWidget {
             physics: const NeverScrollableScrollPhysics(),
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
-            childAspectRatio: 0.9,
+            childAspectRatio: 0.75,
             children: _tekBadges
                 .map((b) => _BadgeTile(badge: b, earned: b.earned(profileData)))
                 .toList(),
@@ -6199,7 +6201,7 @@ class _StatCell extends StatelessWidget {
               label,
               style: const TextStyle(
                 color: TekInk.muted,
-                fontSize: 9,
+                fontSize: 11,
                 letterSpacing: 0.5,
                 fontWeight: FontWeight.bold,
               ),
@@ -6250,7 +6252,7 @@ class _BadgeTile extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: earned ? TekInk.high : TekInk.dim,
-              fontSize: 8,
+              fontSize: 11,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.3,
             ),
@@ -6261,7 +6263,7 @@ class _BadgeTile extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: earned ? TekInk.muted : TekInk.line,
-              fontSize: 7,
+              fontSize: 11,
               letterSpacing: 0.2,
             ),
           ),
@@ -9887,7 +9889,7 @@ class _RoomHeader extends StatelessWidget {
             checkedIn ? 'LIVE · YOU\'RE HERE' : 'READ ONLY',
             style: TextStyle(
               color: checkedIn ? TekColors.signal : TekInk.faint,
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: FontWeight.bold,
               letterSpacing: 1,
             ),
@@ -10077,7 +10079,7 @@ class _CrewChatScreenState extends State<CrewChatScreen> {
             Text(
               '${widget.memberCodes.length} MEMBERS',
               style: const TextStyle(
-                  color: TekInk.faint, fontSize: 10, letterSpacing: 0.5),
+                  color: TekInk.faint, fontSize: 11, letterSpacing: 0.5),
             ),
           ],
         ),
@@ -10158,7 +10160,7 @@ class _CrewChatScreenState extends State<CrewChatScreen> {
                                     senderName,
                                     style: const TextStyle(
                                         color: TekInk.faint,
-                                        fontSize: 10,
+                                        fontSize: 11,
                                         letterSpacing: 0.3),
                                   ),
                                 Container(
@@ -10199,7 +10201,7 @@ class _CrewChatScreenState extends State<CrewChatScreen> {
                                   Text(
                                     '${ts.hour.toString().padLeft(2, '0')}:${ts.minute.toString().padLeft(2, '0')}',
                                     style: const TextStyle(
-                                        color: TekInk.line, fontSize: 9),
+                                        color: TekInk.line, fontSize: 11),
                                   ),
                               ],
                             ),
@@ -10319,7 +10321,7 @@ class _MemberAvatarRow extends StatelessWidget {
                   Text(
                     name.split(' ').first,
                     style: const TextStyle(
-                        color: TekInk.faint, fontSize: 8),
+                        color: TekInk.faint, fontSize: 11),
                   ),
                 ],
               );
@@ -10616,7 +10618,7 @@ class _NightReportCardState extends State<_NightReportCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text('NIGHT REPORT — TAP FOR DEBRIEF',
-                          style: TextStyle(color: TekColors.platinum, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                          style: TextStyle(color: TekColors.platinum, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
                       const SizedBox(height: 4),
                       Text(title,
                           maxLines: 1,
@@ -10989,7 +10991,7 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
       children: [
         Container(width: 6, height: 6, decoration: BoxDecoration(shape: BoxShape.circle, color: color)),
         const SizedBox(width: 6),
-        Text(text, style: TextStyle(color: color, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2.5)),
+        Text(text, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2.5)),
       ],
     );
   }
@@ -11155,7 +11157,7 @@ class _MissionControlHeroState extends State<_MissionControlHero> {
                   '● $n OP${n == 1 ? '' : 'S'} HIT THIS',
                   style: const TextStyle(
                     color: TekColors.signal,
-                    fontSize: 9,
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 2,
                   ),
@@ -11386,7 +11388,7 @@ class _StoriesRowState extends State<_StoriesRow> {
                         ),
                         const SizedBox(height: 4),
                         const Text('YOUR STORY',
-                            style: TextStyle(color: TekInk.muted, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                            style: TextStyle(color: TekInk.muted, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
                       ],
                     ),
                   ),
@@ -11446,7 +11448,7 @@ class _StoriesRowState extends State<_StoriesRow> {
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: TekInk.body, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1),
+                          style: const TextStyle(color: TekInk.body, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1),
                         ),
                       ),
                     ],
@@ -11752,7 +11754,7 @@ class _TierLoungeRow extends StatelessWidget {
                       unlocked ? 'ACCESS GRANTED' : '$xpToGo XP TO UNLOCK',
                       style: TextStyle(
                         color: unlocked ? TekInk.body : TekInk.faint,
-                        fontSize: 10,
+                        fontSize: 11,
                         letterSpacing: 1,
                       ),
                     ),
@@ -11898,7 +11900,7 @@ class _TierLoungeChatScreenState extends State<_TierLoungeChatScreen> {
                           children: [
                             if (!isMine)
                               Text(name.toUpperCase(),
-                                  style: TextStyle(color: widget.lounge.color, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                  style: TextStyle(color: widget.lounge.color, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
                             Text(text, style: const TextStyle(color: TekInk.high, fontSize: 14)),
                           ],
                         ),
@@ -12444,7 +12446,7 @@ class _EventsScreenCreateModalState extends State<EventsScreenCreateModal> {
                           const Text(
                             'Use for staging / test events. Only admins see hidden events.',
                             style: TextStyle(
-                                color: TekInk.faint, fontSize: 10),
+                                color: TekInk.faint, fontSize: 11),
                           ),
                         ],
                       ),
@@ -12693,7 +12695,7 @@ class _EventChatScreenState extends State<EventChatScreen> with SingleTickerProv
                               children: [
                                 if (!isMine)
                                   Text(name.toUpperCase(),
-                                      style: const TextStyle(color: TekColors.signal, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                      style: const TextStyle(color: TekColors.signal, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
                                 Text(text, style: const TextStyle(color: TekInk.high, fontSize: 14)),
                               ],
                             ),
@@ -13943,7 +13945,7 @@ class _CheckInSectionState extends State<_CheckInSection> {
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               color: TekInk.muted,
-                              fontSize: 9,
+                              fontSize: 11,
                             ),
                           ),
                         ),
@@ -14783,7 +14785,7 @@ class _RadarPainter extends CustomPainter {
             text: firstName.toUpperCase(),
             style: TextStyle(
               color: green.withValues(alpha: 0.95),
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.0,
             ),
@@ -14805,7 +14807,7 @@ class _RadarPainter extends CustomPainter {
           text: distLabel,
           style: TextStyle(
             color: TekInk.high.withValues(alpha: 0.75),
-            fontSize: 9.5,
+            fontSize: 11,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,
           ),
@@ -15844,7 +15846,7 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
                                 'PAST',
                                 style: TextStyle(
                                   color: TekInk.body,
-                                  fontSize: 10,
+                                  fontSize: 11,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -15869,7 +15871,7 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
                                 'HIDDEN',
                                 style: TextStyle(
                                   color: TekColors.silver,
-                                  fontSize: 10,
+                                  fontSize: 11,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 1,
                                 ),
@@ -17325,7 +17327,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                     physics: const NeverScrollableScrollPhysics(),
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
-                    childAspectRatio: 0.9,
+                    childAspectRatio: 0.75,
                     children: _tekBadges
                         .map((b) =>
                             _BadgeTile(badge: b, earned: b.earned(live)))
@@ -21187,7 +21189,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
                               _getStatusLabel(normalizedStatus),
                               style: TextStyle(
                                 color: _getStatusColor(normalizedStatus),
-                                fontSize: 9,
+                                fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 0.5,
                               ),
@@ -23926,7 +23928,7 @@ class _VerificationBadge extends StatelessWidget {
           label,
           style: TextStyle(
             color: color,
-            fontSize: 9,
+            fontSize: 11,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
           ),
@@ -24022,10 +24024,10 @@ class _SidequestCard extends StatelessWidget {
                     const Icon(Icons.bolt, color: TekColors.signal, size: 12),
                     const SizedBox(width: 4),
                     const Text('LOOT DROP — TIME-LIMITED',
-                        style: TextStyle(color: TekColors.signal, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                        style: TextStyle(color: TekColors.signal, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
                     const Spacer(),
                     Text(_lootCountdown(lootExpires),
-                        style: const TextStyle(color: TekColors.signal, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, fontFamily: 'monospace')),
+                        style: const TextStyle(color: TekColors.signal, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1, fontFamily: 'monospace')),
                   ]),
                   const SizedBox(height: 8),
                 ],
@@ -24137,7 +24139,7 @@ class _SidequestCard extends StatelessWidget {
                         'DONE',
                         style: TextStyle(
                           color: TekInk.faint,
-                          fontSize: 10,
+                          fontSize: 11,
                           letterSpacing: 1,
                         ),
                       ),
@@ -24171,7 +24173,7 @@ class _SidequestCard extends StatelessWidget {
                             '$n OP${n == 1 ? '' : 'S'} HIT THIS',
                             style: const TextStyle(
                               color: TekColors.signal,
-                              fontSize: 10,
+                              fontSize: 11,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1.5,
                             ),
@@ -24243,7 +24245,7 @@ class _QuestProgressBar extends StatelessWidget {
                       color: isReady
                           ? TekColors.signal
                           : TekInk.body,
-                      fontSize: 10,
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,
                     ),
@@ -25522,7 +25524,7 @@ class _AiMissionDesignerSheetState extends State<_AiMissionDesignerSheet> {
                   style: const TextStyle(color: TekInk.high, fontSize: 12),
                   decoration: InputDecoration(
                     labelText: 'VERIFICATION',
-                    labelStyle: const TextStyle(color: TekColors.signal, fontSize: 10, letterSpacing: 1.5),
+                    labelStyle: const TextStyle(color: TekColors.signal, fontSize: 11, letterSpacing: 1.5),
                     enabledBorder: OutlineInputBorder(borderRadius: TekShape.br, borderSide: const BorderSide(color: TekInk.line)),
                     focusedBorder: OutlineInputBorder(borderRadius: TekShape.br, borderSide: const BorderSide(color: TekColors.signal)),
                   ),
@@ -25544,7 +25546,7 @@ class _AiMissionDesignerSheetState extends State<_AiMissionDesignerSheet> {
                   controller: TextEditingController(text: '$_xp'),
                   decoration: InputDecoration(
                     labelText: 'XP',
-                    labelStyle: const TextStyle(color: TekColors.signal, fontSize: 10, letterSpacing: 1.5),
+                    labelStyle: const TextStyle(color: TekColors.signal, fontSize: 11, letterSpacing: 1.5),
                     enabledBorder: OutlineInputBorder(borderRadius: TekShape.br, borderSide: const BorderSide(color: TekInk.line)),
                     focusedBorder: OutlineInputBorder(borderRadius: TekShape.br, borderSide: const BorderSide(color: TekColors.signal)),
                   ),
@@ -25594,7 +25596,7 @@ class _AiMissionDesignerSheetState extends State<_AiMissionDesignerSheet> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('GENERATED MISSION',
-                        style: TextStyle(color: TekColors.signal, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                        style: TextStyle(color: TekColors.signal, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
                     const SizedBox(height: 8),
                     Text((_generated!['title'] ?? '').toString().toUpperCase(),
                         style: const TextStyle(color: TekColors.signal, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
@@ -26625,7 +26627,7 @@ class _RanksTab extends StatelessWidget {
                           'LVL $level',
                           style: const TextStyle(
                             color: TekInk.faint,
-                            fontSize: 10,
+                            fontSize: 11,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -26782,7 +26784,7 @@ class _ChallengeCardState extends State<_ChallengeCard> {
                   statusLabel,
                   style: TextStyle(
                       color: statusColor,
-                      fontSize: 10,
+                      fontSize: 11,
                       fontWeight: FontWeight.bold),
                 ),
               ),
@@ -27097,7 +27099,7 @@ class _TekNotificationBell extends StatelessWidget {
                       count > 9 ? '9+' : '$count',
                       style: const TextStyle(
                         color: Colors.black,
-                        fontSize: 9,
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
                       textAlign: TextAlign.center,

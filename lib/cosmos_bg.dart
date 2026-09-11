@@ -93,19 +93,37 @@ class _CosmosBackgroundState extends State<CosmosBackground>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _ctrl,
-      builder: (context, _) {
-        return CustomPaint(
-          painter: _TekVoidPainter(
-            wisps: _wisps,
-            dust: _dust,
-            tick: _ctrl.value,
-            intense: widget.intense,
-          ),
-          size: Size.infinite,
-        );
-      },
+    // Respect the OS "reduce motion" setting: paint one static frame and
+    // leave the ticker stopped. Also the single biggest battery win on a
+    // long night — this background otherwise repaints for six hours
+    // straight behind every screen.
+    final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    if (reduceMotion) {
+      if (_ctrl.isAnimating) _ctrl.stop();
+    } else if (!_ctrl.isAnimating) {
+      _ctrl.repeat();
+    }
+
+    // RepaintBoundary isolates the background onto its own layer. Without
+    // it, every frame of this full-screen painter marks the whole app's
+    // layer dirty — so the entire UI above repaints 60x a second forever.
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _ctrl,
+        builder: (context, _) {
+          return CustomPaint(
+            painter: _TekVoidPainter(
+              wisps: _wisps,
+              dust: _dust,
+              tick: _ctrl.value,
+              intense: widget.intense,
+            ),
+            isComplex: true,
+            willChange: !reduceMotion,
+            size: Size.infinite,
+          );
+        },
+      ),
     );
   }
 }
@@ -218,7 +236,8 @@ class _TekVoidPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _TekVoidPainter old) => true;
+  bool shouldRepaint(covariant _TekVoidPainter old) =>
+      old.tick != tick || old.intense != intense;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
