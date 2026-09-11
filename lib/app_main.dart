@@ -8172,7 +8172,7 @@ class _MainAppState extends State<MainApp> {
   List<Widget> get _screens {
     if (_showControl) {
       return [
-        SocialScreen(),
+        SocialScreen(isAdmin: true),
         MyTicketsPage(),
         SidequestScreen(),
         EventsScreen(isAdmin: true),
@@ -8181,7 +8181,7 @@ class _MainAppState extends State<MainApp> {
       ];
     }
     return [
-      SocialScreen(),
+      SocialScreen(isAdmin: false),
       MyTicketsPage(),
       SidequestScreen(),
       EventsScreen(isAdmin: false),
@@ -8358,7 +8358,9 @@ class _MainAppState extends State<MainApp> {
 
 // ==================== SOCIAL SCREEN ====================
 class SocialScreen extends StatefulWidget {
-  const SocialScreen({super.key});
+  const SocialScreen({super.key, this.isAdmin = false});
+
+  final bool isAdmin;
 
   @override
   State<SocialScreen> createState() => _SocialScreenState();
@@ -8607,7 +8609,7 @@ class _SocialScreenState extends State<SocialScreen>
                   _buildFriendList(),
                   _buildRequests(),
                   _buildCrews(),
-                  _LocationRoomTab(userCode: _currentUserCode),
+                  _LocationRoomTab(userCode: _currentUserCode, isAdmin: widget.isAdmin),
                 ],
               ),
             ),
@@ -9440,9 +9442,16 @@ class _SocialScreenState extends State<SocialScreen>
 ///
 /// Surfaced as the ROOM tab inside SOCIAL, and from an event's own page.
 class _LocationRoomTab extends StatefulWidget {
-  const _LocationRoomTab({required this.userCode});
+  const _LocationRoomTab({required this.userCode, this.isAdmin = false});
 
   final String? userCode;
+
+  /// Admins can open the room for a `hidden` staging event and post without a
+  /// check-in doc. This mirrors what the create-event sheet already promises
+  /// ("Only admins see hidden events") and what firestore.rules already allows
+  /// (admins are exempt from the checkins requirement). Without it a staging
+  /// event is untestable: the room skips hidden events for everyone.
+  final bool isAdmin;
 
   @override
   State<_LocationRoomTab> createState() => _LocationRoomTabState();
@@ -9504,7 +9513,7 @@ class _LocationRoomTabState extends State<_LocationRoomTab> {
       String? liveTitle;
       for (final d in snap.docs) {
         final data = d.data();
-        if (data['hidden'] == true) continue;
+        if (data['hidden'] == true && !widget.isAdmin) continue;
         liveId = d.id;
         liveTitle = (data['title'] as String?) ?? 'TEK';
         break;
@@ -9520,9 +9529,11 @@ class _LocationRoomTabState extends State<_LocationRoomTab> {
         return;
       }
 
-      var checkedIn = false;
+      // firestore.rules already exempts admins from the checkins requirement;
+      // mirror that here so the composer isn't gated shut on a staging event.
+      var checkedIn = widget.isAdmin;
       final code = widget.userCode;
-      if (code != null && code.isNotEmpty) {
+      if (!checkedIn && code != null && code.isNotEmpty) {
         final ci = await FirebaseFirestore.instance
             .collection('events')
             .doc(liveId)
