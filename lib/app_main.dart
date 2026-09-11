@@ -9930,9 +9930,12 @@ class _RoomNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Scrollable so the notice can never overflow: when the send-error banner
+    // appears it takes height off this area, and a fixed Column overflowed by
+    // ~28px. Center + SingleChildScrollView still centres when there is room.
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(TekSpace.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
