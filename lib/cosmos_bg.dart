@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'tek_tokens.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TEK Void Background
@@ -290,13 +291,13 @@ class GlassCard extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.all(16),
     this.margin = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    this.borderRadius = 16,
+    this.borderRadius = TekShape.radius,
     this.glowColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    final glow = glowColor ?? const Color(0xFF00FF41);
+    final glow = glowColor ?? TekColors.signal;
     return Container(
       margin: margin,
       decoration: BoxDecoration(
@@ -322,9 +323,9 @@ class GlassCard extends StatelessWidget {
             padding: padding,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(borderRadius),
-              color: Colors.white.withValues(alpha: 0.06),
+              color: TekInk.high.withValues(alpha: 0.06),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: TekInk.high.withValues(alpha: 0.1),
                 width: 1,
               ),
             ),
@@ -405,7 +406,7 @@ class _GlowButtonState extends State<GlowButton>
               width: widget.width,
               height: widget.height,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: TekShape.br,
                 border: Border.all(
                   color: widget.color.withValues(alpha: 0.7),
                   width: 1.5,
