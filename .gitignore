@@ -64,3 +64,9 @@ app.*.map.json
 **/node_modules/
 landingpage/
 tek_visualizer_display/
+
+# App Store Connect API keys — NEVER commit. Real location is
+# ~/.appstoreconnect/private_keys/ (outside the repo); these are a safety net.
+*.p8
+AuthKey_*.p8
+.appstoreconnect/
