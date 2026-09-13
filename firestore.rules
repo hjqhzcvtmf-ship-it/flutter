@@ -6,19 +6,11 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Admin allowlist stored at /config/admins:
-    //   uids:          ["uid1", ...]   persistent / email-login UIDs
-    //   referralCodes: ["CODE", ...]   admins who sign in anonymously
-    // The referralCode claim is minted server-side by syncReferralClaim, only
-    // for a uid already bound to that application (ownerUid/webUid/webUids),
-    // so it is not a user-presented value. Keep ownerUid set on every admin
-    // application, or an unowned application could be first-claimed.
+    // Admin allowlist stored at /config/admins with field: { uids: ["uid1", ...] }
     function isAdmin() {
       return isSignedIn() &&
         exists(/databases/$(database)/documents/config/admins) &&
-        (request.auth.uid in get(/databases/$(database)/documents/config/admins).data.uids ||
-         request.auth.token.get('referralCode', '') in
-           get(/databases/$(database)/documents/config/admins).data.get('referralCodes', []));
+        request.auth.uid in get(/databases/$(database)/documents/config/admins).data.uids;
     }
 
     // Events are readable by signed-in users.

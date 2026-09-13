@@ -655,29 +655,12 @@ async function isAdminRequest(request) {
   if (!uid) return false;
   if (await isAdminUid(uid)) return true;
 
-  const fromClaim =
-    request.auth.token && request.auth.token.referralCode
-      ? String(request.auth.token.referralCode)
-      : "";
-  const fromData =
-    request.data && typeof request.data.referralCode === "string"
-      ? request.data.referralCode.trim()
-      : "";
-  const referralCode = fromClaim || fromData;
-  if (!referralCode) return false;
-
-  const appSnap = await db
-    .collection("applications")
-    .where("referralCode", "==", referralCode)
-    .limit(1)
-    .get();
-  if (appSnap.empty) return false;
-
-  const appData = appSnap.docs[0].data() || {};
-  const candidateUids = [appData.ownerUid, appData.webUid].filter(Boolean);
-  for (const u of candidateUids) {
-    if (await isAdminUid(u)) return true;
-  }
+  // Admin is ONLY an allowlisted uid (config/admins.uids), i.e. the
+  // email/password admin login. It is never derived from a referral code:
+  // the code is the member login credential and is shown in the friend QR,
+  // so anyone who scanned it could log in, receive the referralCode claim,
+  // and pass a claim-based check (a code passed in request data was even
+  // trusted without logging in). Closed 2026-09-14.
   return false;
 }
 
@@ -699,52 +682,13 @@ exports.getAdminStatus = onCall(
     if (!uid) {
       throw new HttpsError("unauthenticated", "Unauthenticated");
     }
-    const referralCodeFromClaim =
-      request.auth.token && request.auth.token.referralCode
-        ? String(request.auth.token.referralCode)
-        : "";
-    const referralCodeFromData =
-      request.data && typeof request.data.referralCode === "string"
-        ? request.data.referralCode.trim()
-        : "";
-    const referralCode = referralCodeFromClaim || referralCodeFromData;
-    console.log("getAdminStatus call", {
-      uid,
-      anon: !!(request.auth.token && request.auth.token.firebase &&
-        request.auth.token.firebase.sign_in_provider === "anonymous"),
-      referralCodeFromClaim,
-      referralCodeFromData,
-    });
-    // Direct match: caller's auth UID is on the allowlist.
-    if (await isAdminUid(uid)) {
-      console.log("getAdminStatus direct UID match");
-      return {isAdmin: true};
-    }
-    if (!referralCode) {
-      console.log("getAdminStatus no referralCode available");
-      return {isAdmin: false};
-    }
-    const appSnap = await db
-      .collection("applications")
-      .where("referralCode", "==", referralCode)
-      .limit(1)
-      .get();
-    if (appSnap.empty) {
-      console.log("getAdminStatus no application doc for referralCode",
-        referralCode);
-      return {isAdmin: false};
-    }
-    const appData = appSnap.docs[0].data() || {};
-    const candidateUids = [appData.ownerUid, appData.webUid].filter(Boolean);
-    console.log("getAdminStatus candidateUids", candidateUids);
-    for (const u of candidateUids) {
-      if (await isAdminUid(u)) {
-        console.log("getAdminStatus matched via candidate", u);
-        return {isAdmin: true};
-      }
-    }
-    console.log("getAdminStatus no candidate matched");
-    return {isAdmin: false};
+    // Admin is ONLY an allowlisted uid (config/admins.uids), i.e. the
+    // email/password admin login. Never derived from a referral code: it is
+    // the member login credential and is shown in the friend QR (see
+    // isAdminRequest). Closed 2026-09-14.
+    const isAdmin = await isAdminUid(uid);
+    console.log("getAdminStatus", {uid, isAdmin});
+    return {isAdmin};
   }
 );
 
