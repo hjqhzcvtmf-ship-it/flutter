@@ -31,6 +31,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:convert' show utf8;
+import 'package:crypto/crypto.dart' show sha256;
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -42,6 +44,21 @@ late final FirebaseFirestore db;
 
 // Global storage for application data
 Map<String, dynamic> _applicationData = {};
+
+/// Deterministic document id for an application, derived from the applicant's
+/// email. One email can only ever map to one `/applications/{id}` path, so a
+/// duplicate is not something we check for — it is unrepresentable. Concurrent
+/// submissions (the applicant taps SUBMIT repeatedly while the profile image
+/// uploads) all target this same path instead of minting fresh random ids via
+/// `.add()`, which is what produced the duplicate rows in the admin dashboard.
+///
+/// Must stay byte-for-byte in sync with `applicationDocIdForEmail()` in
+/// landingpage/membership.html so the app and the website collapse onto the
+/// same document for the same person.
+String applicationDocIdForEmail(String email) {
+  final normalized = email.trim().toLowerCase();
+  return sha256.convert(utf8.encode(normalized)).toString();
+}
 
 const List<String> _ugcReportCategories = <String>[
   'Harassment or bullying',
@@ -4114,6 +4131,11 @@ class _MembershipApplicationScreenState
   final TextEditingController _instagramController = TextEditingController();
   String? _profileImage;
   bool _eulaAccepted = false;
+  // Re-entrancy guard. The submit path awaits an anonymous sign-in, two
+  // dedupe queries and a profile-image upload before it writes, which is
+  // seconds on mobile data — long enough that applicants tapped SUBMIT again
+  // and again, and every tap ran its own copy of _submitApplication.
+  bool _isSubmittingApplication = false;
 
   @override
   Widget build(BuildContext context) {
@@ -4278,7 +4300,7 @@ class _MembershipApplicationScreenState
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _eulaAccepted
+                  onPressed: _eulaAccepted && !_isSubmittingApplication
                       ? () {
                           _submitApplication(context);
                         }
@@ -4297,7 +4319,9 @@ class _MembershipApplicationScreenState
                     padding: EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: Text(
-                    _eulaAccepted
+                    _isSubmittingApplication
+                        ? 'SUBMITTING…'
+                        : _eulaAccepted
                         ? 'SUBMIT APPLICATION'
                         : 'ACCEPT TERMS TO CONTINUE',
                     style: TextStyle(
@@ -4363,6 +4387,9 @@ class _MembershipApplicationScreenState
   }
 
   void _submitApplication(BuildContext context) async {
+    // A second tap while the first submission is still in flight is ignored.
+    if (_isSubmittingApplication) return;
+
     if (_nameController.text.isEmpty ||
         _emailController.text.isEmpty ||
         _phoneController.text.isEmpty ||
@@ -4386,6 +4413,8 @@ class _MembershipApplicationScreenState
       );
       return;
     }
+
+    setState(() => _isSubmittingApplication = true);
 
     try {
       // Ensure user is authenticated (required for Firestore queries)
@@ -4488,7 +4517,37 @@ class _MembershipApplicationScreenState
         if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
       };
 
-      await db.collection('applications').add(applicationData);
+      // `.add()` minted a fresh random id on every call, so each racing tap
+      // created its own document. Addressing the document by a deterministic
+      // id derived from the email means every submission for this person
+      // targets one and the same path — a duplicate is unrepresentable, not
+      // merely checked for. The transaction keeps the exists-check and the
+      // write atomic so a resubmission cannot clobber an application that has
+      // already been approved (and had its referral code issued).
+      final appRef = db
+          .collection('applications')
+          .doc(applicationDocIdForEmail(_emailController.text.trim()));
+
+      final alreadyApplied = await db.runTransaction<bool>((transaction) async {
+        final existing = await transaction.get(appRef);
+        if (existing.exists) return true;
+        transaction.set(appRef, applicationData);
+        return false;
+      });
+
+      if (alreadyApplied) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'This email is already registered. Please use your existing referral code to log in.',
+            ),
+            backgroundColor: TekColors.danger,
+            duration: Duration(seconds: 4),
+          ),
+        );
+        return;
+      }
       debugPrint('Application saved to Firestore as pending');
 
       // Send admin notification email (no welcome email to applicant yet)
@@ -4543,6 +4602,10 @@ class _MembershipApplicationScreenState
           duration: Duration(seconds: 5),
         ),
       );
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmittingApplication = false);
+      }
     }
   }
 

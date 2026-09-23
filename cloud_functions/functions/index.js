@@ -300,6 +300,16 @@ function toIsoString(value) {
   return null;
 }
 
+// Deterministic document id for an application, derived from the applicant's
+// email. One email can only ever map to one /applications/{id} path, so a
+// duplicate is unrepresentable rather than something we check for after the
+// fact. Must stay byte-for-byte in sync with applicationDocIdForEmail() in
+// lib/app_main.dart and landingpage/membership.html.
+function applicationDocIdForEmail(email) {
+  const normalized = String(email || "").trim().toLowerCase();
+  return crypto.createHash("sha256").update(normalized, "utf8").digest("hex");
+}
+
 function serializeApplicationDoc(doc) {
   const data = doc.data() || {};
   const normalizedStatus = typeof data.status === "string" && data.status.trim()
@@ -1920,8 +1930,21 @@ exports.sendMembershipEmail = onCall(
       applicationData.profileImageUrl = profileImageUrl;
     }
 
-    await db.collection("applications").add(applicationData);
-    console.log("Application saved to Firestore");
+    // Addressed by a deterministic id rather than `.add()`, so this legacy
+    // path cannot mint a second document for someone who has already applied.
+    // `create()` throws if the document exists, which keeps an already-approved
+    // application from being overwritten.
+    const appRef = db.collection("applications").doc(applicationDocIdForEmail(email));
+    try {
+      await appRef.create(applicationData);
+      console.log("Application saved to Firestore");
+    } catch (createError) {
+      if (createError && createError.code === 6) { // ALREADY_EXISTS
+        console.log("Application already exists for this email, not duplicating");
+      } else {
+        throw createError;
+      }
+    }
 
     return { 
       success: true, 
