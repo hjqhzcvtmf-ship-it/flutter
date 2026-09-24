@@ -8438,10 +8438,26 @@ class _SocialScreenState extends State<SocialScreen>
 
   List<Map<String, dynamic>> _searchResults = [];
 
+  /// Index of the ROOM tab. While it is selected the header above the tabs
+  /// (search, report, mission, stories) collapses so the chat gets the
+  /// screen — with the keyboard open it was left ~13% of the height.
+  static const int _roomTabIndex = 3;
+  bool _onRoomTab = false;
+
+  void _handleTabChange() {
+    final onRoom = _tabController.index == _roomTabIndex;
+    if (onRoom == _onRoomTab) return;
+    // Drop focus from the (about to be hidden) search field so its keyboard
+    // doesn't linger over the room.
+    if (onRoom) FocusScope.of(context).unfocus();
+    setState(() => _onRoomTab = onRoom);
+  }
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    _tabController.addListener(_handleTabChange);
     _initializeModerationState();
     _searchController.addListener(() {
       setState(() {
@@ -8598,6 +8614,18 @@ class _SocialScreenState extends State<SocialScreen>
         ),
         body: Column(
           children: [
+            // Collapses on the ROOM tab so the chat gets the height.
+            // maintainState keeps the hero/stories streams alive while hidden.
+            AnimatedSize(
+              duration: TekMotion.normal,
+              curve: TekMotion.easeMechanical,
+              alignment: Alignment.topCenter,
+              child: Visibility(
+                visible: !_onRoomTab,
+                maintainState: true,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
             // Search Bar
             Padding(
               padding: EdgeInsets.all(12),
@@ -8639,6 +8667,10 @@ class _SocialScreenState extends State<SocialScreen>
             const _NightReportCard(),
             const _MissionControlHero(),
             const _StoriesRow(),
+                  ],
+                ),
+              ),
+            ),
             Container(
               decoration: BoxDecoration(
                 border: Border(
@@ -9764,6 +9796,8 @@ class _LocationRoomTabState extends State<_LocationRoomTab> {
 
         return ListView.builder(
           reverse: true,
+          // Drag the conversation to put the keyboard away and read more.
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           itemCount: docs.length,
           itemBuilder: (context, i) {
